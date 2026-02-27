@@ -10,5 +10,11 @@ public class Inventario {
         this.lista = new ArrayList<>();
     }
 
-    public ArrayList<Item> getLista() { return lista; }
-}
+    public ArrayList<Item> getLista() { 
+    	
+    	
+    	
+    	return lista; 
+    }
+    
+}	

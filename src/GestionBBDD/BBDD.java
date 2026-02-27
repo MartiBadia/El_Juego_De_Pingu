@@ -6,20 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-/**
- * Clase que proporciona métodos para interactuar con una base de datos Oracle.
- */
+import Partida.Partida;
+
 public class BBDD {
 
-	/**
-	 * Intenta establecer una conexión a la base de datos Oracle. NO HACE FALTA QUE
-	 * ENTENDÁIS CÓMO FUNCIONA, SE HACE TODO DE MANERA AUTOMÁTICA.
-	 *
-	 * @param scan Scanner de main con el que vais a leer por consola
-	 * @return Objeto Connection si la conexión es exitosa, null en caso contrario.
-	 *         LA VARIABLE QUE DEVUELVE LA TENÉIS QUE GUARDAR PARA LAS DEMÁS
-	 *         FUNCIONES
-	 */
 	public static Connection conectarBaseDatos(Scanner scan) {
 		System.out.println("Intentando conectarse a la base de datos...");
 
@@ -27,8 +17,6 @@ public class BBDD {
 		String entorno = "";
 		boolean valido = false;
 		while (!valido) {
-			// PODEIS HARDCODEAR ESTAS VARIABLES SI VAIS A USAR SIEMPRE LAS MISMAS
-			//VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 			System.out.println("Selecciona centro o fuera de centro (CENTRO/FUERA):");
 			entorno = scan.nextLine().trim().toLowerCase();
 
@@ -43,8 +31,6 @@ public class BBDD {
 				: "jdbc:oracle:thin:@//oracle.ilerna.com:1521/XEPDB2";
 
 		// 2) Pedir credenciales (con trim para evitar espacios raros)
-		// PODEIS HARDCODEAR ESTAS CREDENCIALES SI VAIS A USAR SIEMPRE LAS MISMAS
-		//VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 		System.out.println("¿Usuario?");
 		String user = scan.nextLine().trim();
 
@@ -79,8 +65,6 @@ public class BBDD {
 
 	/**
 	 * Cierra la conexión con la BBDD.
-	 *
-	 * @param con Objeto Connection que representa la conexión a la base de datos.
 	 */
 	public static void cerrar(Connection con) {
 		if (con != null) {
@@ -225,4 +209,17 @@ public class BBDD {
 			return 0;
 		}
 	}
+	
+	
+	/*
+	 public void guardarBBDD(Partida p) {
+	        System.out.println("Guardando partida en BBDD...");
+	    }
+
+	    public Object cargarBBDD(int id) {
+	        System.out.println("Cargando partida " + id);
+	        return null;
+	    }
+	*/
+	
 }
