@@ -12,5 +12,7 @@ public abstract class Jugador {
     	
     } // Constructor básico
 
-    public abstract void moverPosicion(int n);
+    public void moverPosicion(int n) {
+    	
+    }
 }
