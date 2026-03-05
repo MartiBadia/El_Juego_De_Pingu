@@ -1,7 +1,7 @@
-package Jugador;
+package jugador;
 
-import Items.Inventario;
-import Items.Item;
+import modelo.items.Inventario;
+import modelo.items.Item;
 
 public abstract class Jugador {
     protected int posicion; // Protegido para que Pinguino y Foca lo vean
