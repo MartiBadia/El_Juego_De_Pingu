@@ -1,13 +1,22 @@
-package Tablero;
-import Partida.Partida;
-import Jugador.Jugador;
+package tablero;
+import jugador.Jugador;
+import partida.Partida;
 
 public class Oso extends Casilla {
+
+    // Constructor
     public Oso(int pos) {
-        this.posicion = pos; // Asignación directa sin super()
+        this.posicion = pos;
     }
-    
+
+    @Override
     public void realizarAccion(Partida p, Jugador j) {
-        j.moverPosicion(-2);
+        // Según el enunciado: "si un jugador es atacado, retorna al inicio del juego"
+        j.setPosicion(0);
+    }
+
+    @Override
+    public String toString() {
+        return "Casilla Oso en posicion " + posicion;
     }
 }
