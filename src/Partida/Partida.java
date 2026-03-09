@@ -1,7 +1,8 @@
-package Partida;
+package partida;
 
-import Tablero.Tablero;
-import Jugador.Jugador;
+import jugador.Jugador;
+import tablero.Tablero;
+
 import java.util.ArrayList;
 
 public class Partida {
