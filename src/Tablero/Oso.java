@@ -9,13 +9,13 @@ public class Oso extends Casilla {
         this.posicion = pos;
     }
 
-    @Override
+   
     public void realizarAccion(Partida p, Jugador j) {
-        // Según el enunciado: "si un jugador es atacado, retorna al inicio del juego"
+        //retorna al inicio del juego si es atacado
         j.setPosicion(0);
     }
 
-    @Override
+   
     public String toString() {
         return "Casilla Oso en posicion " + posicion;
     }
