@@ -4,26 +4,26 @@ import jugador.Jugador;
 import partida.Partida;
 
 public class Agujero extends Casilla {
-    private int turnosAtrapado; // Número de turnos que el jugador queda atrapado
+    private int posicionAgujeroAnterior; // Posición del agujero de hielo al que envía al jugador
     private boolean esPrimero;  // Si es el primer agujero, el jugador va al inicio del tablero
 
     // Constructor
     public Agujero(int pos) {
         this.posicion = pos;
-        this.turnosAtrapado = 1; // Por defecto 1 turno atrapado
-        this.esPrimero = false;
+        this.posicionAgujeroAnterior = 0;
+        this.esPrimero = true;
     }
 
-    // Constructor con parámetros completos
-    public Agujero(int pos, boolean esPrimero) {
+    // Constructor con destino
+    public Agujero(int pos, int posicionAgujeroAnterior) {
         this.posicion = pos;
-        this.turnosAtrapado = 1;
-        this.esPrimero = esPrimero;
+        this.posicionAgujeroAnterior = posicionAgujeroAnterior;
+        this.esPrimero = (posicionAgujeroAnterior == 0);
     }
 
     // --- GETTERS ---
-    public int getTurnosAtrapado() {
-        return turnosAtrapado;
+    public int getPosicionAgujeroAnterior() {
+        return posicionAgujeroAnterior;
     }
 
     public boolean isEsPrimero() {
@@ -31,8 +31,9 @@ public class Agujero extends Casilla {
     }
 
     // --- SETTERS ---
-    public void setTurnosAtrapado(int turnosAtrapado) {
-        this.turnosAtrapado = turnosAtrapado;
+    public void setPosicionAgujeroAnterior(int posicionAgujeroAnterior) {
+        this.posicionAgujeroAnterior = posicionAgujeroAnterior;
+        this.esPrimero = (posicionAgujeroAnterior == 0);
     }
 
     public void setEsPrimero(boolean esPrimero) {
@@ -41,8 +42,14 @@ public class Agujero extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        // Si es el primer agujero -> vuelve al inicio del tablero (posición 0)
-        // Si no -> el jugador queda atrapado turnosAtrapado turnos
-        // ???????? No info: no está claro si la lógica de congelado se gestiona aquí o en GestorPartida
+        // Según el enunciado BÀSIC: "Envia al jugador al forat d'abans. 
+        // Si és al primer forat, retrocedeix al principi del taulell."
+        System.out.println("¡Caída en Agujero de Hielo! Retrocedes a la posición " + posicionAgujeroAnterior);
+        j.setPosicion(posicionAgujeroAnterior);
+    }
+
+    @Override
+    public String toString() {
+        return "Casilla Forat al Gel en posicion " + posicion + " -> envia a " + posicionAgujeroAnterior;
     }
 }
