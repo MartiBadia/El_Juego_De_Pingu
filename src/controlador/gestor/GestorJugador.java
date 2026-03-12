@@ -30,6 +30,10 @@ public class GestorJugador {
         System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
     }
 
+    public void jugadorUsaNuevo(Pinguino p, String nombreItem) {
+        jugadorUsaItem(p, nombreItem);
+    }
+
     /**
      * El jugador retrocede 'pasos' posiciones (recibe daño).
      * La posición no puede bajar de 0.
@@ -38,6 +42,10 @@ public class GestorJugador {
         j.moverPosicion(-pasos);
         if (j.getPosicion() < 0) j.setPosicion(0);
         System.out.println(j.getNombre() + " retrocede " + pasos + " -> casilla " + j.getPosicion());
+    }
+
+    public void jugadorSetNuevo(Jugador j, int pasos, Tablero t) {
+        jugadorRecibeDaño(j, pasos, t);
     }
 
     /**
@@ -140,6 +148,15 @@ public class GestorJugador {
     public void pinguinoPierdeUnTurno(Pinguino p) {
         p.setTurnosCongelado(p.getTurnosCongelado() + 1);
         System.out.println(p.getNombre() + " pierde un turno.");
+    }
+
+    public void pinguinoEvento(Pinguino p, String tipo) {
+        switch (tipo) {
+            case "Pez": pinguinoEventoPez(p); break;
+            case "Bola": pinguinoEventoBolaDeNieve(p); break;
+            case "DadoRapido": pinguinoEventoDadoRapido(p); break;
+            case "DadoLento": pinguinoEventoDadoLento(p); break;
+        }
     }
 
     void pinguinoPierdeItemAleatorio(Pinguino p) {

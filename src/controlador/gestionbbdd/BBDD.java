@@ -239,7 +239,7 @@ public class BBDD {
 
 	    // 1) INSERT EN PARTIDA (Siguiendo tus columnas: TURNOS, JUGADOR_ACTUAL, FINALIZADA)
 	    String sqlPartida = "INSERT INTO PARTIDA (TURNOS, JUGADOR_ACTUAL, FINALIZADA) VALUES ("
-	            + p.getTurnos() + ", " + 0 + ", '" + (p.isFinalizada() ? "S" : "N") + "')";
+	            + p.getTurnos() + ", " + p.getJugadorActualIndice() + ", '" + (p.isFinalizada() ? "S" : "N") + "')";
 	    insert(con, sqlPartida);
 
 	    // Recuperamos el ID_PARTIDA generado
@@ -271,10 +271,17 @@ public class BBDD {
 	            int idEstado = Integer.parseInt(select(con, sqlIdJ).get(0).get("ID"));
 	            
 	            modelo.items.Inventario inv = ((modelo.jugador.Pinguino) j).getInventario();
-	            // Guardamos por tipos (Dado, Pez, Bola de Nieve)
-	            insert(con, "INSERT INTO INVENTARIO_ITEMS (ID_ESTADO, TIPO_ITEM, CANTIDAD) VALUES (" + idEstado + ", 'Dado', " + inv.contarPorTipo("Dado") + ")");
-	            insert(con, "INSERT INTO INVENTARIO_ITEMS (ID_ESTADO, TIPO_ITEM, CANTIDAD) VALUES (" + idEstado + ", 'Pez', " + inv.contarPorTipo("Pez") + ")");
-	            insert(con, "INSERT INTO INVENTARIO_ITEMS (ID_ESTADO, TIPO_ITEM, CANTIDAD) VALUES (" + idEstado + ", 'Bola de Nieve', " + inv.contarPorTipo("Bola de Nieve") + ")");
+	            
+	            // Guardamos los ítems agrupados por su nombre exacto para no perder el tipo de dado
+	            java.util.Map<String, Integer> conteo = new java.util.HashMap<>();
+	            for (modelo.items.Item it : inv.getLista()) {
+	                conteo.put(it.getNombre(), conteo.getOrDefault(it.getNombre(), 0) + 1);
+	            }
+	            
+	            for (java.util.Map.Entry<String, Integer> entry : conteo.entrySet()) {
+	                insert(con, "INSERT INTO INVENTARIO_ITEMS (ID_ESTADO, TIPO_ITEM, CANTIDAD) VALUES (" 
+	                        + idEstado + ", '" + entry.getKey() + "', " + entry.getValue() + ")");
+	            }
 	        }
 	    }
 
@@ -351,6 +358,8 @@ public class BBDD {
 						int cantidad    = Integer.parseInt(fi.getOrDefault("CANTIDAD", "0"));
 						for (int k = 0; k < cantidad; k++) {
 							if ("Dado".equals(tipoItem))            ping.getInventario().añadirItem(new modelo.items.Dado());
+							else if ("Dado Rapido".equals(tipoItem)) ping.getInventario().añadirItem(new modelo.items.Dado("Dado Rapido", 5, 10, true));
+							else if ("Dado Lento".equals(tipoItem))  ping.getInventario().añadirItem(new modelo.items.Dado("Dado Lento", 1, 3, true));
 							else if ("Pez".equals(tipoItem))        ping.getInventario().añadirItem(new modelo.items.Pez());
 							else if ("Bola de Nieve".equals(tipoItem)) ping.getInventario().añadirItem(new modelo.items.BolaDeNieve());
 						}
@@ -387,6 +396,7 @@ public class BBDD {
 		Partida partida = new Partida(tablero, jugadores);
 		LinkedHashMap<String, String> filaP = filas.get(0);
 		partida.setTurnos(Integer.parseInt(filaP.getOrDefault("TURNOS", "0")));
+		partida.setJugadorActual(Integer.parseInt(filaP.getOrDefault("JUGADOR_ACTUAL", "0")));
 		partida.setFinalizada("S".equals(filaP.getOrDefault("FINALIZADA", "N")));
 
 		System.out.println("Partida " + id + " cargada correctamente.");

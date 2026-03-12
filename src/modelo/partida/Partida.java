@@ -34,6 +34,10 @@ public class Partida {
         return jugadores.get(jugadorActual);
     }
 
+    public int getJugadorActualIndice() {
+        return this.jugadorActual;
+    }
+
     public Tablero getTablero() {
         return this.tablero;
     }
