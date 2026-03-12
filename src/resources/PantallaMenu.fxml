@@ -19,7 +19,7 @@
     xmlns="http://javafx.com/javafx/21.0.10"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="vista.PantallaMenu"
-    stylesheets="@PantallaMenu.css"
+    stylesheets="/resources/PantallaMenu.css"
     styleClass="root">
 
     <top>

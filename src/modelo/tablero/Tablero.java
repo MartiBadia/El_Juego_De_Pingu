@@ -50,7 +50,7 @@ public class Tablero {
         for (int i = 1; i < this.tamano - 1; i++) {
             // Probabilidad de casilla especial (35%)
             if (Math.random() < 0.35) {
-                int tipo = (int)(Math.random() * 5);
+                int tipo = (int)(Math.random() * 6);
                 Casilla c = null;
 
                 switch (tipo) {
@@ -73,6 +73,9 @@ public class Tablero {
                         break;
                     case 4: // Suelo Quebradizo (Intermig): penalización por peso
                         c = new SueloQuebradizo(i);
+                        break;
+                    case 5: // Moto de Nieve (Impossible): avance al siguiente trineo
+                        c = new MotoNieve(i);
                         break;
                 }
 

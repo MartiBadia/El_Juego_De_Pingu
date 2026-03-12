@@ -12,8 +12,8 @@ module Pingu {
     requires javafx.graphics;
 
  
-    opens vista.menu to javafx.fxml;
     opens vista to javafx.fxml;
+    opens resources to javafx.fxml;
 
     exports controlador.gestionbbdd;
     exports controlador.gestor;
@@ -22,7 +22,5 @@ module Pingu {
     exports modelo.jugador;
     exports modelo.partida;
     exports modelo.tablero;
-    exports vista.menu;
     exports vista;
-
 }
