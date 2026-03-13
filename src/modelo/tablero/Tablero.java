@@ -74,9 +74,7 @@ public class Tablero {
                     case 4: // Suelo Quebradizo (Intermig): penalización por peso
                         c = new SueloQuebradizo(i);
                         break;
-                    case 5: // Moto de Nieve (Impossible): avance al siguiente trineo
-                        c = new MotoNieve(i);
-                        break;
+                    
                 }
 
                 if (c != null) {
