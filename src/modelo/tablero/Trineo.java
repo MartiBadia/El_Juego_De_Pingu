@@ -9,7 +9,7 @@ public class Trineo extends Casilla {
     // Constructor
     public Trineo(int pos) {
         this.posicion = pos;
-        this.posicionSiguienteTrineo = -1; // -1 indica que es el último trineo (no pasa nada)
+        this.posicionSiguienteTrineo = -1;
     }
 
     // Constructor con posición del siguiente trineo
@@ -30,8 +30,7 @@ public class Trineo extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        // Según el enunciado: avanza al siguiente trineo del tablero
-        // Si ya estás en el último trineo, no pasa nada
+        //avanza al siguiente trineo del tablero  
         if (posicionSiguienteTrineo != -1) {
             j.setPosicion(posicionSiguienteTrineo);
         }

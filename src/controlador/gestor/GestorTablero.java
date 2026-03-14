@@ -29,11 +29,10 @@ public class GestorTablero {
         }
     }
 
-    /**
-     * Comprueba si la partida ha terminado.
-     * La partida termina cuando algún jugador llega o supera la última casilla del tablero.
-     * En ese caso, marca la partida como finalizada y establece al ganador.
-     */
+    
+     //Comprueba si la partida ha terminado.
+    
+     
     public void comprobarFinTurno(Partida partida) {
         int totalCasillas = partida.getTablero().getTamaño();
 
