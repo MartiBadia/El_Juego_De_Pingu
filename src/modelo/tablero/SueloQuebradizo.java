@@ -46,6 +46,6 @@ public class SueloQuebradizo extends Casilla {
 
     @Override
     public String toString() {
-        return "Casilla Terra Trencadís en posicion " + posicion;
+        return "Casilla suelo quebradizo en posicion " + posicion;
     }
 }

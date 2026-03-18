@@ -42,14 +42,12 @@ public class Agujero extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        // Según el enunciado BÀSIC: "Envia al jugador al forat d'abans. 
-        // Si és al primer forat, retrocedeix al principi del taulell."
         System.out.println("¡Caída en Agujero de Hielo! Retrocedes a la posición " + posicionAgujeroAnterior);
         j.setPosicion(posicionAgujeroAnterior);
     }
 
     @Override
     public String toString() {
-        return "Casilla Forat al Gel en posicion " + posicion + " -> envia a " + posicionAgujeroAnterior;
+        return "Casilla agujero en el hielo en posicion " + posicion + " -> envia a " + posicionAgujeroAnterior;
     }
 }

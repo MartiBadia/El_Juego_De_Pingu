@@ -9,7 +9,6 @@ public class BolaDeNieve extends Item {
     }
 
     // Constructor con cantidad personalizada
-    // máximo 6 bolas de nieve en el inventario
     public BolaDeNieve(int cantidad) {
         this.nombre = "Bola de Nieve";
         this.cantidad = cantidad;

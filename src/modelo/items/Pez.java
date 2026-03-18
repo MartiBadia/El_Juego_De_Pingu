@@ -9,7 +9,6 @@ public class Pez extends Item {
     }
 
     // Constructor con cantidad personalizada
-    // El enunciado dice: máximo 2 peces (para sobornar a la foca)
     public Pez(int cantidad) {
         this.nombre = "Pez";
         this.cantidad = cantidad;

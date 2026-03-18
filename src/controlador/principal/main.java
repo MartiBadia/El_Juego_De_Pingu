@@ -18,7 +18,6 @@ public class main extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 	    // Solo esta línea para cargar el FXML
-		// Quita el "/resources" y deja solo el nombre si ya es Source Folder
 		Parent root = FXMLLoader.load(getClass().getResource("/resources/PantallaMenu.fxml"));
 
 	    Scene scene = new Scene(root);

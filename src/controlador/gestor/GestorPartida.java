@@ -81,12 +81,9 @@ public class GestorPartida {
         partida.setTurnos(partida.getTurnos() + 1);
     }
 
-    /**
-     * Procesa el turno de un jugador concreto:
-     * 1. Tira el dado y mueve al jugador
-     * 2. Ejecuta la casilla donde ha caído
-     * 3. Comprueba si la partida ha terminado
-     */
+    
+      //Procesa el turno de un jugador concreto:
+     
     public void procesarTurnoJugador(Jugador j) {
         // Lógica de congelación para Pingüinos
         if (j instanceof modelo.jugador.Pinguino) {
@@ -151,13 +148,10 @@ public class GestorPartida {
             }
         }
 
-        // Ejecutar efecto de la casilla
         gestorTablero.ejecutarCasilla(partida, j);
 
-        // Comprobar si alguien llegó al final
         gestorTablero.comprobarFinTurno(partida);
 
-        // Decrementar contadores de estado al finalizar el turno
         gestorJugador.jugadorFinalizaTurno(j);
     }
 
@@ -196,9 +190,9 @@ public class GestorPartida {
         }
     }
 
-    /**
-     * Cierra la conexión con la BBDD al terminar la sesión.
-     */
+    
+     //Cierra la conexión con la BBDD al terminar la sesión.
+     
     public void cerrarConexion() {
         BBDD.cerrar(con);
         this.con = null;

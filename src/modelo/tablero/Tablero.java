@@ -35,11 +35,7 @@ public class Tablero {
         casillas.add(c);
     }
 
-    /**
-     * Genera el tablero aleatorio cumpliendo con los requisitos:
-     * - Mínimo 50 casillas.
-     * - Tipos: Oso, Agujero (retroceso), Trineo (avance), Evento (?), Suelo Quebradizo (inventario).
-     */
+    
     public void generarTableroAleatorio() {
         casillas.clear();
         this.tamano = TAMANO_MINIMO + (int)(Math.random() * 21); // 50-70 casillas
@@ -54,26 +50,29 @@ public class Tablero {
                 Casilla c = null;
 
                 switch (tipo) {
-                    case 0: // Oso (Bàsic): inicio
+                    case 0: // Oso 
                         c = new Oso(i);
                         break;
-                    case 1: // Agujero (Bàsic): retroceso al anterior
+                    case 1: // Agujero 
                         c = new Agujero(i, ultimoAgujeroPos);
                         ultimoAgujeroPos = i; // Este pasa a ser el anterior para el siguiente
                         break;
-                    case 2: // Trineo (Bàsic): avance al siguiente
+                    case 2: // Trineo 
                         c = new Trineo(i);
                         if (ultimoTrineo != null) {
                             ultimoTrineo.setPosicionSiguienteTrineo(i);
                         }
                         ultimoTrineo = (Trineo) c;
                         break;
-                    case 3: // Evento (Bàsic): recompensas
+                    case 3: // Evento
                         c = new Evento(i);
                         break;
-                    case 4: // Suelo Quebradizo (Intermig): penalización por peso
+                    case 4: // Suelo Quebradizo
                         c = new SueloQuebradizo(i);
                         break;
+                    case 5:
+                    	c = new MotoNieve(i);
+                    	break;
                     
                 }
 
