@@ -23,7 +23,7 @@
     xmlns="http://javafx.com/javafx/21.0.10"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="vista.PantallaJuego"
-    stylesheets="/resources/PantallaJuego.css"
+    stylesheets="resources/PantallaJuego.css"
     styleClass="root">
 
     <top>
