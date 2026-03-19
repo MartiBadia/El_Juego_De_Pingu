@@ -15,12 +15,14 @@ public class MotoNieve extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        System.out.println("¡Has encontrado una Moto de Nieve! Avanzando al siguiente trineo...");
-        
+        realizarAccionConLog(p, j);
+    }
+
+    @Override
+    public String realizarAccionConLog(Partida p, Jugador j) {
         int posActual = j.getPosicion();
         int destino = -1;
 
-        // Buscamos el primer trineo que esté después de la posición actual
         for (Casilla c : p.getTablero().getCasillas()) {
             if (c instanceof Trineo && c.getPosicion() > posActual) {
                 destino = c.getPosicion();
@@ -30,13 +32,9 @@ public class MotoNieve extends Casilla {
 
         if (destino != -1) {
             j.setPosicion(destino);
-            System.out.println(j.getNombre() + " se ha desplazado en moto hasta la casilla " + destino + " (Trineo).");
-            
-            // Opcional: Ejecutar la acción del trineo al caer en él
-            // p.getTablero().getCasillaEnPosicion(destino).realizarAccion(p, j);
-        } else {
-            System.out.println("No hay más trineos en el tablero. La moto no te lleva a ninguna parte.");
+            return "🏍️ ¡Moto de Nieve! Te lanzas hasta el Trineo en casilla " + destino + ".";
         }
+        return "🏍️ Moto de Nieve, pero no hay trineos por delante. Sin efecto.";
     }
 
     @Override
