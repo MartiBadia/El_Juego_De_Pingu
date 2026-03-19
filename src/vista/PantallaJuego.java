@@ -51,9 +51,11 @@ public class PantallaJuego {
     @FXML private Circle P2;
     @FXML private Circle P3;
     @FXML private Circle P4;
+    @FXML private Circle PFoca;
+    @FXML private Button finTurno;
 
     private GestorPartida gestorPartida;
-    private int p1Position = 0; 
+    // La variable p1Position ha sido eliminada para evitar desincronización con el modelo lógico.
     private static final int COLUMNS = 5;
     private static final String TAG_CASILLA_TEXT = "CASILLA_TEXT";
 
@@ -72,18 +74,35 @@ public class PantallaJuego {
     public void iniciarPartida() {
         ArrayList<Jugador> jugadores = new ArrayList<>();
         
-        // Configuración inicial de ejemplo de un pingüino
         Pinguino p1 = new Pinguino("Jugador1", "Azul");
-        p1.getInventario().añadirItem(new Dado()); // Dado normal inicial
+        p1.getInventario().añadirItem(new Dado()); 
         jugadores.add(p1);
 
-        // Generamos el tablero desde el modelo
+        Pinguino p2 = new Pinguino("Jugador2", "Rojo");
+        p2.getInventario().añadirItem(new Dado());
+        jugadores.add(p2);
+        
+        modelo.jugador.Foca foca = new modelo.jugador.Foca("Morsa CPU", "Gris");
+        jugadores.add(foca);
+
         Tablero modeloTablero = new Tablero();
         modeloTablero.generarTableroAleatorio();
 
         gestorPartida.nuevaPartida(jugadores, modeloTablero);
         
+        P1.setVisible(true);
+        P2.setVisible(true);
+        P3.setVisible(false);
+        P4.setVisible(false);
+        PFoca.setVisible(true);
+        
         refrescarPartida();
+        
+        if (gestorPartida.getPartida().getJugadorActual() instanceof modelo.jugador.Foca) {
+            jugarTurnoFoca();
+        } else {
+            eventos.setText("Turno de: " + gestorPartida.getPartida().getJugadorActual().getNombre());
+        }
     }
 
     /**
@@ -127,35 +146,82 @@ public class PantallaJuego {
             lento_t.setText("D. Lento: " + inv.contarPorTipo("Dado Lento"));
             peces_t.setText("Peces: " + inv.contarPorTipo("Pez"));
             nieve_t.setText("Bolas: " + inv.contarPorTipo("Bola de Nieve"));
+        } else {
+            rapido_t.setText("D. Rápido: -");
+            lento_t.setText("D. Lento: -");
+            peces_t.setText("Peces: -");
+            nieve_t.setText("Bolas: -");
         }
     }
 
-    // --- ACCIONES DE BOTONES (SEGÚN DIAGRAMA) ---
+    // --- ACCIONES DE BOTONES ---
 
     @FXML
     public void botonTirarDado() {
         Jugador actual = gestorPartida.getPartida().getJugadorActual();
+        if (actual instanceof modelo.jugador.Foca) return; // La foca juega sola
         
         dado.setDisable(true);
+        finTurno.setDisable(true);
         
         int resultado = gestorPartida.tirarDado(actual);
         dadoResultText.setText("Ha salido: " + resultado);
 
-        // La lógica de movimiento animado se mantiene
-        moveP1(resultado);
+        moverJugadorUI(actual, resultado, () -> {
+            String log = gestorPartida.procesarTurnoConAvance(actual, resultado);
+            eventos.setText(log);
+            actualizarPosicionesVisuales();
+            finTurno.setDisable(true);
+            
+            // Finalizar turno automáticamente tras unos segundos
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(2));
+            pause.setOnFinished(ev -> botonFinalizarTurno());
+            pause.play();
+        });
     }
 
     @FXML
     public void botonUsarObjeto() {
-        // En una implementación real, esto abriría un selector o usaría el seleccionado
-        System.out.println("Usando objeto...");
+        System.out.println("Selector de objetos...");
     }
 
     @FXML
     public void botonFinalizarTurno() {
         gestorPartida.siguienteTurno();
+        Jugador actual = gestorPartida.getPartida().getJugadorActual();
         actualizarInventarioVisual();
-        eventos.setText("Turno de: " + gestorPartida.getPartida().getJugadorActual().getNombre());
+        eventos.setText("Turno de: " + actual.getNombre());
+        
+        if (actual instanceof modelo.jugador.Foca) {
+            dado.setDisable(true);
+            finTurno.setDisable(true);
+            jugarTurnoFoca();
+        } else {
+            dado.setDisable(false);
+            finTurno.setDisable(false);
+        }
+    }
+
+    private void jugarTurnoFoca() {
+        Jugador actual = gestorPartida.getPartida().getJugadorActual();
+        eventos.setText("Foca está pensando...");
+        
+        // Timer simple
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(1));
+        pause.setOnFinished(e -> {
+            int avance = gestorPartida.tirarDado(actual);
+            moverJugadorUI(actual, avance, () -> {
+                String log = gestorPartida.procesarTurnoConAvance(actual, avance);
+                eventos.setText("FOCA:\n" + log);
+                actualizarPosicionesVisuales();
+                
+                // Pasa turno automático para la foca
+                javafx.animation.PauseTransition pause2 = new javafx.animation.PauseTransition(Duration.seconds(2));
+                pause2.setOnFinished(ev -> botonFinalizarTurno());
+                pause2.play();
+            });
+        });
+        pause.play();
     }
 
     @FXML
@@ -186,24 +252,53 @@ public class PantallaJuego {
     private void usarItemEspecifico(String nombre) {
         Jugador j = gestorPartida.getPartida().getJugadorActual();
         if (j instanceof Pinguino) {
-            // Lógica delegada al gestor
-            System.out.println("Usando: " + nombre);
-            actualizarInventarioVisual();
+            Pinguino p = (Pinguino) j;
+            Item item = p.getInventario().obtenerItemPorNombre(nombre);
+            
+            if (item != null) {
+                if (nombre.equals("Dado Lento") || nombre.equals("Dado Rapido")) {
+                    p.getInventario().quitarItem(item);
+                    dado.setDisable(true);
+                    finTurno.setDisable(true);
+                    
+                    int resultado = ((Dado)item).tirarRandom();
+                    dadoResultText.setText("Dado Especial: " + resultado);
+                    
+                    moverJugadorUI(j, resultado, () -> {
+                        String log = gestorPartida.procesarTurnoConAvance(j, resultado);
+                        eventos.setText(log);
+                        actualizarPosicionesVisuales();
+                        finTurno.setDisable(true);
+                        
+                        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(2));
+                        pause.setOnFinished(ev -> botonFinalizarTurno());
+                        pause.play();
+                    });
+                } else if (nombre.equals("Bola de Nieve")) {
+                    p.getInventario().quitarItem(item);
+                    eventos.setText("Has lanzado una Bola de Nieve. (Efecto no implementado visual guiado)");
+                } else if (nombre.equals("Pez")) {
+                    eventos.setText("El pez se usa automáticamente al encontrarse con la Foca!");
+                }
+                actualizarInventarioVisual();
+            } else {
+                eventos.setText("No tienes " + nombre);
+            }
         }
     }
 
-    private void moveP1(int steps) {
-        int oldPosition = p1Position;
-        p1Position += steps;
+    private void moverJugadorUI(Jugador j, int steps, Runnable onFinished) {
+        int oldPosition = j.getPosicion();
+        int targetPosition = oldPosition + steps;
         
         int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
-        if (p1Position > maxPos) p1Position = maxPos;
-        if (p1Position < 0) p1Position = 0;
+        if (targetPosition > maxPos) targetPosition = maxPos;
+        if (targetPosition < 0) targetPosition = 0;
 
         int oldRow = oldPosition / COLUMNS;
         int oldCol = oldPosition % COLUMNS;
-        int newRow = p1Position / COLUMNS;
-        int newCol = p1Position % COLUMNS;
+        int newRow = targetPosition / COLUMNS;
+        int newCol = targetPosition % COLUMNS;
 
         double cellWidth = tablero.getWidth() / COLUMNS;
         double cellHeight = tablero.getHeight() / 10;
@@ -211,22 +306,38 @@ public class PantallaJuego {
         double dx = (newCol - oldCol) * cellWidth;
         double dy = (newRow - oldRow) * cellHeight;
 
-        TranslateTransition slide = new TranslateTransition(Duration.millis(350), P1);
+        Circle playerToken = getTokenDeJugador(j);
+        TranslateTransition slide = new TranslateTransition(Duration.millis(350), playerToken);
         slide.setByX(dx);
         slide.setByY(dy);
 
         slide.setOnFinished(e -> {
-            P1.setTranslateX(0);
-            P1.setTranslateY(0);
-            GridPane.setRowIndex(P1, newRow);
-            GridPane.setColumnIndex(P1, newCol);
-            dado.setDisable(false);
+            playerToken.setTranslateX(0);
+            playerToken.setTranslateY(0);
+            GridPane.setRowIndex(playerToken, newRow);
+            GridPane.setColumnIndex(playerToken, newCol);
             
-            // Ejecutar casilla
-            gestorPartida.procesarTurnoJugador(gestorPartida.getPartida().getJugadorActual());
+            if (onFinished != null) onFinished.run();
         });
 
         slide.play();
+    }
+
+    private Circle getTokenDeJugador(Jugador j) {
+        if (j.getNombre().equals("Jugador1")) return P1;
+        if (j.getNombre().equals("Jugador2")) return P2;
+        if (j instanceof modelo.jugador.Foca) return PFoca;
+        return P3;
+    }
+
+    private void actualizarPosicionesVisuales() {
+        for (Jugador j : gestorPartida.getPartida().getJugadores()) {
+            Circle token = getTokenDeJugador(j);
+            GridPane.setRowIndex(token, j.getPosicion() / COLUMNS);
+            GridPane.setColumnIndex(token, j.getPosicion() % COLUMNS);
+            token.setTranslateX(0);
+            token.setTranslateY(0);
+        }
     }
 
     public void setGestorPartida(GestorPartida gestorPartida) {

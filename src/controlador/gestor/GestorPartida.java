@@ -84,14 +84,16 @@ public class GestorPartida {
     
       //Procesa el turno de un jugador concreto:
      
-    public void procesarTurnoJugador(Jugador j) {
+    public String procesarTurnoConAvance(Jugador j, int avance) {
+        StringBuilder log = new StringBuilder();
+        
         // Lógica de congelación para Pingüinos
         if (j instanceof modelo.jugador.Pinguino) {
             modelo.jugador.Pinguino p = (modelo.jugador.Pinguino) j;
             if (p.getTurnosCongelado() > 0) {
-                System.out.println(p.getNombre() + " está congelado y pierde el turno.");
+                log.append(p.getNombre() + " está congelado.\n");
                 gestorJugador.jugadorFinalizaTurno(p);
-                return;
+                return log.toString();
             }
         }
         
@@ -99,25 +101,22 @@ public class GestorPartida {
         if (j instanceof modelo.jugador.Foca) {
             modelo.jugador.Foca f = (modelo.jugador.Foca) j;
             if (f.getTurnosBloqueada() > 0) {
-                System.out.println("La foca " + f.getNombre() + " está bloqueada/sobornada.");
+                log.append("La foca " + f.getNombre() + " está bloqueada.\n");
                 gestorJugador.jugadorFinalizaTurno(f);
-                return;
+                return log.toString();
             }
         }
 
-        int avance = tirarDado(j);
-        
         // --- IA de la Foca: Lógica de paso ---
         if (j instanceof modelo.jugador.Foca) {
             modelo.jugador.Foca foca = (modelo.jugador.Foca) j;
             int posInicial = foca.getPosicion();
             int posFinal = posInicial + avance;
 
-            // Si la foca PASA por la casilla de un jugador, le hace perder la mitad del inventario
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino) {
                     if (otro.getPosicion() > posInicial && otro.getPosicion() < posFinal) {
-                        System.out.println("¡La foca pasa por encima de " + otro.getNombre() + "!");
+                        log.append("Foca pasó sobre " + otro.getNombre() + "!\n");
                         foca.aplastarJugador((modelo.jugador.Pinguino) otro);
                     }
                 }
@@ -125,33 +124,74 @@ public class GestorPartida {
         }
 
         j.moverPosicion(avance);
-        System.out.println(j.getNombre() + " avanza " + avance + " -> casilla " + j.getPosicion());
+        log.append(j.getNombre() + " avanzó " + avance + ".\n");
 
         // --- IA de la Foca: Lógica al caer coincidiendo ---
         if (j instanceof modelo.jugador.Foca) {
             modelo.jugador.Foca foca = (modelo.jugador.Foca) j;
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro.getPosicion() == foca.getPosicion()) {
-                    System.out.println("¡La foca coincide con " + otro.getNombre() + " y le da un coletazo!");
+                    log.append("Foca coincide con " + otro.getNombre() + " y golpea!\n");
                     foca.golpearJugador((modelo.jugador.Pinguino) otro, partida.getTablero());
                 }
             }
         }
         
-        // Guerra de jugadores (si caen dos pingüinos juntos)
+        // Guerra de jugadores
         if (j instanceof modelo.jugador.Pinguino) {
             modelo.jugador.Pinguino p1 = (modelo.jugador.Pinguino) j;
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro != p1 && otro.getPosicion() == p1.getPosicion()) {
+                    log.append("¡Batalla " + p1.getNombre() + " vs " + otro.getNombre() + "!\n");
                     gestorJugador.pinguinoLuchaPinguino(p1, (modelo.jugador.Pinguino) otro);
+                }
+            }
+            
+            // Si cae en foca
+            for (Jugador otro : partida.getJugadores()) {
+                if (otro instanceof modelo.jugador.Foca && otro.getPosicion() == p1.getPosicion()) {
+                    log.append("¡Encuentro con Foca!\n");
+                    gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) otro, partida.getTablero());
                 }
             }
         }
 
+        int posCae = j.getPosicion();
+        modelo.tablero.Casilla c = partida.getTablero().getCasillaEnPosicion(posCae);
+        if (c != null) {
+            log.append("¡Cae en " + c.getClass().getSimpleName() + "!\n");
+        }
+
         gestorTablero.ejecutarCasilla(partida, j);
+        
+        if (j.getPosicion() != posCae) {
+            log.append("-> Te mueves a: " + j.getPosicion() + "\n");
+        }
 
         gestorTablero.comprobarFinTurno(partida);
+        if (partida.isFinalizada()) {
+            log.append("¡LA PARTIDA HA TERMINADO!\n");
+        }
 
+        gestorJugador.jugadorFinalizaTurno(j);
+        
+        return log.toString();
+    }
+    
+    public void procesarTurnoJugador(Jugador j) {
+        int avance = tirarDado(j);
+        procesarTurnoConAvance(j, avance);
+    }
+
+
+    /**
+     * Ejecuta la lógica de la casilla actual del jugador y comprueba el fin de turno.
+     * Creado específicamente para sincronizar el movimiento visual con la lógica del juego.
+     */
+    public void ejecutarCasillaVisualmente(Jugador j) {
+        System.out.println("Ejecutando lógica de la casilla en posición: " + j.getPosicion());
+        gestorTablero.ejecutarCasilla(partida, j);
+        gestorTablero.comprobarFinTurno(partida);
         gestorJugador.jugadorFinalizaTurno(j);
     }
 

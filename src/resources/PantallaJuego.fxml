@@ -88,6 +88,9 @@
                     <Circle fx:id="P4" id="P4" radius="14.0" styleClass="player">
                         <GridPane.margin><Insets left="102.0" /></GridPane.margin>
                     </Circle>
+                    <Circle fx:id="PFoca" id="PFoca" radius="14.0" styleClass="foca" fill="BLACK">
+                        <GridPane.margin><Insets left="136.0" /></GridPane.margin>
+                    </Circle>
                 </children>
             </GridPane>
         </StackPane>
@@ -151,6 +154,7 @@
             <VBox spacing="10" styleClass="card" prefWidth="320">
                 <Label text="Eventos" styleClass="card-title" />
                 <Text fx:id="eventos" text="Evento ocurrido" styleClass="events" wrappingWidth="280" />
+                <Button fx:id="finTurno" text="Finalizar Turno" onAction="#botonFinalizarTurno" maxWidth="Infinity" styleClass="secondary" />
             </VBox>
 
         </HBox>
