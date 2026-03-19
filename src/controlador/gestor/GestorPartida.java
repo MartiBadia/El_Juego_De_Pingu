@@ -123,8 +123,9 @@ public class GestorPartida {
             }
         }
 
-        j.moverPosicion(avance);
-        log.append(j.getNombre() + " avanzó " + avance + ".\n");
+        int maxPosTablero = partida.getTablero().getTamaño() - 1;
+        j.moverPosicion(avance, maxPosTablero);
+        log.append(j.getNombre() + " avanzó " + avance + " → casilla " + j.getPosicion() + ".\n");
 
         // --- IA de la Foca: Lógica al caer coincidiendo ---
         if (j instanceof modelo.jugador.Foca) {
@@ -159,13 +160,15 @@ public class GestorPartida {
         int posCae = j.getPosicion();
         modelo.tablero.Casilla c = partida.getTablero().getCasillaEnPosicion(posCae);
         if (c != null) {
-            log.append("¡Cae en " + c.getClass().getSimpleName() + "!\n");
+            String logCasilla = c.realizarAccionConLog(partida, j);
+            if (logCasilla != null && !logCasilla.isEmpty()) {
+                log.append(logCasilla).append("\n");
+            }
         }
 
-        gestorTablero.ejecutarCasilla(partida, j);
-        
+        // Si la casilla movió al jugador, informamos
         if (j.getPosicion() != posCae) {
-            log.append("-> Te mueves a: " + j.getPosicion() + "\n");
+            log.append("➡ Ahora estás en la casilla ").append(j.getPosicion()).append(".\n");
         }
 
         gestorTablero.comprobarFinTurno(partida);

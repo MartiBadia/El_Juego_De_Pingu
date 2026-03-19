@@ -26,6 +26,15 @@ public abstract class Casilla {
 
     public abstract void realizarAccion(Partida partida, Jugador jugador);
 
+    /**
+     * Ejecuta la acción de la casilla y devuelve una descripción textual para la UI.
+     * Las subclases deben sobreescribir este método para dar feedback al jugador.
+     */
+    public String realizarAccionConLog(Partida partida, Jugador jugador) {
+        realizarAccion(partida, jugador);
+        return "";
+    }
+
     @Override
     public String toString() {
         return "Casilla " + posicion + " [" + getClass().getSimpleName() + "]";

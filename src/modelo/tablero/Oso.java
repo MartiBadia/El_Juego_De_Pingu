@@ -11,8 +11,13 @@ public class Oso extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        // Según el enunciado: "si un jugador es atacado, retorna al inicio del juego"
         j.setPosicion(0);
+    }
+
+    @Override
+    public String realizarAccionConLog(Partida p, Jugador j) {
+        realizarAccion(p, j);
+        return "🐻 ¡Un Oso te ataca! Vuelves al inicio del tablero.";
     }
 
     @Override

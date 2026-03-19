@@ -1,127 +1,253 @@
 .root {
-    -fx-font-family: "System";
-    -fx-background-color: #f6f7fb;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
+    -fx-background-color: #0d1b2a;
 }
 
-/* MENU */
+/* =================== MENÚ =================== */
 .menu-bar {
-    -fx-background-color: white;
-    -fx-border-color: #e6e7ee;
+    -fx-background-color: #0a1628;
+    -fx-border-color: #1a3557;
     -fx-border-width: 0 0 1 0;
+    -fx-padding: 2 8;
 }
 
-/* TABLERO */
+.menu-bar .menu:hover,
+.menu-bar .menu:focused {
+    -fx-background-color: #1a3557;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #a8c8e8;
+    -fx-font-size: 13px;
+}
+
+.context-menu {
+    -fx-background-color: #112240;
+    -fx-border-color: #1a3557;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.menu-item:hover {
+    -fx-background-color: #1a3557;
+}
+
+.menu-item .label {
+    -fx-text-fill: #e8f4fd;
+}
+
+/* =================== TABLERO =================== */
 .board {
-    -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-padding: 14;
-    -fx-border-color: #e6e7ee;
-    -fx-border-radius: 14;
-
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 14, 0.15, 0, 2);
+    -fx-background-color: white; /* Color de las líneas de separación */
+    -fx-hgap: 1.5;
+    -fx-vgap: 1.5;
+    -fx-background-radius: 18;
+    -fx-border-color: #1a4a72;
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.30), 24, 0.2, 0, 4);
+    -fx-padding: 2;
 }
 
-/* TEXTOS DEL TABLERO */
+.board-cell {
+    -fx-background-color: linear-gradient(to bottom right, #112240, #0d1b2a);
+}
+
+/* Primer y último hijo del GridPane para redondear esquinas si quieres, 
+   o simplemente que todas se vean bien */
+
+/* Textos de tipo de casilla */
 .cell-title {
-    -fx-font-size: 22px;
-    -fx-opacity: 0.65;
+    -fx-fill: #4fc3f7;
+    -fx-font-size: 14px; /* Un poco más pequeño para que quepa el nombre completo */
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.6), 8, 0.5, 0, 0);
 }
 
 .cell-type {
-    -fx-font-size: 12px;
+    -fx-fill: #81d4fa;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
     -fx-opacity: 0.85;
 }
 
-/* BARRA INFERIOR */
+/* =================== BARRA INFERIOR =================== */
 .bottom-bar {
-    -fx-background-color: transparent;
+    -fx-background-color: #0a1628;
+    -fx-border-color: #1a3557;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 14 16;
 }
 
-/* TARJETAS */
+/* =================== TARJETAS (CARDS) =================== */
 .card {
-    -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-padding: 14;
-    -fx-border-color: #e6e7ee;
-    -fx-border-radius: 14;
-
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 14, 0.15, 0, 2);
+    /* glassmorphism ártico */
+    -fx-background-color: linear-gradient(to bottom, rgba(17, 34, 64, 0.95), rgba(13, 27, 42, 0.95));
+    -fx-background-radius: 16;
+    -fx-border-color: #1a4a72;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.15), 18, 0.15, 0, 3);
 }
 
 .card-title {
-    -fx-font-size: 16px;
+    -fx-text-fill: #4fc3f7;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-opacity: 0.75;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.5), 6, 0.4, 0, 0);
 }
 
 .big-text {
-    -fx-font-size: 22px;
+    -fx-fill: #e8f4fd;
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.15), 4, 0.2, 0, 1);
 }
 
 .stat {
-    -fx-font-size: 15px;
-    -fx-opacity: 0.85;
+    -fx-fill: #a8c8e8;
+    -fx-font-size: 14px;
 }
 
 .events {
-    -fx-font-size: 14px;
-    -fx-opacity: 0.85;
+    -fx-fill: #e8f4fd;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 3;
 }
 
-/* BOTONES */
+/* =================== FILAS DE INVENTARIO =================== */
+.row {
+    -fx-background-color: rgba(26, 53, 87, 0.4);
+    -fx-background-radius: 8;
+    -fx-padding: 6 10;
+}
+
+/* =================== BOTONES =================== */
 .button {
     -fx-background-radius: 10;
-    -fx-padding: 8 14;
-    -fx-background-color: #eef0f6;
-    -fx-text-fill: #1f2330;
+    -fx-padding: 8 18;
+    -fx-background-color: linear-gradient(to bottom, #1a3a5c, #112240);
+    -fx-text-fill: #a8c8e8;
     -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-border-color: #1a4a72;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 6, 0.2, 0, 2);
 }
 
 .button:hover {
-    -fx-background-color: #e6e8f0;
+    -fx-background-color: linear-gradient(to bottom, #1f4570, #163060);
+    -fx-text-fill: #e8f4fd;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.3), 8, 0.3, 0, 0);
 }
 
+.button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #112240, #0d1b2a);
+    -fx-translate-y: 1;
+}
+
+.button:disabled {
+    -fx-opacity: 0.35;
+    -fx-cursor: default;
+}
+
+/* Botón principal: Tirar Dado */
 .button.primary {
-    -fx-background-color: #2f6fed;
+    -fx-background-color: linear-gradient(to bottom, #0ea5e9, #0284c7);
     -fx-text-fill: white;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.5), 10, 0.4, 0, 2);
 }
 
 .button.primary:hover {
-    -fx-background-color: #295fd0;
+    -fx-background-color: linear-gradient(to bottom, #38bdf8, #0ea5e9);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.7), 14, 0.5, 0, 0);
 }
 
-/* SCROLL */
+.button.primary:disabled {
+    -fx-opacity: 0.3;
+}
+
+/* Botón secundario: Finalizar Turno */
+.button.secondary {
+    -fx-background-color: linear-gradient(to bottom, #065f46, #064e3b);
+    -fx-text-fill: #6ee7b7;
+    -fx-border-color: #10b981;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.3), 8, 0.3, 0, 2);
+}
+
+.button.secondary:hover {
+    -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.6), 12, 0.4, 0, 0);
+}
+
+/* =================== SCROLL =================== */
 .objects-scroll {
     -fx-background-color: transparent;
+    -fx-background: transparent;
 }
 
-.objects-scroll > .viewport {
+.objects-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
-/* ========================= */
-/*        JUGADORES          */
-/* ========================= */
-
-.player {
-    -fx-stroke: white;
-    -fx-stroke-width: 3;
-
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 8, 0.35, 0, 2);
-
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #1a4a72;
+    -fx-background-radius: 6;
 }
 
-/* Colores por ID (robusto en JavaFX 21) */
-#P1 { -fx-fill: #2f6fed; }  /* azul */
-#P2 { -fx-fill: #ef4444; }  /* rojo */
-#P3 { -fx-fill: #22c55e; }  /* verde */
-#P4 { -fx-fill: #facc15; }  /* amarillo */
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
 
-/* Si quieres marcar el jugador activo, añade/quita esta clase desde Java */
+/* =================== FICHAS / TOKENS =================== */
+.player {
+    -fx-stroke: #e8f4fd;
+    -fx-stroke-width: 2.5;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.6), 10, 0.4, 0, 2);
+}
+
+.foca {
+    -fx-stroke: #f87171;
+    -fx-stroke-width: 2.5;
+    -fx-fill: #7f1d1d;
+    -fx-effect: dropshadow(gaussian, rgba(248, 113, 113, 0.6), 10, 0.4, 0, 2);
+}
+
+/* Colores por jugador */
+#P1 {
+    -fx-fill: #0ea5e9;
+}
+
+/* Azul hielo */
+#P2 {
+    -fx-fill: #f97316;
+}
+
+/* Naranja ártico */
+#P3 {
+    -fx-fill: #22c55e;
+}
+
+/* Verde aurora */
+#P4 {
+    -fx-fill: #facc15;
+}
+
+/* Amarillo sol polar */
+#PFoca {
+    -fx-fill: #7f1d1d;
+}
+
+/* Rojo oscuro – Foca villana */
+
+/* Jugador activo — añade/quita esta clase desde Java */
 .current-player {
-    -fx-effect: dropshadow(gaussian, gold, 12, 0.6, 0, 0);
+    -fx-stroke: #facc15;
+    -fx-stroke-width: 3.5;
+    -fx-effect: dropshadow(gaussian, rgba(250, 204, 21, 0.9), 16, 0.7, 0, 0);
 }

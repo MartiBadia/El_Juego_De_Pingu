@@ -46,7 +46,13 @@ public abstract class Jugador {
     }
 
     public void moverPosicion(int n) {
-    	this.posicion += n;
+        this.posicion += n;
+    }
+
+    /** Mueve al jugador n casillas sin sobrepasar maxPos. */
+    public void moverPosicion(int n, int maxPos) {
+        this.posicion = Math.min(this.posicion + n, maxPos);
+        if (this.posicion < 0) this.posicion = 0;
     }
 
     @Override

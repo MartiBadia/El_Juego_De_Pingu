@@ -14,29 +14,35 @@ public class Evento extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        if (j instanceof Pinguino) {
-            Pinguino ping = (Pinguino) j;
-            GestorJugador gestorJ = new GestorJugador(); // Usamos gestor para aplicar efectos de forma centralizada
-            
-            System.out.println("¡Casilla de interrogante (?)!");
-            
-            // Probabilidades basadas en el enunciado:
-            double azar = Math.random();
-            
-            if (azar < 0.25) {
-                // Obtener un pez
-                gestorJ.pinguinoEventoPez(ping);
-            } else if (azar < 0.60) {
-                // Obtener 1-3 bolas de nieve
-                gestorJ.pinguinoEventoBolaDeNieve(ping);
-            } else if (azar < 0.70) {
-                // Obtener un dado rápido (5-10, baja prob)
-                gestorJ.pinguinoEventoDadoRapido(ping);
-            } else {
-                // Obtener un dado lento (1-3, alta prob)
-                gestorJ.pinguinoEventoDadoLento(ping);
-            }
+        realizarAccionConLog(p, j); // delega para no duplicar lógica
+    }
+
+    @Override
+    public String realizarAccionConLog(Partida p, Jugador j) {
+        if (!(j instanceof Pinguino)) return "";
+        Pinguino ping = (Pinguino) j;
+        GestorJugador gestorJ = new GestorJugador();
+
+        double azar = Math.random();
+        String obtenido;
+
+        if (azar < 0.25) {
+            gestorJ.pinguinoEventoPez(ping);
+            obtenido = "🐟 ¡Has obtenido un Pez!";
+        } else if (azar < 0.60) {
+            int antes = ping.getInventario().contarPorTipo("Bola de Nieve");
+            gestorJ.pinguinoEventoBolaDeNieve(ping);
+            int despues = ping.getInventario().contarPorTipo("Bola de Nieve");
+            obtenido = "❄️ ¡Has obtenido " + (despues - antes) + " Bola(s) de Nieve!";
+        } else if (azar < 0.70) {
+            gestorJ.pinguinoEventoDadoRapido(ping);
+            obtenido = "🎲 ¡Has obtenido un Dado Rápido (5-10)!";
+        } else {
+            gestorJ.pinguinoEventoDadoLento(ping);
+            obtenido = "🎲 ¡Has obtenido un Dado Lento (1-3)!";
         }
+
+        return "❓ Casilla Evento: " + obtenido;
     }
 
     @Override

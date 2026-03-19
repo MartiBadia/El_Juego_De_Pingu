@@ -42,8 +42,13 @@ public class Agujero extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        System.out.println("¡Caída en Agujero de Hielo! Retrocedes a la posición " + posicionAgujeroAnterior);
         j.setPosicion(posicionAgujeroAnterior);
+    }
+
+    @Override
+    public String realizarAccionConLog(Partida p, Jugador j) {
+        realizarAccion(p, j);
+        return "🕳️ ¡Caíste en un Agujero de Hielo! Te manda a la casilla " + posicionAgujeroAnterior + ".";
     }
 
     @Override
