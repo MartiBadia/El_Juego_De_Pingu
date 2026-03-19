@@ -16,6 +16,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Text?>
 
@@ -140,6 +142,9 @@
                             </HBox>
 
                             <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
+                                <ImageView fitWidth="28" fitHeight="28" preserveRatio="true" smooth="true">
+                                    <image><Image url="@bola_nieve.png" /></image>
+                                </ImageView>
                                 <Text fx:id="nieve_t" text="Bolas de nieve: 0" styleClass="stat" />
                                 <Region HBox.hgrow="ALWAYS" />
                                 <Button fx:id="nieve" text="Usar" onAction="#handleNieve"/>
