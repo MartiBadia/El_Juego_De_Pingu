@@ -23,6 +23,8 @@ public class main extends Application {
 	    Scene scene = new Scene(root);
 	    primaryStage.setScene(scene);
 	    primaryStage.setTitle("El Juego del Pingüino");
+	    primaryStage.centerOnScreen();
+	    primaryStage.fullScreenProperty();
 	    primaryStage.show();
 	}
 

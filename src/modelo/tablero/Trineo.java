@@ -30,10 +30,18 @@ public class Trineo extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        //avanza al siguiente trineo del tablero  
         if (posicionSiguienteTrineo != -1) {
             j.setPosicion(posicionSiguienteTrineo);
         }
+    }
+
+    @Override
+    public String realizarAccionConLog(Partida p, Jugador j) {
+        if (posicionSiguienteTrineo != -1) {
+            realizarAccion(p, j);
+            return "🛷 ¡Trineo! Te deslizas hasta la casilla " + posicionSiguienteTrineo + ".";
+        }
+        return "🛷 Trineo (último del tablero). No hay siguiente trineo.";
     }
 
     @Override

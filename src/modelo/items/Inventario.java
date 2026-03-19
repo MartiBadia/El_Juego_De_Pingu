@@ -44,6 +44,13 @@ public class Inventario {
     public boolean quitarItem(Item item) {
         return lista.remove(item);
     }
+    
+    public Item obtenerItemPorNombre(String nombre) {
+        for (Item i : lista) {
+            if (i.getNombre().equals(nombre)) return i;
+        }
+        return null;
+    }
 
     // Cuenta ítems de un tipo concreto por nombre
     public int contarPorTipo(String nombre) {

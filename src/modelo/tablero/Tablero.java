@@ -38,7 +38,7 @@ public class Tablero {
     
     public void generarTableroAleatorio() {
         casillas.clear();
-        this.tamano = TAMANO_MINIMO + (int)(Math.random() * 21); // 50-70 casillas
+        this.tamano = TAMANO_MINIMO; // Exactamente 50 casillas.
 
         int ultimoAgujeroPos = 0; // Referencia para el retroceso de Agujeros y Suelos
         Trineo ultimoTrineo = null;

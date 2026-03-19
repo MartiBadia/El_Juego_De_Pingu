@@ -17,31 +17,34 @@ public class SueloQuebradizo extends Casilla {
 
     @Override
     public void realizarAccion(Partida p, Jugador j) {
-        if (j instanceof Pinguino) {
-            Pinguino ping = (Pinguino) j;
-            int totalItems = ping.getInventario().getTotalItems();
-            
-            System.out.println("¡Suelo Quebradizo en la casilla " + posicion + "! Tienes " + totalItems + " objetos.");
-            
-            if (totalItems > 5) {
-                System.out.println("¡CRACK! El suelo no aguanta tu peso. Vuelves al inicio.");
-                ping.setPosicion(0);
-            } else if (totalItems > 0) {
-                System.out.println("El suelo se agrieta un poco... Pierdes un turno para salir con cuidado.");
-                ping.setTurnosCongelado(ping.getTurnosCongelado() + 1);
-                
-                if (random.nextDouble() < 0.30) {
-                    System.out.println("¡Oh no! Al intentar salir, se te ha caído algo.");
-                    Item perdido = ping.getInventario().obtenerItemAleatorio();
-                    if (perdido != null) {
-                        ping.getInventario().quitarItem(perdido);
-                        System.out.println("Has perdido: " + perdido.getNombre());
-                    }
+        realizarAccionConLog(p, j); // delega para no duplicar lógica
+    }
+
+    @Override
+    public String realizarAccionConLog(Partida p, Jugador j) {
+        if (!(j instanceof Pinguino)) return "";
+        Pinguino ping = (Pinguino) j;
+        int totalItems = ping.getInventario().getTotalItems();
+        StringBuilder log = new StringBuilder();
+        log.append("🧊 Suelo Quebradizo (tienes ").append(totalItems).append(" objeto(s)): ");
+
+        if (totalItems > 5) {
+            ping.setPosicion(0);
+            log.append("¡El suelo no aguanta! Vuelves al inicio.");
+        } else if (totalItems > 0) {
+            ping.setTurnosCongelado(ping.getTurnosCongelado() + 1);
+            log.append("El suelo se agrieta. Pierdes un turno.");
+            if (random.nextDouble() < 0.30) {
+                modelo.items.Item perdido = ping.getInventario().obtenerItemAleatorio();
+                if (perdido != null) {
+                    ping.getInventario().quitarItem(perdido);
+                    log.append(" Además pierdes: ").append(perdido.getNombre()).append(".");
                 }
-            } else {
-                System.out.println("Eres ligero como una pluma. Pasas sin problemas.");
             }
+        } else {
+            log.append("Sin objetos, pasas sin problemas.");
         }
+        return log.toString();
     }
 
     @Override
