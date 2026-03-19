@@ -19,13 +19,19 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane
+<StackPane
     xmlns="http://javafx.com/javafx/21.0.10"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="vista.PantallaJuego"
     stylesheets="/resources/PantallaJuego.css"
     styleClass="root"
     prefWidth="1100" prefHeight="780">
+
+    <!-- Fondo de escena: Region estilizada por CSS para que escale perfecto (cover) -->
+    <Region styleClass="scene-background" />
+
+    <!-- Capa de la UI: BorderPane original -->
+    <BorderPane pickOnBounds="false">
 
     <!-- ===== MENÚ SUPERIOR ===== -->
     <top>
@@ -197,4 +203,6 @@
         </VBox>
     </bottom>
 
-</BorderPane>
+    </BorderPane>
+
+</StackPane>

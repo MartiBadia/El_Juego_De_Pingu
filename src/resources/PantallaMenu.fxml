@@ -15,12 +15,18 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane
+<StackPane
     xmlns="http://javafx.com/javafx/21.0.10"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="vista.PantallaMenu"
     stylesheets="/resources/PantallaMenu.css"
     styleClass="root">
+
+    <!-- Fondo de escena: Region estilizada por CSS -->
+    <Region styleClass="scene-background" />
+
+    <!-- Capa de la UI: BorderPane original -->
+    <BorderPane pickOnBounds="false">
 
     <top>
         <MenuBar>
@@ -50,10 +56,8 @@
                     <Insets top="18" right="18" bottom="18" left="18"/>
                 </padding>
 
-                <!-- Cabecera -->
-                <VBox spacing="6" alignment="CENTER">
-                    <Label text="EL JUEGO DEL PINGÜINO" styleClass="title" wrapText="true"/>
-                </VBox>
+                <!-- Cabecera eliminada a petición del usuario -->
+
 
                 <Region prefHeight="8"/>
 
@@ -80,4 +84,6 @@
         </StackPane>
     </center>
 
-</BorderPane>
+    </BorderPane>
+
+</StackPane>

@@ -7,6 +7,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
@@ -62,9 +64,26 @@ public class PantallaJuego {
     @FXML
     private void initialize() {
         eventos.setText("¡El juego ha comenzado!");
-        
+
+        // Asignar icono de imagen a los botones del inventario
+        ponerIconoBoton(nieve,  "bola_nieve.png",      20);
+
         gestorPartida = new GestorPartida();
         iniciarPartida();
+    }
+
+    /** Carga una imagen de resources y la asigna como graphic del botón. */
+    private void ponerIconoBoton(Button boton, String archivo, double tamaño) {
+        try {
+            Image img = new Image(getClass().getResourceAsStream("/resources/" + archivo));
+            ImageView iv = new ImageView(img);
+            iv.setFitWidth(tamaño);
+            iv.setFitHeight(tamaño);
+            iv.setPreserveRatio(true);
+            boton.setGraphic(iv);
+        } catch (Exception e) {
+            // Si falla, el botón queda sin icono (no es crítico)
+        }
     }
 
     /**
@@ -117,6 +136,19 @@ public class PantallaJuego {
         }
     }
 
+    private ImageView crearImagenCasilla(String nombreArchivo) {
+        try {
+            Image img = new Image(getClass().getResourceAsStream("/resources/" + nombreArchivo));
+            ImageView iv = new ImageView(img);
+            iv.setPreserveRatio(true);
+            iv.setFitWidth(70);
+            iv.setFitHeight(70);
+            return iv;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private void mostrarTiposDeCasillasEnTablero(Tablero t) {
         tablero.getChildren().removeIf(node -> TAG_CASILLA_TEXT.equals(node.getUserData()));
 
@@ -129,13 +161,30 @@ public class PantallaJuego {
             cell.getStyleClass().add("board-cell");
             cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-            Text texto = new Text(tipo); 
-            texto.getStyleClass().add("cell-type");
+            // Seleccionar imagen según el tipo de casilla
+            String imgFile;
+            switch (tipo) {
+                case "Evento":          imgFile = "casilla_evento.png";    break;
+                case "MotoNieve":       imgFile = "casilla_motonieve.png"; break;
+                case "Oso":             imgFile = "casilla_oso.png";       break;
+                case "Agujero":         imgFile = "casilla_agujero.png";   break;
+                case "SueloQuebradizo": imgFile = "casilla_agujero.png";   break;
+                default:                imgFile = "casilla_normal.png";    break;
+            }
+
+            ImageView iv = crearImagenCasilla(imgFile);
+            if (iv != null) {
+                cell.getChildren().add(iv);
+            } else {
+                // Fallback: mostrar texto si la imagen no carga
+                Text texto = new Text(tipo);
+                texto.getStyleClass().add("cell-type");
+                cell.getChildren().add(texto);
+            }
 
             int row = i / COLUMNS;
             int col = i % COLUMNS;
 
-            cell.getChildren().add(texto);
             GridPane.setRowIndex(cell, row);
             GridPane.setColumnIndex(cell, col);
             tablero.getChildren().add(cell);
