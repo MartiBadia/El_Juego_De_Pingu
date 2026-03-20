@@ -19,13 +19,19 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane
+<StackPane
     xmlns="http://javafx.com/javafx/21.0.10"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="vista.PantallaJuego"
     stylesheets="/resources/PantallaJuego.css"
     styleClass="root"
     prefWidth="1100" prefHeight="780">
+
+    <!-- Fondo de escena: Region estilizada por CSS para que escale perfecto (cover) -->
+    <Region styleClass="scene-background" />
+
+    <!-- Capa de la UI: BorderPane original -->
+    <BorderPane pickOnBounds="false">
 
     <!-- ===== MENÚ SUPERIOR ===== -->
     <top>
@@ -108,9 +114,13 @@
                             <GridPane.margin><Insets left="108.0" /></GridPane.margin>
                         </Circle>
 
-                        <!-- Foca CPU -->
-                        <Circle fx:id="PFoca" id="PFoca" radius="15.0" styleClass="foca">
+                        <!-- Focas CPU -->
+                        <Circle fx:id="PFoca" id="PFoca" radius="15.0" styleClass="foca" visible="false">
                             <GridPane.margin><Insets left="144.0" /></GridPane.margin>
+                        </Circle>
+
+                        <Circle fx:id="PFoca2" id="PFoca2" radius="15.0" styleClass="foca" visible="false">
+                            <GridPane.margin><Insets left="160.0" top="10.0"/></GridPane.margin>
                         </Circle>
                     </children>
                 </GridPane>
@@ -197,4 +207,29 @@
         </VBox>
     </bottom>
 
-</BorderPane>
+    </BorderPane>
+
+    <!-- ===== BOTÓN HAMBURGUESA (FLOTANTE) ===== -->
+    <Button fx:id="hamburgerButton" text="☰" onAction="#toggleMenu" 
+            StackPane.alignment="TOP_RIGHT" styleClass="hamburger-button">
+        <StackPane.margin>
+            <Insets top="10" right="10"/>
+        </StackPane.margin>
+    </Button>
+
+    <!-- ===== MENÚ DESPLEGABLE (OVERLAY) ===== -->
+    <VBox fx:id="menuOverlay" visible="false" managed="false" spacing="15" 
+          alignment="CENTER" styleClass="menu-overlay" maxWidth="300" maxHeight="400">
+        <padding>
+            <Insets top="30" right="30" bottom="30" left="30"/>
+        </padding>
+        <Label text="MENÚ" styleClass="card-title" style="-fx-font-size: 24px;"/>
+        <Region prefHeight="10"/>
+        <Button text="💾 Guardar Partida" onAction="#handleSaveGame" maxWidth="Infinity" styleClass="primary"/>
+        <Button text="🏠 Salir al Menú" onAction="#handleGoToMenu" maxWidth="Infinity"/>
+        <Button text="🚪 Cerrar Juego" onAction="#handleQuitGame" maxWidth="Infinity" style="-fx-opacity: 0.8;"/>
+        <Region prefHeight="10"/>
+        <Button text="Volver al Juego" onAction="#toggleMenu" maxWidth="Infinity" styleClass="secondary"/>
+    </VBox>
+
+</StackPane>
