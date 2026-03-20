@@ -15,12 +15,16 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<<<<<<< Updated upstream
 <BorderPane
     xmlns="http://javafx.com/javafx/21.0.10"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="vista.PantallaMenu"
     stylesheets="/resources/PantallaMenu.css"
     styleClass="root">
+=======
+<StackPane prefHeight="848.0" prefWidth="1136.0" styleClass="root" stylesheets="/resources/PantallaMenu.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vista.PantallaMenu">
+>>>>>>> Stashed changes
 
     <top>
         <MenuBar>
@@ -40,14 +44,14 @@
     </top>
 
     <center>
-        <StackPane>
+        <StackPane prefHeight="491.0" prefWidth="476.0">
             <padding>
-                <Insets top="28" right="28" bottom="28" left="28"/>
+                <Insets bottom="28" left="28" right="28" top="28" />
             </padding>
 
-            <VBox spacing="16" styleClass="card" maxWidth="420">
+            <VBox maxWidth="420" spacing="16" styleClass="card">
                 <padding>
-                    <Insets top="18" right="18" bottom="18" left="18"/>
+                    <Insets bottom="18" left="18" right="18" top="18" />
                 </padding>
 
                 <!-- Cabecera -->
@@ -55,29 +59,32 @@
                     <Label text="EL JUEGO DEL PINGÜINO" styleClass="title" wrapText="true"/>
                 </VBox>
 
-                <Region prefHeight="8"/>
+                <Region prefHeight="8" />
 
                 <!-- Formulario -->
                 <VBox spacing="10">
-                    <Label text="Usuario" styleClass="field-label"/>
-                    <TextField fx:id="userField" promptText="Usuario..." styleClass="field"/>
+                    <Label styleClass="field-label" text="Usuario" />
+                    <TextField fx:id="userField" promptText="Usuario..." styleClass="field" />
 
-                    <Label text="Contraseña" styleClass="field-label"/>
-                    <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field"/>
+                    <Label styleClass="field-label" text="Contraseña" />
+                    <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field" />
                 </VBox>
 
-                <Region prefHeight="6"/>
+                <Region prefHeight="6" />
 
                 <!-- Botonera -->
                 <HBox spacing="10">
-                    <Button fx:id="loginButton" text="Login" onAction="#handleLogin" maxWidth="Infinity" styleClass="primary"/>
-                    <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity"/>
+                    <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" styleClass="primary" text="Login" />
+                    <Button fx:id="registerButton" maxWidth="Infinity" onAction="#handleRegister" text="Registro" />
                 </HBox>
-
-                <Label text="Tip: para la demo, puedes entrar con cualquier usuario si aún no hay validación."
-                       styleClass="hint" wrapText="true"/>
             </VBox>
         </StackPane>
     </center>
 
+<<<<<<< Updated upstream
 </BorderPane>
+=======
+    </BorderPane>
+
+</StackPane>
+>>>>>>> Stashed changes
