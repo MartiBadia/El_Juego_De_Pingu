@@ -7,6 +7,7 @@ public abstract class Jugador {
     protected int posicion; // Protegido para que Pinguino y Foca lo vean
     protected String nombre;
     protected String color;
+    protected boolean esIA;
 
     // Constructor vacío básico
     public Jugador() {
@@ -17,9 +18,26 @@ public abstract class Jugador {
         this.nombre = nombre;
         this.color = color;
         this.posicion = 0;
+        this.esIA = false;
+    }
+
+    // Constructor con parámetros incluyendo IA
+    public Jugador(String nombre, String color, boolean esIA) {
+        this.nombre = nombre;
+        this.color = color;
+        this.posicion = 0;
+        this.esIA = esIA;
     }
 
     // --- GETTERS ---
+    public boolean isEsIA() {
+        return esIA;
+    }
+
+    public void setEsIA(boolean esIA) {
+        this.esIA = esIA;
+    }
+
     public int getPosicion() {
         return posicion;
     }

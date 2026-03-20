@@ -203,6 +203,35 @@
     -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.6), 12, 0.4, 0, 0);
 }
 
+/* =================== MENÚ HAMBURGUESA =================== */
+.hamburger-button {
+    -fx-background-color: rgba(10, 22, 40, 0.82);
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-text-fill: #4fc3f7;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 4);
+}
+
+.hamburger-button:hover {
+    -fx-background-color: rgba(26, 74, 114, 0.9);
+    -fx-text-fill: white;
+}
+
+.menu-overlay {
+    -fx-background-color: rgba(10, 22, 40, 0.92);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(79, 195, 247, 0.5);
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 100, 0, 0, 0);
+    -fx-padding: 30;
+}
+
 /* =================== SCROLL =================== */
 .objects-scroll {
     -fx-background-color: transparent;

@@ -21,76 +21,83 @@
     -fx-text-fill: #a8c8e8;
 }
 
-/* CARD */
+/* CARD - Glassmorphism style */
 .card {
-    -fx-background-color: rgba(17, 34, 64, 0.75);
-    -fx-background-radius: 16;
+    -fx-background-color: rgba(17, 34, 64, 0.82);
+    -fx-background-radius: 20;
     -fx-border-color: rgba(79, 195, 247, 0.4);
-    -fx-border-radius: 16;
-    -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 4);
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 30, 0, 0, 8);
 }
 
 /* TITLES */
 .title {
-    -fx-font-size: 26px;
+    -fx-font-size: 30px;
     -fx-font-weight: 800;
-    -fx-text-fill: #4fc3f7;
+    -fx-text-fill: linear-gradient(to bottom right, #4fc3f7, #ffffff);
     -fx-alignment: center;
-    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.5), 8, 0.4, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.4), 10, 0, 0, 0);
 }
 
 /* FIELDS */
 .field-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-text-fill: #a8c8e8;
     -fx-font-weight: bold;
 }
 
 .field {
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-    -fx-border-color: rgba(79, 195, 247, 0.3);
-    -fx-background-color: rgba(13, 27, 42, 0.8);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-background-color: rgba(13, 27, 42, 0.7);
     -fx-text-fill: white;
-    -fx-padding: 10 12;
+    -fx-padding: 12;
+    -fx-transition: all 0.2s;
 }
 
 .field:focused {
     -fx-border-color: #4fc3f7;
-    -fx-background-color: rgba(13, 27, 42, 1);
+    -fx-background-color: rgba(13, 27, 42, 0.95);
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.2), 8, 0, 0, 0);
 }
 
 /* BUTTONS */
 .button {
-    -fx-background-radius: 10;
-    -fx-padding: 10 18;
-    -fx-background-color: linear-gradient(to bottom, #1a3a5c, #112240);
+    -fx-background-radius: 12;
+    -fx-padding: 12 20;
+    -fx-background-color: rgba(26, 53, 87, 0.5);
     -fx-text-fill: #a8c8e8;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
-    -fx-border-color: rgba(79, 195, 247, 0.3);
-    -fx-border-radius: 10;
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 12;
 }
 
 .button:hover {
-    -fx-background-color: linear-gradient(to bottom, #1f4570, #163060);
+    -fx-background-color: rgba(31, 69, 112, 0.7);
     -fx-text-fill: white;
+    -fx-border-color: #4fc3f7;
 }
 
 .button.primary {
-    -fx-background-color: linear-gradient(to bottom, #0ea5e9, #0284c7);
+    -fx-background-color: linear-gradient(to bottom right, #0ea5e9, #0284c7);
     -fx-text-fill: white;
     -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.3), 10, 0, 0, 0);
 }
 
 .button.primary:hover {
-    -fx-background-color: linear-gradient(to bottom, #38bdf8, #0ea5e9);
+    -fx-background-color: linear-gradient(to bottom right, #38bdf8, #0ea5e9);
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.5), 15, 0, 0, 0);
 }
 
 /* Hint */
 .hint {
-    -fx-font-size: 11px;
-    -fx-text-fill: #a8c8e8;
-    -fx-opacity: 0.7;
+    -fx-font-size: 12px;
+    -fx-text-fill: #e8f4ff;
+    -fx-opacity: 0.6;
+    -fx-alignment: center;
 }

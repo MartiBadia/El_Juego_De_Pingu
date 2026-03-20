@@ -11,6 +11,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -54,43 +56,100 @@ public class PantallaJuego {
     @FXML private Circle P3;
     @FXML private Circle P4;
     @FXML private Circle PFoca;
+    @FXML private Circle PFoca2;
     @FXML private javafx.scene.control.Label turnLabel;
 
+    // Elementos del menú hamburguesa
+    @FXML private Button hamburgerButton;
+    @FXML private VBox menuOverlay;
+
     private GestorPartida gestorPartida;
-    // La variable p1Position ha sido eliminada para evitar desincronización con el modelo lógico.
     private static final int COLUMNS = 5;
     private static final String TAG_CASILLA_TEXT = "CASILLA_TEXT";
+    
+    // Listas para acceso dinámico a los círculos
+    private ArrayList<Circle> fichasPinguinos;
+    private ArrayList<Circle> fichasFocas;
 
     @FXML
     private void initialize() {
-        eventos.setText("¡El juego ha comenzado!");
+        eventos.setText("Bienvenido a El Juego de Pingu.");
+        
+        // Inicializar listas de fichas
+        fichasPinguinos = new ArrayList<>();
+        fichasPinguinos.add(P1);
+        fichasPinguinos.add(P2);
+        fichasPinguinos.add(P3);
+        fichasPinguinos.add(P4);
 
-        // Asignar icono de imagen a los botones del inventario
-        ponerIconoBoton(nieve,  "bola_nieve.png",      20);
+        fichasFocas = new ArrayList<>();
+        fichasFocas.add(PFoca);
+        fichasFocas.add(PFoca2);
+
+        // Ocultar todas las fichas al inicio
+        for(Circle c : fichasPinguinos) c.setVisible(false);
+        for(Circle c : fichasFocas) c.setVisible(false);
 
         gestorPartida = new GestorPartida();
-        iniciarPartida();
+        
+        // No llamamos a iniciarPartida() aquí para que el menú pueda pasar la configuración
     }
 
-    /** Carga una imagen de resources y la asigna como graphic del botón. */
-    private void ponerIconoBoton(Button boton, String archivo, double tamaño) {
-        try {
-            Image img = new Image(getClass().getResourceAsStream("/resources/" + archivo));
-            ImageView iv = new ImageView(img);
-            iv.setFitWidth(tamaño);
-            iv.setFitHeight(tamaño);
-            iv.setPreserveRatio(true);
-            boton.setGraphic(iv);
-        } catch (Exception e) {
-            // Si falla, el botón queda sin icono (no es crítico)
+    /**
+     * Permite al menú pasar una partida ya creada.
+     */
+    public void prepararPartidaPersonalizada(modelo.partida.Partida p) {
+        this.gestorPartida.nuevaPartida(p.getJugadores(), p.getTablero());
+        configurarFichasYRefrescar();
+    }
+
+    /**
+     * Permite al menú cargar una partida de la BD.
+     */
+    public void cargarPartidaEspecifica(int id) {
+        this.gestorPartida.cargaPartida(id);
+        configurarFichasYRefrescar();
+    }
+
+    private void configurarFichasYRefrescar() {
+        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
+        
+        int pingCount = 0;
+        int sealCount = 0;
+
+        for (Jugador j : jugadores) {
+            if (j instanceof modelo.jugador.Pinguino) {
+                if (pingCount < fichasPinguinos.size()) {
+                    fichasPinguinos.get(pingCount).setVisible(true);
+                    pingCount++;
+                }
+            } else if (j instanceof modelo.jugador.Foca) {
+                if (sealCount < fichasFocas.size()) {
+                    fichasFocas.get(sealCount).setVisible(true);
+                    sealCount++;
+                }
+            }
+        }
+
+        refrescarPartida();
+        
+        Jugador actual = gestorPartida.getPartida().getJugadorActual();
+        String msg = "¡Partida lista! Turno de: " + actual.getNombre();
+        eventos.setText(msg);
+        if (turnLabel != null) turnLabel.setText("▶ Turno de: " + actual.getNombre());
+        
+        if (actual instanceof modelo.jugador.Foca) {
+            dado.setDisable(true);
+            jugarTurnoFoca();
         }
     }
 
     /**
-     * Requisito: Iniciar la partida configurando jugadores y tablero.
+     * Requisito: Iniciar la partida configurando jugadores y tablero (Versión por defecto).
      */
     @FXML
     public void iniciarPartida() {
+        // Mantenemos este método por compatibilidad si se pulsa "New" desde dentro del juego
         ArrayList<Jugador> jugadores = new ArrayList<>();
         
         Pinguino p1 = new Pinguino("Jugador1", "Azul");
@@ -109,19 +168,7 @@ public class PantallaJuego {
 
         gestorPartida.nuevaPartida(jugadores, modeloTablero);
         
-        P1.setVisible(true);
-        P2.setVisible(true);
-        P3.setVisible(false);
-        P4.setVisible(false);
-        PFoca.setVisible(true);
-        
-        refrescarPartida();
-        
-        if (gestorPartida.getPartida().getJugadorActual() instanceof modelo.jugador.Foca) {
-            jugarTurnoFoca();
-        } else {
-            eventos.setText("Turno de: " + gestorPartida.getPartida().getJugadorActual().getNombre());
-        }
+        prepararPartidaPersonalizada(gestorPartida.getPartida());
     }
 
     /**
@@ -132,7 +179,7 @@ public class PantallaJuego {
         if (gestorPartida.getPartida() != null) {
             mostrarTiposDeCasillasEnTablero(gestorPartida.getPartida().getTablero());
             actualizarInventarioVisual();
-            // Aquí se actualizarían las posiciones de las fichas si fuera una carga
+            actualizarPosicionesVisuales();
         }
     }
 
@@ -341,6 +388,33 @@ public class PantallaJuego {
     @FXML private void handleLoadGame() { cargarPartida(); }
     @FXML private void handleQuitGame() { System.exit(0); }
 
+    @FXML
+    public void toggleMenu() {
+        boolean visible = !menuOverlay.isVisible();
+        menuOverlay.setVisible(visible);
+        menuOverlay.setManaged(visible);
+        if (visible) menuOverlay.toFront();
+    }
+
+    @FXML
+    public void handleGoToMenu(ActionEvent event) {
+        try {
+            java.net.URL fxmlUrl = getClass().getResource("/resources/PantallaMenu.fxml");
+            if (fxmlUrl == null) fxmlUrl = getClass().getClassLoader().getResource("resources/PantallaMenu.fxml");
+            
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(fxmlUrl);
+            javafx.scene.Parent root = loader.load();
+            
+            javafx.scene.Scene scene = new javafx.scene.Scene(root);
+            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("El Juego de Pingu - Menú");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void usarItemEspecifico(String nombre) {
         Jugador j = gestorPartida.getPartida().getJugadorActual();
         if (j instanceof Pinguino) {
@@ -471,19 +545,42 @@ public class PantallaJuego {
     }
 
     private Circle getTokenDeJugador(Jugador j) {
-        if (j.getNombre().equals("Jugador1")) return P1;
-        if (j.getNombre().equals("Jugador2")) return P2;
-        if (j instanceof modelo.jugador.Foca) return PFoca;
-        return P3;
+        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
+        
+        if (j instanceof modelo.jugador.Foca) {
+            int focaIndex = 0;
+            for (Jugador jug : jugadores) {
+                if (jug == j) break;
+                if (jug instanceof modelo.jugador.Foca) focaIndex++;
+            }
+            if (focaIndex < fichasFocas.size()) return fichasFocas.get(focaIndex);
+            return PFoca;
+        }
+        
+        int pingIndex = 0;
+        for (Jugador jug : jugadores) {
+            if (jug == j) break;
+            if (jug instanceof Pinguino) pingIndex++;
+        }
+        
+        if (pingIndex < fichasPinguinos.size()) {
+            return fichasPinguinos.get(pingIndex);
+        }
+        
+        return P1;
     }
 
     private void actualizarPosicionesVisuales() {
+        if (gestorPartida.getPartida() == null) return;
+        
         for (Jugador j : gestorPartida.getPartida().getJugadores()) {
             Circle token = getTokenDeJugador(j);
-            GridPane.setRowIndex(token, j.getPosicion() / COLUMNS);
-            GridPane.setColumnIndex(token, j.getPosicion() % COLUMNS);
-            token.setTranslateX(0);
-            token.setTranslateY(0);
+            if (token != null) {
+                GridPane.setRowIndex(token, j.getPosicion() / COLUMNS);
+                GridPane.setColumnIndex(token, j.getPosicion() % COLUMNS);
+                token.setTranslateX(0);
+                token.setTranslateY(0);
+            }
         }
     }
 

@@ -51,35 +51,84 @@
                 <Insets top="28" right="28" bottom="28" left="28"/>
             </padding>
 
-            <VBox spacing="16" styleClass="card" maxWidth="420">
+            <!-- CARD DE LOGIN -->
+            <VBox fx:id="loginCard" spacing="16" styleClass="card" maxWidth="420" visible="true">
                 <padding>
-                    <Insets top="18" right="18" bottom="18" left="18"/>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
                 </padding>
-
-                <!-- Cabecera eliminada a petición del usuario -->
-
-
+                
+                <Label text="Bienvenido" styleClass="title"/>
                 <Region prefHeight="8"/>
 
-                <!-- Formulario -->
                 <VBox spacing="10">
                     <Label text="Usuario" styleClass="field-label"/>
                     <TextField fx:id="userField" promptText="Usuario..." styleClass="field"/>
 
                     <Label text="Contraseña" styleClass="field-label"/>
-                    <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field"/>
+                    <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field" onAction="#handleLogin"/>
                 </VBox>
 
                 <Region prefHeight="6"/>
 
-                <!-- Botonera -->
                 <HBox spacing="10">
-                    <Button fx:id="loginButton" text="Login" onAction="#handleLogin" maxWidth="Infinity" styleClass="primary"/>
-                    <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity"/>
+                    <Button fx:id="loginButton" text="Entrar" onAction="#handleLogin" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary"/>
+                    <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
+                
+                <Label text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+            </VBox>
 
-                <Label text="Tip: para la demo, puedes entrar con cualquier usuario si aún no hay validación."
-                       styleClass="hint" wrapText="true"/>
+            <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
+            <VBox fx:id="optionsCard" spacing="20" styleClass="card" maxWidth="420" visible="false">
+                <padding>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
+                </padding>
+                
+                <Label text="Menú Principal" styleClass="title"/>
+                <Region prefHeight="10"/>
+
+                <Button text="Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
+                <Button text="Cargar Partida Guardada" onAction="#handleLoadGame" maxWidth="Infinity" prefHeight="50"/>
+                <Button text="Cerrar Sesión" onAction="#handleLogout" maxWidth="Infinity" style="-fx-opacity: 0.8;"/>
+                
+                <Region prefHeight="10"/>
+                <Label text="Elige una opción para comenzar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- CARD DE CONFIGURACIÓN -->
+            <VBox fx:id="configCard" spacing="16" styleClass="card" maxWidth="450" visible="false">
+                <padding>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
+                </padding>
+                
+                <Label text="Configurar Partida" styleClass="title"/>
+                <Region prefHeight="8"/>
+
+                <VBox spacing="12">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Jugadores (Humanos):" styleClass="field-label" prefWidth="150"/>
+                        <TextField fx:id="playerCountField" text="1" prefWidth="60" styleClass="field"/>
+                    </HBox>
+                    
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Jugadores (CPU):" styleClass="field-label" prefWidth="150"/>
+                        <TextField fx:id="cpuCountField" text="1" prefWidth="60" styleClass="field"/>
+                    </HBox>
+                    
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Número de Focas:" styleClass="field-label" prefWidth="150"/>
+                        <TextField fx:id="sealCountField" text="1" prefWidth="60" styleClass="field"/>
+                    </HBox>
+                </VBox>
+
+                <Region prefHeight="10"/>
+
+                <HBox spacing="10">
+                    <Button text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <Button text="Comenzar" onAction="#handleStartGame" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary"/>
+                </HBox>
+                
+                <Label text="Configura el número de participantes" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
             </VBox>
         </StackPane>
     </center>
