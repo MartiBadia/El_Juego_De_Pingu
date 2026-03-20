@@ -7,6 +7,7 @@ public abstract class Jugador {
     protected int posicion; // Protegido para que Pinguino y Foca lo vean
     protected String nombre;
     protected String color;
+    protected String skin; // Nombre del archivo de imagen
     protected boolean esIA;
 
     // Constructor vacío básico
@@ -61,6 +62,14 @@ public abstract class Jugador {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getSkin() {
+        return skin;
+    }
+
+    public void setSkin(String skin) {
+        this.skin = skin;
     }
 
     public void moverPosicion(int n) {

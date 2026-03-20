@@ -44,6 +44,10 @@ public class GestorPartida {
         return this.partida;
     }
 
+    public void setPartida(Partida partida) {
+        this.partida = partida;
+    }
+
     public Connection getConexion() {
         return this.con;
     }
@@ -186,6 +190,11 @@ public class GestorPartida {
         procesarTurnoConAvance(j, avance);
     }
 
+    public String procesarTurnoFoca(modelo.jugador.Foca f) {
+        int avance = tirarDado(f);
+        return procesarTurnoConAvance(f, avance);
+    }
+
 
     /**
      * Ejecuta la lógica de la casilla actual del jugador y comprueba el fin de turno.
@@ -200,11 +209,15 @@ public class GestorPartida {
 
     
     public void siguienteTurno() {
-        int actual = partida.getJugadorActual().equals(
-                partida.getJugadores().get(partida.getJugadores().size() - 1))
-                ? 0
-                : partida.getJugadores().indexOf(partida.getJugadorActual()) + 1;
+        int actual = (partida.getJugadorActualIndice() + 1) % partida.getJugadores().size();
         partida.setJugadorActual(actual);
+        if (actual == 0) {
+            partida.setTurnos(partida.getTurnos() + 1);
+        }
+    }
+
+    public void avanzarTurno() {
+        siguienteTurno();
     }
 
     public void actualizarEstadoTablero() {
@@ -213,12 +226,12 @@ public class GestorPartida {
 
 
 
-    public void guardarPartida() {
+    public void guardarPartida(String username) {
         if (con == null) {
             System.out.println("No hay conexión activa. Conecta antes con setConexion().");
             return;
         }
-        bbdd.guardarBBDD(con, this.partida);
+        bbdd.guardarBBDD(con, this.partida, username);
     }
 
 

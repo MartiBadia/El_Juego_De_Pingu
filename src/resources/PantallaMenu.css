@@ -101,3 +101,21 @@
     -fx-opacity: 0.6;
     -fx-alignment: center;
 }
+
+/* SKIN BUTTONS */
+.skin-button {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(79, 195, 247, 0.2);
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-padding: 8;
+    -fx-min-width: 100;
+    -fx-min-height: 100;
+}
+
+.skin-button:hover {
+    -fx-background-color: rgba(79, 195, 247, 0.2);
+    -fx-border-color: #4fc3f7;
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}

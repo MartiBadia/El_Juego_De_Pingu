@@ -14,6 +14,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
 <StackPane
     xmlns="http://javafx.com/javafx/21.0.10"
@@ -75,7 +77,7 @@
                     <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
                 
-                <Label text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+                <Label fx:id="feedbackLabel" text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
             </VBox>
 
             <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
@@ -106,19 +108,16 @@
 
                 <VBox spacing="12">
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Jugadores (Humanos):" styleClass="field-label" prefWidth="150"/>
-                        <TextField fx:id="playerCountField" text="1" prefWidth="60" styleClass="field"/>
+                        <Label text="Pingüinos:" styleClass="field-label" prefWidth="150"/>
+                        <TextField fx:id="playerCountField" text="2" prefWidth="60" styleClass="field"/>
                     </HBox>
                     
                     <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Jugadores (CPU):" styleClass="field-label" prefWidth="150"/>
-                        <TextField fx:id="cpuCountField" text="1" prefWidth="60" styleClass="field"/>
-                    </HBox>
-                    
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Número de Focas:" styleClass="field-label" prefWidth="150"/>
+                        <Label text="Focas:" styleClass="field-label" prefWidth="150"/>
                         <TextField fx:id="sealCountField" text="1" prefWidth="60" styleClass="field"/>
                     </HBox>
+                    
+                    <Label fx:id="errorLabel" text="" style="-fx-text-fill: #ff6b6b; -fx-font-size: 13px; -fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
                 </VBox>
 
                 <Region prefHeight="10"/>
@@ -129,6 +128,84 @@
                 </HBox>
                 
                 <Label text="Configura el número de participantes" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- CARD DE SELECCIÓN DE SKINS -->
+            <VBox fx:id="skinSelectionCard" spacing="16" styleClass="card" maxWidth="450" visible="false">
+                <padding>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
+                </padding>
+                
+                <Label fx:id="skinTitle" text="Jugador 1: Elige tu Skin" styleClass="title"/>
+                <Region prefHeight="8"/>
+
+                <HBox spacing="15" alignment="CENTER">
+                    <VBox spacing="5" alignment="CENTER">
+                        <Button onAction="#selectSkinDino" styleClass="skin-button">
+                            <graphic>
+                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
+                                    <Image url="/resources/skins/skin_dino.png"/>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label text="Dino" styleClass="hint"/>
+                    </VBox>
+                    <VBox spacing="5" alignment="CENTER">
+                        <Button onAction="#selectSkinChef" styleClass="skin-button">
+                            <graphic>
+                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
+                                    <Image url="/resources/skins/skin_chef.png"/>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label text="Chef" styleClass="hint"/>
+                    </VBox>
+                    <VBox spacing="5" alignment="CENTER">
+                        <Button onAction="#selectSkinNinja" styleClass="skin-button">
+                            <graphic>
+                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
+                                    <Image url="/resources/skins/skin_ninja.png"/>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label text="Ninja" styleClass="hint"/>
+                    </VBox>
+                    <VBox spacing="5" alignment="CENTER">
+                        <Button onAction="#selectSkinGhost" styleClass="skin-button">
+                            <graphic>
+                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
+                                    <Image url="/resources/skins/skin_ghost.png"/>
+                                </ImageView>
+                            </graphic>
+                        </Button>
+                        <Label text="Fantasma" styleClass="hint"/>
+                    </VBox>
+                </HBox>
+
+                <Label fx:id="skinErrorLabel" text="" style="-fx-text-fill: #ff6b6b;" alignment="CENTER" maxWidth="Infinity"/>
+
+                <Region prefHeight="10"/>
+                <Button text="Cancelar" onAction="#showConfigCard" maxWidth="Infinity"/>
+            </VBox>
+
+            <!-- CARD DE CARGA (LISTADO DE PARTIDAS) -->
+            <VBox fx:id="loadGameCard" spacing="16" styleClass="card" maxWidth="450" visible="false">
+                <padding>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
+                </padding>
+                
+                <Label text="Partidas Guardadas" styleClass="title"/>
+                <Region prefHeight="8"/>
+
+                <javafx.scene.control.ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 5;">
+                    <VBox fx:id="gamesListContainer" spacing="10">
+                        <!-- Los botones se generarán en el controlador -->
+                    </VBox>
+                </javafx.scene.control.ScrollPane>
+
+                <Region prefHeight="10"/>
+
+                <Button text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" styleClass="secondary"/>
             </VBox>
         </StackPane>
     </center>

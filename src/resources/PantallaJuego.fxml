@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.text.Text?>
 
 <StackPane
@@ -27,13 +27,10 @@
     styleClass="root"
     prefWidth="1100" prefHeight="780">
 
-    <!-- Fondo de escena: Region estilizada por CSS para que escale perfecto (cover) -->
     <Region styleClass="scene-background" />
 
-    <!-- Capa de la UI: BorderPane original -->
     <BorderPane pickOnBounds="false">
 
-    <!-- ===== MENÚ SUPERIOR ===== -->
     <top>
         <MenuBar>
             <menus>
@@ -51,10 +48,8 @@
         </MenuBar>
     </top>
 
-    <!-- ===== ZONA CENTRAL: TABLERO ===== -->
     <center>
         <VBox spacing="0">
-            <!-- Título del tablero -->
             <HBox alignment="CENTER" styleClass="bottom-bar">
                 <padding><Insets top="8" bottom="4"/></padding>
                 <Label text="🐧  EL JUEGO DE PINGU  🐧" styleClass="card-title"
@@ -90,7 +85,6 @@
                     </rowConstraints>
 
                     <children>
-                        <!-- Marcadores de inicio y fin -->
                         <StackPane GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="board-cell">
                              <Text text="🏁 START" styleClass="cell-title" />
                         </StackPane>
@@ -98,59 +92,50 @@
                              <Text text="🏆 FINISH" styleClass="cell-title" />
                         </StackPane>
 
-                        <!-- Fichas de jugadores -->
-                        <Circle fx:id="P1" id="P1" radius="15.0" styleClass="player" />
+                        <!-- Fichas de jugadores (Skins) -->
+                        <ImageView fx:id="P1" id="P1" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false" />
+                        <ImageView fx:id="P2" id="P2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="20.0" /></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="P3" id="P3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="40.0" /></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="P4" id="P4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="60.0" /></GridPane.margin>
+                        </ImageView>
 
-                        <Circle fx:id="P2" id="P2" radius="15.0" styleClass="player">
-                            <GridPane.margin><Insets left="36.0" /></GridPane.margin>
-                        </Circle>
-
-                        <!-- P3 y P4 ocultos por defecto (se muestran si hay más jugadores) -->
-                        <Circle fx:id="P3" id="P3" radius="15.0" styleClass="player" visible="false">
-                            <GridPane.margin><Insets left="72.0" /></GridPane.margin>
-                        </Circle>
-
-                        <Circle fx:id="P4" id="P4" radius="15.0" styleClass="player" visible="false">
-                            <GridPane.margin><Insets left="108.0" /></GridPane.margin>
-                        </Circle>
-
-                        <!-- Focas CPU -->
-                        <Circle fx:id="PFoca" id="PFoca" radius="15.0" styleClass="foca" visible="false">
-                            <GridPane.margin><Insets left="144.0" /></GridPane.margin>
-                        </Circle>
-
-                        <Circle fx:id="PFoca2" id="PFoca2" radius="15.0" styleClass="foca" visible="false">
-                            <GridPane.margin><Insets left="160.0" top="10.0"/></GridPane.margin>
-                        </Circle>
+                        <!-- Fichas de focas -->
+                        <ImageView fx:id="PFoca" id="PFoca" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="80.0" /></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="100.0" top="10.0"/></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="120.0" top="20.0"/></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="140.0" top="30.0"/></GridPane.margin>
+                        </ImageView>
                     </children>
                 </GridPane>
             </StackPane>
         </VBox>
     </center>
 
-    <!-- ===== PANEL INFERIOR ===== -->
     <bottom>
         <VBox spacing="0">
-
-            <!-- Leyenda de jugadores -->
             <HBox spacing="20" alignment="CENTER_LEFT" styleClass="bottom-bar"
                   style="-fx-border-width: 1 0 1 0; -fx-border-color: #1a3557; -fx-padding: 6 18;">
-                <Circle radius="8" style="-fx-fill:#0ea5e9; -fx-stroke:white; -fx-stroke-width:1;"/>
-                <Label text="Jugador 1" style="-fx-text-fill:#a8c8e8; -fx-font-size:12px;"/>
-                <Circle radius="8" style="-fx-fill:#f97316; -fx-stroke:white; -fx-stroke-width:1;"/>
-                <Label text="Jugador 2" style="-fx-text-fill:#a8c8e8; -fx-font-size:12px;"/>
-                <Circle radius="8" style="-fx-fill:#7f1d1d; -fx-stroke:#f87171; -fx-stroke-width:1.5;"/>
-                <Label text="Foca CPU" style="-fx-text-fill:#f87171; -fx-font-size:12px; -fx-font-weight:bold;"/>
+                <Label text="Turno actual gestionado por skins" style="-fx-text-fill:#a8c8e8; -fx-font-size:12px;"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="turnLabel" text="▶ Turno de: Jugador 1"
                        style="-fx-text-fill:#4fc3f7; -fx-font-size:13px; -fx-font-weight:bold;"/>
             </HBox>
 
-            <!-- Controles principales -->
             <HBox spacing="14" styleClass="bottom-bar">
                 <padding><Insets top="14" right="16" bottom="16" left="16"/></padding>
 
-                <!-- Tarjeta: Dado -->
                 <VBox spacing="10" styleClass="card" prefWidth="220">
                     <Label text="🎲  Dado" styleClass="card-title" />
                     <Text fx:id="dadoResultText" text="— Tira el dado —"
@@ -159,30 +144,25 @@
                             maxWidth="Infinity" styleClass="primary" />
                 </VBox>
 
-                <!-- Tarjeta: Inventario -->
                 <VBox spacing="8" styleClass="card" HBox.hgrow="ALWAYS">
                     <Label text="🎒  Inventario" styleClass="card-title" />
                     <VBox spacing="8">
                         <padding><Insets top="4" right="4" bottom="4" left="4"/></padding>
-
                         <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
                             <Text fx:id="rapido_t" text="🎲  Dado Rápido: 0" styleClass="stat"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Button fx:id="rapido" text="Usar" onAction="#handleRapido"/>
                         </HBox>
-
                         <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
                             <Text fx:id="lento_t"  text="🐢  Dado Lento: 0"  styleClass="stat"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Button fx:id="lento"  text="Usar" onAction="#handleLento"/>
                         </HBox>
-
                         <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
                             <Text fx:id="peces_t"  text="🐟  Peces: 0"        styleClass="stat"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Button fx:id="peces"  text="Usar" onAction="#handlePeces"/>
                         </HBox>
-
                         <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
                             <Text fx:id="nieve_t"  text="❄️  Bolas de Nieve: 0" styleClass="stat"/>
                             <Region HBox.hgrow="ALWAYS"/>
@@ -191,7 +171,6 @@
                     </VBox>
                 </VBox>
 
-                <!-- Tarjeta: Eventos -->
                 <VBox spacing="10" styleClass="card" prefWidth="340" VBox.vgrow="ALWAYS">
                     <Label text="📋  Eventos" styleClass="card-title"/>
                     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
@@ -209,7 +188,6 @@
 
     </BorderPane>
 
-    <!-- ===== BOTÓN HAMBURGUESA (FLOTANTE) ===== -->
     <Button fx:id="hamburgerButton" text="☰" onAction="#toggleMenu" 
             StackPane.alignment="TOP_RIGHT" styleClass="hamburger-button">
         <StackPane.margin>
@@ -217,7 +195,6 @@
         </StackPane.margin>
     </Button>
 
-    <!-- ===== MENÚ DESPLEGABLE (OVERLAY) ===== -->
     <VBox fx:id="menuOverlay" visible="false" managed="false" spacing="15" 
           alignment="CENTER" styleClass="menu-overlay" maxWidth="300" maxHeight="400">
         <padding>
