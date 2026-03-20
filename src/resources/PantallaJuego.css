@@ -3,6 +3,13 @@
     -fx-background-color: #0d1b2a;
 }
 
+.scene-background {
+    -fx-background-image: url("/resources/fondo_tablero.png");
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
 /* =================== MENÚ =================== */
 .menu-bar {
     -fx-background-color: #0a1628;
@@ -38,19 +45,30 @@
 
 /* =================== TABLERO =================== */
 .board {
-    -fx-background-color: white; /* Color de las líneas de separación */
-    -fx-hgap: 1.5;
-    -fx-vgap: 1.5;
+    /* Fondo de mar ártico semitransparente para ver el fondo */
+    -fx-background-color: rgba(10, 22, 40, 0.6);
+    -fx-hgap: 4;
+    -fx-vgap: 4;
     -fx-background-radius: 18;
-    -fx-border-color: #1a4a72;
+    -fx-border-color: rgba(79, 195, 247, 0.5);
     -fx-border-radius: 18;
-    -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.30), 24, 0.2, 0, 4);
-    -fx-padding: 2;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.3), 30, 0.4, 0, 0);
+    -fx-padding: 8;
 }
 
 .board-cell {
-    -fx-background-color: linear-gradient(to bottom right, #112240, #0d1b2a);
+    /* Celdas semitransparentes para que se vea el fondo */
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+/* Efecto de "hielo" o brillo al pasar por encima */
+.board-cell:hover {
+    -fx-background-color: rgba(79, 195, 247, 0.15);
 }
 
 /* Primer y último hijo del GridPane para redondear esquinas si quieres, 
@@ -76,18 +94,18 @@
     -fx-background-color: #0a1628;
     -fx-border-color: #1a3557;
     -fx-border-width: 1 0 0 0;
-    -fx-padding: 14 16;
+    -fx-padding: 8 12;
 }
 
 /* =================== TARJETAS (CARDS) =================== */
 .card {
-    /* glassmorphism ártico */
-    -fx-background-color: linear-gradient(to bottom, rgba(17, 34, 64, 0.95), rgba(13, 27, 42, 0.95));
+    /* glassmorphism ártico más transparente */
+    -fx-background-color: rgba(17, 34, 64, 0.7);
     -fx-background-radius: 16;
-    -fx-border-color: #1a4a72;
+    -fx-border-color: rgba(26, 74, 114, 0.8);
     -fx-border-radius: 16;
     -fx-border-width: 1;
-    -fx-padding: 16;
+    -fx-padding: 10;
     -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.15), 18, 0.15, 0, 3);
 }
 
@@ -185,10 +203,40 @@
     -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.6), 12, 0.4, 0, 0);
 }
 
+/* =================== MENÚ HAMBURGUESA =================== */
+.hamburger-button {
+    -fx-background-color: rgba(10, 22, 40, 0.82);
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-text-fill: #4fc3f7;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 4);
+}
+
+.hamburger-button:hover {
+    -fx-background-color: rgba(26, 74, 114, 0.9);
+    -fx-text-fill: white;
+}
+
+.menu-overlay {
+    -fx-background-color: rgba(10, 22, 40, 0.92);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(79, 195, 247, 0.5);
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 100, 0, 0, 0);
+    -fx-padding: 30;
+}
+
 /* =================== SCROLL =================== */
 .objects-scroll {
     -fx-background-color: transparent;
     -fx-background: transparent;
+    -fx-pref-height: 100;
 }
 
 .objects-scroll>.viewport {
