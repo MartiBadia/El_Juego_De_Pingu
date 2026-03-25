@@ -62,6 +62,15 @@ public class BBDD {
 			} catch (SQLException e) {
 				// Ignoramos si la columna ya existe
 			}
+
+			// Aseguramos que la tabla JUGADOR_ESTADO tenga la columna SKIN
+			String sqlSkin = "ALTER TABLE JUGADOR_ESTADO ADD SKIN VARCHAR2(255)";
+			try (Statement st = con.createStatement()) {
+				st.execute(sqlSkin);
+				System.out.println("Columna SKIN añadida a JUGADOR_ESTADO.");
+			} catch (SQLException e) {
+				// Ignoramos si ya existe
+			}
 		}
 		return con;
 	}
@@ -314,9 +323,9 @@ public class BBDD {
 	        }
 
 	        // Insertar en JUGADOR_ESTADO
-	        String sqlJ = "INSERT INTO JUGADOR_ESTADO (ID_PARTIDA, NOMBRE_JUGADOR, TIPO_JUGADOR, COLOR, POSICION, TURNOS_STOP, SOBORNADA, TURNOS_BLOQUEO) VALUES ("
+	        String sqlJ = "INSERT INTO JUGADOR_ESTADO (ID_PARTIDA, NOMBRE_JUGADOR, TIPO_JUGADOR, COLOR, POSICION, TURNOS_STOP, SOBORNADA, TURNOS_BLOQUEO, SKIN) VALUES ("
 	                + idPartida + ", '" + j.getNombre() + "', '" + tipo + "', '" + j.getColor() + "', "
-	                + j.getPosicion() + ", " + stop + ", '" + sobornada + "', " + bloqueo + ")";
+	                + j.getPosicion() + ", " + stop + ", '" + sobornada + "', " + bloqueo + ", '" + j.getSkin() + "')";
 	        insert(con, sqlJ);
 
 	        // Si es Pinguino, guardamos sus items en INVENTARIO_ITEMS
@@ -394,12 +403,14 @@ public class BBDD {
 				foca.setPosicion(posicion);
 				foca.setSoborno("S".equals(fila.getOrDefault("SOBORNADA", "N")));
 				foca.setTurnosBloqueada(Integer.parseInt(fila.getOrDefault("TURNOS_BLOQUEO", "0")));
+				foca.setSkin(fila.getOrDefault("SKIN", "foca.png"));
 				jugadores.add(foca);
 			} else {
 				// Por defecto: Pinguino
 				modelo.jugador.Pinguino ping = new modelo.jugador.Pinguino(nombre, color);
 				ping.setPosicion(posicion);
 				ping.setTurnosCongelado(Integer.parseInt(fila.getOrDefault("TURNOS_STOP", "0")));
+				ping.setSkin(fila.getOrDefault("SKIN", "skin_dino.png"));
 
 				// Reconstruir inventario desde INVENTARIO_ITEMS
 				String idEstadoStr = fila.get("ID_ESTADO");

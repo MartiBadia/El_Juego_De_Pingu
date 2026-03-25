@@ -156,7 +156,7 @@ public class PantallaJuego {
                 fichasPinguinos.get(pingIdx).setVisible(true);
                 pingIdx++;
             } else {
-                fichasFocas.get(focaIdx).setImage(new Image("/resources/skins/foca.png"));
+                fichasFocas.get(focaIdx).setImage(new Image("/resources/skins/" + j.getSkin()));
                 fichasFocas.get(focaIdx).setVisible(true);
                 focaIdx++;
             }
@@ -186,8 +186,23 @@ public class PantallaJuego {
             ImageView ficha = (j instanceof Pinguino) ? fichasPinguinos.get(pIdx++) : fichasFocas.get(fIdx++);
             GridPane.setColumnIndex(ficha, j.getPosicion() % COLUMNS);
             GridPane.setRowIndex(ficha, j.getPosicion() / COLUMNS);
+            // Al refrescar todas, ponemos traslación a 0 por si había alguna animación
+            ficha.setTranslateX(0);
+            ficha.setTranslateY(0);
             ficha.toFront();
         }
+    }
+
+    private ImageView getFichaDeJugador(Jugador j) {
+        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
+        int pIdx = 0; int fIdx = 0;
+        for (Jugador item : jugadores) {
+            if (item == j) {
+                return (j instanceof Pinguino) ? fichasPinguinos.get(pIdx) : fichasFocas.get(fIdx);
+            }
+            if (item instanceof Pinguino) pIdx++; else fIdx++;
+        }
+        return null;
     }
 
     private void actualizarInventarioVisual() {
@@ -212,27 +227,129 @@ public class PantallaJuego {
     @FXML
     public void handleDado() {
         if (gestorPartida.getPartida().isFinalizada()) return;
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        if (actual instanceof modelo.jugador.Foca) return;
-        
-        int res = gestorPartida.tirarDado(actual);
+        Jugador j = gestorPartida.getPartida().getJugadorActual();
+        if (j instanceof modelo.jugador.Foca) return;
+
+        int res = gestorPartida.tirarDado(j);
         dadoResultText.setText("Ha salido: " + res);
-        eventos.setText("⏳ " + actual.getNombre() + " avanza " + res + " casillas...");
         
-        animarPasoAPaso(actual, actual.getPosicion(), res, () -> {
-            String log = gestorPartida.procesarTurnoConAvance(actual, res);
+        iniciarMovimientoAnimado(j, res);
+    }
+
+    private void iniciarMovimientoAnimado(Jugador j, int avance) {
+        int posFisicaInicio = j.getPosicion();
+        eventos.setText("⏳ " + j.getNombre() + " avanza " + avance + " casillas...");
+        
+        animarPasoAPaso(j, posFisicaInicio, avance, () -> {
+            j.setPosicion(posFisicaInicio);
+            
+            // Calculamos la posición destino esperada
+            int targetPos = Math.min(posFisicaInicio + avance, gestorPartida.getPartida().getTablero().getTamaño() - 1);
+            
+            // Gestión del soborno por UI: preguntamos al jugador involucrado
+            comprobarSobornoEnCasilla(j, targetPos);
+            
+            String log = gestorPartida.procesarTurnoConAvance(j, avance);
             eventos.setText(log.trim());
             concluirTurno();
         });
     }
 
-    private void animarPasoAPaso(Jugador j, int posInicial, int pasos, Runnable onFinish) {
-        if (pasos <= 0) { onFinish.run(); return; }
-        TranslateTransition tt = new TranslateTransition(Duration.millis(300));
-        tt.setOnFinished(e -> animarPasoAPaso(j, posInicial + 1, pasos - 1, onFinish));
-        tt.play();
-        j.setPosicion(posInicial + 1);
-        actualizarPosicionesVisuales();
+    private void comprobarSobornoEnCasilla(Jugador j, int targetPos) {
+        Pinguino pTarget = null;
+        modelo.jugador.Foca fTarget = null;
+        
+        // 1. Identificar quién es quién en esta colisión
+        if (j instanceof Pinguino) {
+            pTarget = (Pinguino) j;
+            // Buscamos si hay una foca en la casilla destino
+            for (Jugador item : gestorPartida.getPartida().getJugadores()) {
+                if (item instanceof modelo.jugador.Foca && item.getPosicion() == targetPos) {
+                    fTarget = (modelo.jugador.Foca) item;
+                    break;
+                }
+            }
+        } else if (j instanceof modelo.jugador.Foca) {
+            fTarget = (modelo.jugador.Foca) j;
+            // Buscamos si hay un pingüino en la casilla destino
+            for (Jugador item : gestorPartida.getPartida().getJugadores()) {
+                if (item instanceof Pinguino && item.getPosicion() == targetPos) {
+                    pTarget = (Pinguino) item;
+                    break;
+                }
+            }
+        }
+
+        // 2. Si hay colisión de especies distinta y foca no sobornada, preguntar
+        if (pTarget != null && fTarget != null && !fTarget.isSoborno()) {
+            int nPeces = pTarget.getInventario().contarPorTipo("Pez");
+            if (nPeces > 0) {
+                // Interrupción por UI
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                alert.setTitle("¡Interacción con la Foca!");
+                alert.setHeaderText(null);
+                alert.setContentText(pTarget.getNombre() + " ¡tienes un pescado! ¿Quieres sobornar a la foca?");
+                
+                javafx.scene.control.ButtonType btnSi = new javafx.scene.control.ButtonType("Sí (Sobornar)");
+                javafx.scene.control.ButtonType btnNo = new javafx.scene.control.ButtonType("No");
+                alert.getButtonTypes().setAll(btnSi, btnNo);
+
+                java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == btnSi) {
+                    // Acción de soborno
+                    gestorPartida.getGestorJugador().jugadorUsaItem(pTarget, "Pez");
+                    fTarget.setSoborno(true);
+                    fTarget.setTurnosBloqueada(2);
+                    eventos.setText(pTarget.getNombre() + " soborna a la foca con su pescado. 🐟");
+                }
+            }
+        }
+    }
+
+    private void animarPasoAPaso(Jugador j, int posActual, int pasosRestantes, Runnable onFinish) {
+        if (pasosRestantes <= 0) {
+            onFinish.run();
+            return;
+        }
+
+        int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
+        if (j.getPosicion() < maxPos) {
+            int posNueva = j.getPosicion() + 1;
+            ImageView ficha = getFichaDeJugador(j);
+            if (ficha == null) { onFinish.run(); return; }
+
+            // 1. Guardar la posición visual actual en la escena antes del salto
+            double startX = ficha.getLayoutX() + ficha.getTranslateX();
+            double startY = ficha.getLayoutY() + ficha.getTranslateY();
+
+            // 2. Mover lógicamente y cambiar índices en el GridPane (esto "teletransporta")
+            j.setPosicion(posNueva);
+            GridPane.setColumnIndex(ficha, posNueva % COLUMNS);
+            GridPane.setRowIndex(ficha, posNueva / COLUMNS);
+            
+            // 3. Forzar layout para que el ImageView calcule su nueva posición objetivo
+            ficha.getParent().layout();
+            
+            // 4. Calcular el salto relativo para reponer la ficha visualmente donde estaba
+            double newLayoutX = ficha.getLayoutX();
+            double newLayoutY = ficha.getLayoutY();
+            
+            ficha.setTranslateX(startX - newLayoutX);
+            ficha.setTranslateY(startY - newLayoutY);
+
+            // 5. Animar suavemente hacia (0,0) (que es su posición en el GridPane)
+            TranslateTransition tt = new TranslateTransition(Duration.millis(350), ficha);
+            tt.setToX(0);
+            tt.setToY(0);
+            tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            tt.setOnFinished(e -> {
+                animarPasoAPaso(j, posNueva, pasosRestantes - 1, onFinish);
+            });
+            tt.play();
+            ficha.toFront();
+        } else {
+            onFinish.run();
+        }
     }
 
     private void concluirTurno() {
@@ -252,15 +369,17 @@ public class PantallaJuego {
     private void jugarTurnoFoca() {
         modelo.jugador.Foca foca = (modelo.jugador.Foca) gestorPartida.getPartida().getJugadorActual();
         eventos.setText("🦭 Turno de la Foca " + foca.getNombre() + "...");
+        
+        // Pequeño delay inicial antes de tirar el dado
         new java.util.Timer().schedule(new java.util.TimerTask() {
             @Override public void run() {
                 javafx.application.Platform.runLater(() -> {
-                    String log = gestorPartida.procesarTurnoFoca(foca);
-                    eventos.setText(log);
-                    concluirTurno();
+                    int avance = gestorPartida.tirarDado(foca);
+                    dadoResultText.setText("Foca tira: " + avance);
+                    iniciarMovimientoAnimado(foca, avance);
                 });
             }
-        }, 1500);
+        }, 1000);
     }
 
     private void mostrarFinDePartida() {

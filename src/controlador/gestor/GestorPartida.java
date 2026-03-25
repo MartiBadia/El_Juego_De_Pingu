@@ -52,8 +52,12 @@ public class GestorPartida {
         return this.con;
     }
 
-    public void setConexion(Connection con) {
-        this.con = con;
+    public GestorJugador getGestorJugador() {
+        return this.gestorJugador;
+    }
+
+    public void setGestorJugador(GestorJugador gestorJugador) {
+        this.gestorJugador = gestorJugador;
     }
 
     // --- Gestión de partida ---
@@ -134,6 +138,8 @@ public class GestorPartida {
         // --- IA de la Foca: Lógica al caer coincidiendo ---
         if (j instanceof modelo.jugador.Foca) {
             modelo.jugador.Foca foca = (modelo.jugador.Foca) j;
+            if (foca.isSoborno()) return log.toString();
+            
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro.getPosicion() == foca.getPosicion()) {
                     log.append("Foca coincide con " + otro.getNombre() + " y golpea!\n");

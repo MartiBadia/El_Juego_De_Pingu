@@ -51,6 +51,7 @@ public class PantallaMenu {
     
     @FXML private Label skinTitle;
     @FXML private Label skinErrorLabel;
+    @FXML private javafx.scene.image.ImageView skinPreview;
 
     // Variables de estado para selección de skins
     private int numHumans;
@@ -58,6 +59,9 @@ public class PantallaMenu {
     private int currentSkinPlayerIndex;
     private ArrayList<String> selectedSkins = new ArrayList<>();
     private ArrayList<modelo.jugador.Jugador> jugadoresTemp = new ArrayList<>();
+
+    private final String[] SKIN_FILES = {"skin_dino.png", "skin_chef.png", "skin_ninja.png", "skin_ghost.png"};
+    private int currentCarouselIdx = 0;
 
     @FXML
     private void initialize() {
@@ -211,6 +215,9 @@ public class PantallaMenu {
             currentSkinPlayerIndex = 1;
             selectedSkins.clear();
             jugadoresTemp.clear();
+            currentCarouselIdx = 0;
+            skinPreview.setImage(new javafx.scene.image.Image("/resources/skins/" + SKIN_FILES[0]));
+            actualizarEstadoSeleccionSkin();
             skinTitle.setText("Jugador " + currentSkinPlayerIndex + ": Elige tu Skin");
             skinErrorLabel.setText("");
 
@@ -219,10 +226,54 @@ public class PantallaMenu {
         }
     }
 
-    @FXML private void selectSkinDino(ActionEvent event) { processSkinSelection(event, "skin_dino.png"); }
-    @FXML private void selectSkinChef(ActionEvent event) { processSkinSelection(event, "skin_chef.png"); }
-    @FXML private void selectSkinNinja(ActionEvent event) { processSkinSelection(event, "skin_ninja.png"); }
-    @FXML private void selectSkinGhost(ActionEvent event) { processSkinSelection(event, "skin_ghost.png"); }
+    @FXML
+    private void handlePrevSkin() {
+        currentCarouselIdx = (currentCarouselIdx - 1 + SKIN_FILES.length) % SKIN_FILES.length;
+        animateSkinChange(true);
+    }
+
+    @FXML
+    private void handleNextSkin() {
+        currentCarouselIdx = (currentCarouselIdx + 1) % SKIN_FILES.length;
+        animateSkinChange(false);
+    }
+
+    private void animateSkinChange(boolean reverse) {
+        javafx.animation.ScaleTransition scaleOut = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), skinPreview);
+        scaleOut.setFromX(1.0); scaleOut.setFromY(1.0);
+        scaleOut.setToX(0.1); scaleOut.setToY(0.1);
+        
+        scaleOut.setOnFinished(e -> {
+            skinPreview.setImage(new javafx.scene.image.Image("/resources/skins/" + SKIN_FILES[currentCarouselIdx]));
+            actualizarEstadoSeleccionSkin();
+            javafx.animation.ScaleTransition scaleIn = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), skinPreview);
+            scaleIn.setFromX(0.1); scaleIn.setFromY(0.1);
+            scaleIn.setToX(1.1); scaleIn.setToY(1.1);
+            scaleIn.setOnFinished(e2 -> {
+                javafx.animation.ScaleTransition settle = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(100), skinPreview);
+                settle.setToX(1.0); settle.setToY(1.0);
+                settle.play();
+            });
+            scaleIn.play();
+        });
+        
+        scaleOut.play();
+    }
+
+    @FXML
+    private void handleSelectCurrentSkin(ActionEvent event) {
+        processSkinSelection(event, SKIN_FILES[currentCarouselIdx]);
+    }
+
+    private void actualizarEstadoSeleccionSkin() {
+        if (selectedSkins.contains(SKIN_FILES[currentCarouselIdx])) {
+            skinErrorLabel.setText("¡Esta skin ya está en uso!");
+            skinPreview.setOpacity(0.5); // Feedback visual opcional
+        } else {
+            skinErrorLabel.setText("");
+            skinPreview.setOpacity(1.0);
+        }
+    }
 
     private void processSkinSelection(ActionEvent event, String skinFile) {
         if (selectedSkins.contains(skinFile)) {
@@ -241,13 +292,22 @@ public class PantallaMenu {
         if (currentSkinPlayerIndex < numHumans) {
             currentSkinPlayerIndex++;
             skinTitle.setText("Jugador " + currentSkinPlayerIndex + ": Elige tu Skin");
-            skinErrorLabel.setText("");
+            actualizarEstadoSeleccionSkin();
         } else {
             // Todos los humanos han elegido, añadir focas y empezar
+            // Preparamos lista de skins de focas disponibles y las barajamos
+            ArrayList<String> focaSkins = new ArrayList<>();
+            focaSkins.add("foca_skin1.png");
+            focaSkins.add("foca_skin2.png");
+            focaSkins.add("foca_skin3.png");
+            java.util.Collections.shuffle(focaSkins);
+
             for (int i = 1; i <= numSeals; i++) {
                 modelo.jugador.Foca foca = new modelo.jugador.Foca("Foca " + i, "Blanco");
                 foca.setEsIA(true);
-                foca.setSkin("foca.png"); // Skin por defecto para la foca
+                // Asignamos una skin única de la lista barajada (usando módulo por si hubiera más de 3 focas)
+                String skinUnica = focaSkins.get((i - 1) % focaSkins.size());
+                foca.setSkin(skinUnica);
                 jugadoresTemp.add(foca);
             }
 

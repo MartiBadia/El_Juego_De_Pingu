@@ -93,28 +93,28 @@
                         </StackPane>
 
                         <!-- Fichas de jugadores (Skins) -->
-                        <ImageView fx:id="P1" id="P1" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false" />
-                        <ImageView fx:id="P2" id="P2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="P1" id="P1" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false" />
+                        <ImageView fx:id="P2" id="P2" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="20.0" /></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="P3" id="P3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="P3" id="P3" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="40.0" /></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="P4" id="P4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="P4" id="P4" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="60.0" /></GridPane.margin>
                         </ImageView>
 
                         <!-- Fichas de focas -->
-                        <ImageView fx:id="PFoca" id="PFoca" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="PFoca" id="PFoca" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="80.0" /></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="100.0" top="10.0"/></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="120.0" top="20.0"/></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                        <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
                             <GridPane.margin><Insets left="140.0" top="30.0"/></GridPane.margin>
                         </ImageView>
                     </children>

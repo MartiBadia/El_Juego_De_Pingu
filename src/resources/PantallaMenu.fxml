@@ -139,48 +139,20 @@
                 <Label fx:id="skinTitle" text="Jugador 1: Elige tu Skin" styleClass="title"/>
                 <Region prefHeight="8"/>
 
-                <HBox spacing="15" alignment="CENTER">
-                    <VBox spacing="5" alignment="CENTER">
-                        <Button onAction="#selectSkinDino" styleClass="skin-button">
-                            <graphic>
-                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
-                                    <Image url="/resources/skins/skin_dino.png"/>
-                                </ImageView>
-                            </graphic>
-                        </Button>
-                        <Label text="Dino" styleClass="hint"/>
-                    </VBox>
-                    <VBox spacing="5" alignment="CENTER">
-                        <Button onAction="#selectSkinChef" styleClass="skin-button">
-                            <graphic>
-                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
-                                    <Image url="/resources/skins/skin_chef.png"/>
-                                </ImageView>
-                            </graphic>
-                        </Button>
-                        <Label text="Chef" styleClass="hint"/>
-                    </VBox>
-                    <VBox spacing="5" alignment="CENTER">
-                        <Button onAction="#selectSkinNinja" styleClass="skin-button">
-                            <graphic>
-                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
-                                    <Image url="/resources/skins/skin_ninja.png"/>
-                                </ImageView>
-                            </graphic>
-                        </Button>
-                        <Label text="Ninja" styleClass="hint"/>
-                    </VBox>
-                    <VBox spacing="5" alignment="CENTER">
-                        <Button onAction="#selectSkinGhost" styleClass="skin-button">
-                            <graphic>
-                                <ImageView fitWidth="64" fitHeight="64" preserveRatio="true">
-                                    <Image url="/resources/skins/skin_ghost.png"/>
-                                </ImageView>
-                            </graphic>
-                        </Button>
-                        <Label text="Fantasma" styleClass="hint"/>
-                    </VBox>
-                </HBox>
+                <VBox spacing="20" alignment="CENTER">
+                    <StackPane styleClass="skin-preview-container">
+                        <ImageView fx:id="skinPreview" fitWidth="120" fitHeight="120" preserveRatio="true">
+                            <Image url="/resources/skins/skin_dino.png"/>
+                        </ImageView>
+                    </StackPane>
+                    
+                    <HBox spacing="30" alignment="CENTER">
+                        <Button text="◀" onAction="#handlePrevSkin" styleClass="arrow-button"/>
+                        <Button text="▶" onAction="#handleNextSkin" styleClass="arrow-button"/>
+                    </HBox>
+
+                    <Button text="Confirmar Selección" onAction="#handleSelectCurrentSkin" maxWidth="Infinity" styleClass="primary" prefHeight="45"/>
+                </VBox>
 
                 <Label fx:id="skinErrorLabel" text="" style="-fx-text-fill: #ff6b6b;" alignment="CENTER" maxWidth="Infinity"/>
 
