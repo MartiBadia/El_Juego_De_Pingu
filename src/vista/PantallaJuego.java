@@ -3,12 +3,14 @@ package vista;
 import java.util.ArrayList;
 
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -16,6 +18,11 @@ import javafx.scene.control.Label;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
+
+import javafx.scene.layout.TilePane;
+import java.util.Map;
+import java.util.HashMap;
+import javafx.scene.paint.Color;
 
 import controlador.gestor.GestorPartida;
 import modelo.jugador.Jugador;
@@ -47,7 +54,9 @@ public class PantallaJuego {
     @FXML private Text lento_t;
     @FXML private Text peces_t;
     @FXML private Text nieve_t;
-    @FXML private Text eventos;
+    
+    @FXML private VBox vboxEventos;
+    @FXML private ScrollPane scrollEventos;
 
     // Game board and player pieces
     @FXML private GridPane tablero;
@@ -58,6 +67,9 @@ public class PantallaJuego {
     @FXML private Circle PFoca;
     @FXML private Circle PFoca2;
     @FXML private javafx.scene.control.Label turnLabel;
+
+    @FXML private TilePane playersPanel;
+    private Map<Jugador, VBox> playerUIMap = new HashMap<>();
 
     // Elementos del menú hamburguesa
     @FXML private Button hamburgerButton;
@@ -73,7 +85,7 @@ public class PantallaJuego {
 
     @FXML
     private void initialize() {
-        eventos.setText("Bienvenido a El Juego de Pingu.");
+        registrarEvento("¡Bienvenido a El Juego de Pingu! 🐧", null);
         
         // Inicializar listas de fichas
         fichasPinguinos = new ArrayList<>();
@@ -134,13 +146,55 @@ public class PantallaJuego {
         refrescarPartida();
         
         Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        String msg = "¡Partida lista! Turno de: " + actual.getNombre();
-        eventos.setText(msg);
+
+        // Generar UI de Jugadores en playersPanel
+        if (playersPanel != null) {
+            playersPanel.getChildren().clear();
+            playerUIMap.clear();
+            for (Jugador j : jugadores) {
+                VBox pBox = new VBox(5);
+                pBox.setAlignment(javafx.geometry.Pos.CENTER);
+                pBox.setPrefSize(90, 70);
+                pBox.setStyle("-fx-border-color: #1a3557; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 5;");
+                
+                Circle skin = new Circle(14);
+                Circle tokenOriginal = getTokenDeJugador(j);
+                if (tokenOriginal != null) {
+                    skin.setId(tokenOriginal.getId());
+                    skin.getStyleClass().addAll(tokenOriginal.getStyleClass());
+                } else if (j instanceof modelo.jugador.Foca) {
+                    skin.getStyleClass().add("foca");
+                } else {
+                    skin.getStyleClass().add("player");
+                }
+                
+                Label nameLbl = new Label(j.getNombre());
+                nameLbl.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;");
+                
+                pBox.getChildren().addAll(skin, nameLbl);
+                playersPanel.getChildren().add(pBox);
+                playerUIMap.put(j, pBox);
+            }
+        }
+        actualizarTurnoVisual(actual);
+
+        registrarEvento("¡Partida lista! Turno de: " + actual.getNombre(), actual);
         if (turnLabel != null) turnLabel.setText("▶ Turno de: " + actual.getNombre());
         
         if (actual instanceof modelo.jugador.Foca) {
             dado.setDisable(true);
             jugarTurnoFoca();
+        }
+    }
+
+    private void actualizarTurnoVisual(Jugador actual) {
+        if (playerUIMap == null || playerUIMap.isEmpty()) return;
+        for (Map.Entry<Jugador, VBox> entry : playerUIMap.entrySet()) {
+            if (entry.getKey().equals(actual)) {
+                entry.getValue().setStyle("-fx-border-color: #1dd1a1; -fx-border-width: 3; -fx-border-radius: 5; -fx-padding: 5; -fx-background-color: rgba(29, 209, 161, 0.2);");
+            } else {
+                entry.getValue().setStyle("-fx-border-color: #1a3557; -fx-border-width: 2; -fx-border-radius: 5; -fx-padding: 5; -fx-background-color: transparent;");
+            }
         }
     }
 
@@ -188,10 +242,11 @@ public class PantallaJuego {
             Image img = new Image(getClass().getResourceAsStream("/resources/" + nombreArchivo));
             ImageView iv = new ImageView(img);
             iv.setPreserveRatio(true);
-            iv.setFitWidth(70);
-            iv.setFitHeight(70);
+            iv.setFitWidth(45);
+            iv.setFitHeight(45);
             return iv;
         } catch (Exception e) {
+            System.err.println("Error cargando imagen: " + nombreArchivo + " - " + e.getMessage());
             return null;
         }
     }
@@ -216,7 +271,13 @@ public class PantallaJuego {
                 case "Oso":             imgFile = "casilla_oso.png";       break;
                 case "Agujero":         imgFile = "casilla_agujero.png";   break;
                 case "SueloQuebradizo": imgFile = "casilla_agujero.png";   break;
-                default:                imgFile = "casilla_normal.png";    break;
+                case "Trineo":
+                case "trineo":
+                    imgFile = "casilla_trineo.png"; 
+                    break;
+                default:
+                    imgFile = "casilla_normal.png"; 
+                    break;
             }
 
             ImageView iv = crearImagenCasilla(imgFile);
@@ -278,11 +339,11 @@ public class PantallaJuego {
         
         int resultado = gestorPartida.tirarDado(actual);
         dadoResultText.setText("Ha salido: " + resultado);
-        eventos.setText("⏳ " + actual.getNombre() + " avanza " + resultado + " casillas...");
+        registrarEvento("⏳ " + actual.getNombre() + " avanza " + resultado + " casillas...", actual);
 
         animarPasoAPaso(actual, actual.getPosicion(), resultado, () -> {
             String log = gestorPartida.procesarTurnoConAvance(actual, resultado);
-            eventos.setText(log.trim());
+            registrarEvento(log.trim(), actual);
             actualizarInventarioVisual();
             actualizarPosicionesVisuales();
 
@@ -312,8 +373,9 @@ public class PantallaJuego {
         Jugador actual = gestorPartida.getPartida().getJugadorActual();
         actualizarInventarioVisual();
         String nombreActual = actual.getNombre();
-        eventos.setText("▶ Turno de: " + nombreActual);
+        registrarEvento("▶ Turno de: " + nombreActual, actual);
         if (turnLabel != null) turnLabel.setText("▶ Turno de: " + nombreActual);
+        actualizarTurnoVisual(actual);
         
         if (actual instanceof modelo.jugador.Foca) {
             dado.setDisable(true);
@@ -325,17 +387,17 @@ public class PantallaJuego {
 
     private void jugarTurnoFoca() {
         Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        eventos.setText("🦭 La Foca está pensando...");
+        registrarEvento("🦭 La Foca está pensando...", actual);
         
         javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(1));
         pause.setOnFinished(e -> {
             int avance = gestorPartida.tirarDado(actual);
             dadoResultText.setText("Foca: " + avance);
-            eventos.setText("🦭 La Foca avanza " + avance + " casillas...");
+            registrarEvento("🦭 La Foca avanza " + avance + " casillas...", actual);
 
             animarPasoAPaso(actual, actual.getPosicion(), avance, () -> {
                 String log = gestorPartida.procesarTurnoConAvance(actual, avance);
-                eventos.setText("🦭 FOCA:\n" + log.trim());
+                registrarEvento("🦭 FOCA:\n" + log.trim(), actual);
                 actualizarPosicionesVisuales();
 
                 if (gestorPartida.getPartida().isFinalizada()) {
@@ -360,13 +422,14 @@ public class PantallaJuego {
         Jugador ganador = gestorPartida.getPartida().getGanador();
         String nombre = (ganador != null) ? ganador.getNombre() : "Desconocido";
         dadoResultText.setText("FIN");
-        eventos.setText("🏆 ¡PARTIDA TERMINADA!\n¡" + nombre + " ha ganado la partida!\n\nPulsa 'New' para jugar de nuevo.");
+        registrarEvento("🏆 ¡PARTIDA TERMINADA!\n¡" + nombre + " ha ganado la partida!", ganador);
+        registrarEvento("Pulsa 'New' para jugar de nuevo.", null);
     }
 
     @FXML
     public void guardarPartida() {
         gestorPartida.guardarPartida();
-        eventos.setText("Partida guardada en BD.");
+        registrarEvento("✅ Partida guardada en BD.", null);
     }
 
     @FXML
@@ -374,7 +437,7 @@ public class PantallaJuego {
         // Por simplificación cargamos la ID 1 para el ejemplo
         gestorPartida.cargaPartida(1);
         refrescarPartida();
-        eventos.setText("Partida cargada.");
+        registrarEvento("📂 Partida cargada.", null);
     }
 
     // --- Aliases para mantener compatibilidad con FXML actual hasta que se actualice ---
@@ -428,11 +491,11 @@ public class PantallaJuego {
                     
                     int resultado = ((Dado)item).tirarRandom();
                     dadoResultText.setText("Dado Especial: " + resultado);
-                    eventos.setText("⏳ " + p.getNombre() + " usa dado especial, avanza " + resultado + " casillas...");
+                    registrarEvento("⏳ " + p.getNombre() + " usa dado especial, avanza " + resultado + " casillas...", p);
                     
                     animarPasoAPaso(j, j.getPosicion(), resultado, () -> {
                         String log = gestorPartida.procesarTurnoConAvance(j, resultado);
-                        eventos.setText(log.trim());
+                        registrarEvento(log.trim(), p);
                         actualizarInventarioVisual();
                         actualizarPosicionesVisuales();
 
@@ -447,13 +510,13 @@ public class PantallaJuego {
                     });
                 } else if (nombre.equals("Bola de Nieve")) {
                     p.getInventario().quitarItem(item);
-                    eventos.setText("Has lanzado una Bola de Nieve. (Efecto no implementado visual guiado)");
+                    registrarEvento("❄️ Has lanzado una Bola de Nieve.", p);
                 } else if (nombre.equals("Pez")) {
-                    eventos.setText("El pez se usa automáticamente al encontrarse con la Foca!");
+                    registrarEvento("🐟 El pez se usa automáticamente al encontrarse con la Foca!", p);
                 }
                 actualizarInventarioVisual();
             } else {
-                eventos.setText("No tienes " + nombre);
+                registrarEvento("❌ No tienes " + nombre, p);
             }
         }
     }
@@ -522,13 +585,11 @@ public class PantallaJuego {
             // Log de la casilla actual
             modelo.tablero.Casilla c = gestorPartida.getPartida().getTablero().getCasillaEnPosicion(posSiguiente);
             int total = Math.min(totalPasos, maxPos - inicio); // pasos reales posibles
-            if (c != null) {
-                eventos.setText("Paso " + (pasoActual + 1) + "/" + total
-                        + " — casilla " + posSiguiente + " (" + c.getClass().getSimpleName() + ")");
-            } else {
-                eventos.setText("Paso " + (pasoActual + 1) + "/" + total
-                        + " — casilla " + posSiguiente);
-            }
+            String msgPaso = (c != null) 
+                ? "Paso " + (pasoActual + 1) + "/" + total + " — casilla " + posSiguiente + " (" + c.getClass().getSimpleName() + ")"
+                : "Paso " + (pasoActual + 1) + "/" + total + " — casilla " + posSiguiente;
+            
+            registrarEvento(msgPaso, j);
 
             // Si alcanzamos el límite del tablero, terminamos
             if (esUltimoPorLimite || pasoActual + 1 >= totalPasos) {
@@ -586,5 +647,36 @@ public class PantallaJuego {
 
     public void setGestorPartida(GestorPartida gestorPartida) {
         this.gestorPartida = gestorPartida;
+    }
+
+    private void registrarEvento(String mensaje, Jugador j) {
+        if (vboxEventos == null) return;
+
+        Label entry = new Label(mensaje);
+        entry.setWrapText(true);
+        entry.setMaxWidth(310);
+
+        // Estilo dinámico según el jugador
+        if (j != null) {
+            String colorStyle = "-fx-text-fill: #e8f4fd;"; // Default
+            if (j instanceof modelo.jugador.Foca) {
+                colorStyle = "-fx-text-fill: #f87171; -fx-font-weight: bold;"; // Rojo para foca
+            } else {
+                // Pinguino: intentamos usar su color o un color brillante
+                colorStyle = "-fx-text-fill: #4fc3f7; -fx-font-weight: bold;"; // Celeste para jugadores
+            }
+            entry.setStyle(colorStyle + " -fx-font-size: 13px;");
+            entry.setText("➤ [" + j.getNombre() + "]: " + mensaje.replace("⏳ ", "").replace(j.getNombre() + " ", ""));
+        } else {
+            // Mensaje de sistema
+            entry.setStyle("-fx-text-fill: #a8c8e8; -fx-font-size: 12px; -fx-font-style: italic;");
+        }
+
+        vboxEventos.getChildren().add(entry);
+
+        // Auto-scroll al final
+        Platform.runLater(() -> {
+            if (scrollEventos != null) scrollEventos.setVvalue(1.0);
+        });
     }
 }

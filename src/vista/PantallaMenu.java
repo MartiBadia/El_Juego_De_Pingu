@@ -13,6 +13,14 @@ import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import java.util.ArrayList;
 
+import controlador.gestor.GestorUsuarios;
+import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 public class PantallaMenu {
 
     @FXML private MenuItem newGame;
@@ -24,6 +32,9 @@ public class PantallaMenu {
     @FXML private PasswordField passField;
     @FXML private Button loginButton;
     @FXML private Button registerButton;
+    @FXML private Label mensajeLoginLabel;
+
+    private GestorUsuarios gestorUsuarios;
 
     // Nuevos campos para las tarjetas
     @FXML private javafx.scene.layout.VBox loginCard;
@@ -38,6 +49,7 @@ public class PantallaMenu {
     @FXML
     private void initialize() {
         System.out.println("PantallaMenu initialized");
+        gestorUsuarios = new GestorUsuarios();
         // Aseguramos que solo el login sea visible al inicio
         loginCard.setVisible(true);
         optionsCard.setVisible(false);
@@ -46,16 +58,24 @@ public class PantallaMenu {
 
     @FXML
     private void handleLogin(ActionEvent event) {
-        String username = userField.getText();
+        String username = userField.getText().trim();
         String password = passField.getText();
 
         System.out.println("Login button pressed. User: " + username);
 
-        // Validación simple para la demo
-        if (!username.isEmpty() && !password.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty()) {
+            mensajeLoginLabel.setText("Por favor, introduce usuario y contraseña.");
+            mensajeLoginLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            return;
+        }
+
+        if (gestorUsuarios.validarLogin(username, password)) {
+            mensajeLoginLabel.setText("Inicia sesión para jugar");
+            mensajeLoginLabel.setStyle(""); // Restablecer
             showOptionsCard();
         } else {
-            System.out.println("Por favor, introduce usuario y contraseña.");
+            mensajeLoginLabel.setText("Credenciales inválidas o no registrado.");
+            mensajeLoginLabel.setStyle("-fx-text-fill: #ff6b6b;");
         }
     }
 
@@ -66,6 +86,10 @@ public class PantallaMenu {
         configCard.setVisible(false);
         userField.clear();
         passField.clear();
+        if (mensajeLoginLabel != null) {
+            mensajeLoginLabel.setText("Inicia sesión para jugar");
+            mensajeLoginLabel.setStyle("");
+        }
     }
 
     @FXML
@@ -183,7 +207,74 @@ public class PantallaMenu {
 
     @FXML
     private void handleRegister() {
-        System.out.println("Register pressed");
+        String username = userField.getText().trim();
+        String password = passField.getText();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            mensajeLoginLabel.setText("Introduce un usuario y contraseña.");
+            mensajeLoginLabel.setStyle("-fx-text-fill: #feca57;");
+            return;
+        }
+        
+        if (username.contains(",") || password.contains(",")) {
+            mensajeLoginLabel.setText("El usuario/contraseña no pueden tener comas.");
+            mensajeLoginLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            return;
+        }
+
+        if (gestorUsuarios.registrarUsuario(username, password)) {
+            mensajeLoginLabel.setText("¡Usuario '" + username + "' registrado!");
+            mensajeLoginLabel.setStyle("-fx-text-fill: #1dd1a1;");
+        } else {
+            mensajeLoginLabel.setText("Error: El usuario '" + username + "' ya existe.");
+            mensajeLoginLabel.setStyle("-fx-text-fill: #ff6b6b;");
+        }
+    }
+
+    @FXML
+    private void handleExitAppDialog() {
+        Stage stage = new Stage();
+        stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        stage.initStyle(javafx.stage.StageStyle.UNDECORATED); 
+
+        javafx.scene.layout.VBox root = new javafx.scene.layout.VBox(25);
+        root.setAlignment(javafx.geometry.Pos.CENTER);
+        root.setStyle("-fx-background-color: #ff0000; -fx-padding: 40; -fx-border-color: #8b0000; -fx-border-width: 6; -fx-background-radius: 10; -fx-border-radius: 10;");
+
+        // Imagen central y grande
+        ImageView image = null;
+        try {
+            image = new ImageView(new javafx.scene.image.Image(getClass().getResource("/resources/alerta_salidaa.png").toExternalForm()));
+            image.setFitWidth(350); 
+            image.setPreserveRatio(true);
+        } catch (Exception e) {
+            System.err.println("Imagen alerta_salidaa no encontrada");
+        }
+
+        Label label = new Label("¿ESTÁS SEGURO DE QUE QUIERES ABANDONAR EL JUEGO?");
+        label.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, black, 5, 0.5, 0, 0);");
+
+        javafx.scene.layout.HBox buttons = new javafx.scene.layout.HBox(30);
+        buttons.setAlignment(javafx.geometry.Pos.CENTER);
+        
+        Button btnYes = new Button("SÍ, SALIR");
+        btnYes.setStyle("-fx-background-color: #111; -fx-text-fill: #ff4757; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12 25; -fx-border-color: #ff4757; -fx-border-width: 2; -fx-border-radius: 5;");
+        btnYes.setOnAction(e -> System.exit(0));
+
+        Button btnNo = new Button("NO, QUEDARME");
+        btnNo.setStyle("-fx-background-color: #111; -fx-text-fill: #1dd1a1; -fx-font-weight: bold; -fx-font-size: 16px; -fx-padding: 12 25; -fx-border-color: #1dd1a1; -fx-border-width: 2; -fx-border-radius: 5;");
+        btnNo.setOnAction(e -> stage.close());
+
+        buttons.getChildren().addAll(btnYes, btnNo);
+        if (image != null) {
+            root.getChildren().add(image);
+        }
+        root.getChildren().addAll(label, buttons);
+
+        Scene scene = new Scene(root);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        stage.setScene(scene);
+        stage.showAndWait();
     }
 
     @FXML private void handleQuitGame() { System.exit(0); }

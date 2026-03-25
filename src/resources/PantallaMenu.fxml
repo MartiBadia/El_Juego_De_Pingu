@@ -75,7 +75,9 @@
                     <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                 </HBox>
                 
-                <Label text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+                <Button text="Salir del Juego" onAction="#handleExitAppDialog" maxWidth="Infinity" style="-fx-background-color: #e84118; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                
+                <Label fx:id="mensajeLoginLabel" text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
             </VBox>
 
             <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
