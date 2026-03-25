@@ -139,6 +139,11 @@
                 <Label fx:id="skinTitle" text="Jugador 1: Elige tu Skin" styleClass="title"/>
                 <Region prefHeight="8"/>
 
+                <VBox spacing="10">
+                    <Label text="Tu Nombre:" styleClass="field-label"/>
+                    <TextField fx:id="playerNameField" promptText="Escribe tu nombre..." styleClass="field"/>
+                </VBox>
+
                 <VBox spacing="20" alignment="CENTER">
                     <StackPane styleClass="skin-preview-container">
                         <ImageView fx:id="skinPreview" fitWidth="120" fitHeight="120" preserveRatio="true">

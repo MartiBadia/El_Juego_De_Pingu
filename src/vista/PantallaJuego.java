@@ -49,6 +49,8 @@ public class PantallaJuego {
     @FXML private ImageView P1, P2, P3, P4;
     @FXML private ImageView PFoca, PFoca2, PFoca3, PFoca4;
     @FXML private javafx.scene.control.Label turnLabel;
+    @FXML private javafx.scene.control.Label inventoryTitle;
+    @FXML private ImageView currentTurnSkin;
 
     @FXML private Button hamburgerButton;
     @FXML private VBox menuOverlay;
@@ -207,20 +209,30 @@ public class PantallaJuego {
 
     private void actualizarInventarioVisual() {
         Jugador actual = gestorPartida.getPartida().getJugadorActual();
+        inventoryTitle.setText("🎒  Mochila de " + actual.getNombre());
         if (actual instanceof Pinguino) {
             modelo.items.Inventario inv = ((Pinguino) actual).getInventario();
             rapido_t.setText("D. Rápido: " + inv.contarPorTipo("Dado Rapido"));
             lento_t.setText("D. Lento: " + inv.contarPorTipo("Dado Lento"));
             peces_t.setText("Peces: " + inv.contarPorTipo("Pez"));
             nieve_t.setText("Bolas: " + inv.contarPorTipo("Bola de Nieve"));
+        } else {
+            rapido_t.setText("— IA —");
+            lento_t.setText("");
+            peces_t.setText("");
+            nieve_t.setText("");
         }
     }
 
     private void actualizarLabelTurno() {
         if (gestorPartida.getPartida().isFinalizada()) {
             turnLabel.setText("PARTIDA FINALIZADA");
+            currentTurnSkin.setVisible(false);
         } else {
-            turnLabel.setText("▶ Turno de: " + gestorPartida.getPartida().getJugadorActual().getNombre());
+            Jugador jActual = gestorPartida.getPartida().getJugadorActual();
+            turnLabel.setText("▶ Turno de: " + jActual.getNombre());
+            currentTurnSkin.setImage(new Image("/resources/skins/" + jActual.getSkin()));
+            currentTurnSkin.setVisible(true);
         }
     }
 

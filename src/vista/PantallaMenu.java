@@ -47,6 +47,7 @@ public class PantallaMenu {
 
     @FXML private TextField playerCountField;
     @FXML private TextField sealCountField;
+    @FXML private TextField playerNameField;
     @FXML private Label errorLabel;
     
     @FXML private Label skinTitle;
@@ -220,6 +221,8 @@ public class PantallaMenu {
             actualizarEstadoSeleccionSkin();
             skinTitle.setText("Jugador " + currentSkinPlayerIndex + ": Elige tu Skin");
             skinErrorLabel.setText("");
+            playerNameField.clear();
+            playerNameField.setPromptText("Nombre del Jugador " + currentSkinPlayerIndex);
 
         } catch (NumberFormatException e) {
             errorLabel.setText("Introduce números válidos");
@@ -282,16 +285,23 @@ public class PantallaMenu {
         }
 
         selectedSkins.add(skinFile);
+        
+        String inputName = playerNameField.getText().trim();
+        String playerName = inputName.isEmpty() ? "Jugador " + currentSkinPlayerIndex : inputName;
+        
         String color = (currentSkinPlayerIndex == 1) ? "Azul" : (currentSkinPlayerIndex == 2) ? "Naranja" : (currentSkinPlayerIndex == 3) ? "Verde" : "Amarillo";
-        modelo.jugador.Pinguino p = new modelo.jugador.Pinguino("Jugador " + currentSkinPlayerIndex, color);
+        modelo.jugador.Pinguino p = new modelo.jugador.Pinguino(playerName, color);
         p.setSkin(skinFile);
         p.getInventario().añadirItem(new modelo.items.Dado());
         p.setEsIA(false);
         jugadoresTemp.add(p);
+        
+        playerNameField.clear();
 
         if (currentSkinPlayerIndex < numHumans) {
             currentSkinPlayerIndex++;
             skinTitle.setText("Jugador " + currentSkinPlayerIndex + ": Elige tu Skin");
+            playerNameField.setPromptText("Nombre del Jugador " + currentSkinPlayerIndex);
             actualizarEstadoSeleccionSkin();
         } else {
             // Todos los humanos han elegido, añadir focas y empezar
