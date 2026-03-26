@@ -25,7 +25,6 @@
     styleClass="root">
 
     <!-- Fondo de escena: Region estilizada por CSS -->
-    <Region styleClass="scene-background" />
 
     <!-- Capa de la UI: BorderPane original -->
     <BorderPane pickOnBounds="false">
@@ -54,9 +53,9 @@
             </padding>
 
             <!-- CARD DE LOGIN -->
-            <VBox fx:id="loginCard" spacing="16" styleClass="card" maxWidth="420" visible="true">
+            <VBox fx:id="loginCard" spacing="12" styleClass="card" maxWidth="340" maxHeight="-Infinity" visible="true">
                 <padding>
-                    <Insets top="24" right="24" bottom="24" left="24"/>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
                 
                 <Label text="Bienvenido" styleClass="title"/>
@@ -81,9 +80,9 @@
             </VBox>
 
             <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
-            <VBox fx:id="optionsCard" spacing="20" styleClass="card" maxWidth="420" visible="false">
+            <VBox fx:id="optionsCard" spacing="16" styleClass="card" maxWidth="340" maxHeight="-Infinity" visible="false">
                 <padding>
-                    <Insets top="24" right="24" bottom="24" left="24"/>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
                 
                 <Label text="Menú Principal" styleClass="title"/>
@@ -98,9 +97,9 @@
             </VBox>
 
             <!-- CARD DE CONFIGURACIÓN -->
-            <VBox fx:id="configCard" spacing="16" styleClass="card" maxWidth="450" visible="false">
+            <VBox fx:id="configCard" spacing="12" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="false">
                 <padding>
-                    <Insets top="24" right="24" bottom="24" left="24"/>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
                 
                 <Label text="Configurar Partida" styleClass="title"/>
@@ -131,7 +130,7 @@
             </VBox>
 
             <!-- CARD DE SELECCIÓN DE SKINS -->
-            <VBox fx:id="skinSelectionCard" spacing="16" styleClass="card" maxWidth="450" visible="false">
+            <VBox fx:id="skinSelectionCard" spacing="16" styleClass="card" maxWidth="450" maxHeight="-Infinity" visible="false">
                 <padding>
                     <Insets top="24" right="24" bottom="24" left="24"/>
                 </padding>
@@ -166,7 +165,7 @@
             </VBox>
 
             <!-- CARD DE CARGA (LISTADO DE PARTIDAS) -->
-            <VBox fx:id="loadGameCard" spacing="16" styleClass="card" maxWidth="450" visible="false">
+            <VBox fx:id="loadGameCard" spacing="16" styleClass="card" maxWidth="450" maxHeight="-Infinity" visible="false">
                 <padding>
                     <Insets top="24" right="24" bottom="24" left="24"/>
                 </padding>

@@ -58,7 +58,7 @@
 
             <StackPane VBox.vgrow="ALWAYS">
                 <padding>
-                    <Insets top="12" right="16" bottom="0" left="16"/>
+                    <Insets top="4" right="16" bottom="0" left="16"/>
                 </padding>
 
                 <GridPane fx:id="tablero" styleClass="board"
@@ -93,29 +93,29 @@
                         </StackPane>
 
                         <!-- Fichas de jugadores (Skins) -->
-                        <ImageView fx:id="P1" id="P1" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false" />
-                        <ImageView fx:id="P2" id="P2" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="20.0" /></GridPane.margin>
+                        <ImageView fx:id="P1" id="P1" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false" />
+                        <ImageView fx:id="P2" id="P2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="15.0" /></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="P3" id="P3" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="40.0" /></GridPane.margin>
+                        <ImageView fx:id="P3" id="P3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="30.0" /></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="P4" id="P4" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="60.0" /></GridPane.margin>
+                        <ImageView fx:id="P4" id="P4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="45.0" /></GridPane.margin>
                         </ImageView>
 
                         <!-- Fichas de focas -->
-                        <ImageView fx:id="PFoca" id="PFoca" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="80.0" /></GridPane.margin>
+                        <ImageView fx:id="PFoca" id="PFoca" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="60.0" /></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="100.0" top="10.0"/></GridPane.margin>
+                        <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="75.0" top="5.0"/></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="120.0" top="20.0"/></GridPane.margin>
+                        <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="90.0" top="10.0"/></GridPane.margin>
                         </ImageView>
-                        <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="55" fitHeight="55" preserveRatio="true" visible="false">
-                            <GridPane.margin><Insets left="140.0" top="30.0"/></GridPane.margin>
+                        <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="105.0" top="15.0"/></GridPane.margin>
                         </ImageView>
                     </children>
                 </GridPane>
@@ -125,14 +125,12 @@
 
     <bottom>
         <VBox spacing="0">
-            <HBox spacing="20" alignment="CENTER_LEFT" styleClass="bottom-bar"
+            <HBox alignment="CENTER" styleClass="bottom-bar"
                   style="-fx-border-width: 1 0 1 0; -fx-border-color: #1a3557; -fx-padding: 6 18;">
-                <Label text="Turno actual gestionado por skins" style="-fx-text-fill:#a8c8e8; -fx-font-size:12px;"/>
-                <Region HBox.hgrow="ALWAYS"/>
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <ImageView fx:id="currentTurnSkin" fitWidth="30" fitHeight="30" preserveRatio="true" />
+                    <ImageView fx:id="currentTurnSkin" fitWidth="28" fitHeight="28" preserveRatio="true" />
                     <Label fx:id="turnLabel" text="▶ Turno de: Jugador 1"
-                           style="-fx-text-fill: linear-gradient(to right, #4fc3f7, #ffffff); -fx-font-size:18px; -fx-font-weight:900; -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.5), 10, 0, 0, 0);"/>
+                           style="-fx-text-fill: linear-gradient(to right, #4fc3f7, #ffffff); -fx-font-size:14px; -fx-font-weight:900; -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.5), 10, 0, 0, 0);"/>
                 </HBox>
             </HBox>
 
@@ -147,40 +145,47 @@
                             maxWidth="Infinity" styleClass="primary" />
                 </VBox>
 
-                <VBox spacing="8" styleClass="card" HBox.hgrow="ALWAYS">
+                <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS">
                     <Label fx:id="inventoryTitle" text="🎒  Inventario" styleClass="card-title" />
-                    <VBox spacing="8">
-                        <padding><Insets top="4" right="4" bottom="4" left="4"/></padding>
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
-                            <Text fx:id="rapido_t" text="🎲  Dado Rápido: 0" styleClass="stat"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="rapido" text="Usar" onAction="#handleRapido"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
-                            <Text fx:id="lento_t"  text="🐢  Dado Lento: 0"  styleClass="stat"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="lento"  text="Usar" onAction="#handleLento"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
-                            <Text fx:id="peces_t"  text="🐟  Peces: 0"        styleClass="stat"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="peces"  text="Usar" onAction="#handlePeces"/>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="row">
-                            <Text fx:id="nieve_t"  text="❄️  Bolas de Nieve: 0" styleClass="stat"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Button fx:id="nieve"  text="Usar" onAction="#handleNieve"/>
-                        </HBox>
-                    </VBox>
+                    <GridPane hgap="10" vgap="6">
+                        <padding><Insets top="2" right="2" bottom="2" left="2"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50" />
+                            <ColumnConstraints percentWidth="50" />
+                        </columnConstraints>
+                        
+                        <children>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Text fx:id="rapido_t" text="D. Rápido: 0" styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="rapido" text="Usar" onAction="#handleRapido" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Text fx:id="lento_t"  text="D. Lento: 0"  styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="lento"  text="Usar" onAction="#handleLento" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <Text fx:id="peces_t"  text="Peces: 0"        styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="peces"  text="Usar" onAction="#handlePeces" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <Text fx:id="nieve_t"  text="Bolas: 0"         styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="nieve"  text="Usar" onAction="#handleNieve" styleClass="btn-tiny"/>
+                            </HBox>
+                        </children>
+                    </GridPane>
                 </VBox>
 
-                <VBox spacing="10" styleClass="card" prefWidth="340" VBox.vgrow="ALWAYS">
+                <VBox spacing="10" styleClass="card" prefWidth="300" VBox.vgrow="ALWAYS">
                     <Label text="📋  Eventos" styleClass="card-title"/>
-                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                                styleClass="objects-scroll" prefHeight="130" VBox.vgrow="ALWAYS">
+                    <ScrollPane fx:id="eventosScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                                styleClass="objects-scroll" prefHeight="80" VBox.vgrow="ALWAYS">
                         <content>
-                            <Text fx:id="eventos" text="¡El juego está listo! 🐧"
-                                  styleClass="events" wrappingWidth="305"/>
+                            <Text fx:id="eventos" text=""
+                                  styleClass="events" wrappingWidth="265"/>
                         </content>
                     </ScrollPane>
                 </VBox>

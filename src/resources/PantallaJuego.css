@@ -54,7 +54,7 @@
     -fx-border-radius: 18;
     -fx-border-width: 3;
     -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.3), 30, 0.4, 0, 0);
-    -fx-padding: 8;
+    -fx-padding: 4;
 }
 
 .board-cell {
@@ -77,9 +77,27 @@
 /* Textos de tipo de casilla */
 .cell-title {
     -fx-fill: #4fc3f7;
-    -fx-font-size: 14px; /* Un poco más pequeño para que quepa el nombre completo */
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.6), 8, 0.5, 0, 0);
+}
+
+.start-title {
+    -fx-fill: linear-gradient(to bottom, #c8e6c9, #2e7d32);
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-stroke: #1b5e20;
+    -fx-stroke-width: 0.8;
+    -fx-effect: dropshadow(two-pass-box, rgba(255,255,255,0.7), 10, 0.4, 0, 0);
+}
+
+.finish-title {
+    -fx-fill: linear-gradient(to bottom, #fff9c4, #f57f17);
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-stroke: #bf360c;
+    -fx-stroke-width: 0.8;
+    -fx-effect: dropshadow(two-pass-box, rgba(255,255,255,0.7), 10, 0.4, 0, 0);
 }
 
 .cell-type {
@@ -94,7 +112,7 @@
     -fx-background-color: #0a1628;
     -fx-border-color: #1a3557;
     -fx-border-width: 1 0 0 0;
-    -fx-padding: 8 12;
+    -fx-padding: 4 10;
 }
 
 /* =================== TARJETAS (CARDS) =================== */
@@ -105,7 +123,7 @@
     -fx-border-color: rgba(26, 74, 114, 0.8);
     -fx-border-radius: 16;
     -fx-border-width: 1;
-    -fx-padding: 10;
+    -fx-padding: 6;
     -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.15), 18, 0.15, 0, 3);
 }
 
@@ -125,7 +143,7 @@
 
 .stat {
     -fx-fill: #a8c8e8;
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
 }
 
 .events {
@@ -138,7 +156,7 @@
 .row {
     -fx-background-color: rgba(26, 53, 87, 0.4);
     -fx-background-radius: 8;
-    -fx-padding: 6 10;
+    -fx-padding: 4 6;
 }
 
 /* =================== BOTONES =================== */
@@ -201,6 +219,13 @@
     -fx-background-color: linear-gradient(to bottom, #10b981, #059669);
     -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.6), 12, 0.4, 0, 0);
+}
+
+.btn-tiny {
+    -fx-padding: 3 8;
+    -fx-font-size: 10px;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
 }
 
 /* =================== MENÚ HAMBURGUESA =================== */

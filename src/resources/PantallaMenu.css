@@ -1,14 +1,13 @@
 .root {
     -fx-font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
-    -fx-background-color: #0d1b2a;
-}
-
-.scene-background {
-    -fx-background-image: url("/resources/pantallamenu.png");
+    -fx-background-color: #3b1e5a; /* Color que combina con el cielo de la imagen */
+    -fx-background-image: url("/resources/fondo_menu_widescreen.png");
     -fx-background-size: cover;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
 }
+
+/* .scene-background ya no es necesaria al estar en .root */
 
 /* MENU BAR */
 .menu-bar {
