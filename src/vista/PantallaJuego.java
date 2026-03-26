@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.fxml.FXMLLoader;
@@ -54,6 +55,7 @@ public class PantallaJuego {
 
     @FXML private Button hamburgerButton;
     @FXML private VBox menuOverlay;
+    @FXML private ScrollPane eventosScroll;
 
     private GestorPartida gestorPartida;
     private String usuarioLogueado;
@@ -64,7 +66,7 @@ public class PantallaJuego {
 
     @FXML
     private void initialize() {
-        eventos.setText("Bienvenido a El Juego de Pingu.");
+        appendLog("🐧 ¡Bienvenido a El Juego de Pingu!");
         
         fichasPinguinos = new ArrayList<>();
         fichasPinguinos.add(P1); fichasPinguinos.add(P2);
@@ -78,6 +80,20 @@ public class PantallaJuego {
         for(ImageView iv : fichasFocas) iv.setVisible(false);
 
         gestorPartida = new GestorPartida();
+    }
+
+    /** Añade un mensaje al log acumulativo y hace scroll al final automáticamente. */
+    private void appendLog(String msg) {
+        String current = eventos.getText();
+        if (current == null || current.isEmpty()) {
+            eventos.setText(msg);
+        } else {
+            eventos.setText(current + "\n" + msg);
+        }
+        // Scroll automático al final para ver el último mensaje
+        if (eventosScroll != null) {
+            javafx.application.Platform.runLater(() -> eventosScroll.setVvalue(1.0));
+        }
     }
 
     public void setConexion(java.sql.Connection con) {
@@ -112,32 +128,65 @@ public class PantallaJuego {
         );
 
         ArrayList<Casilla> casillas = gestorPartida.getPartida().getTablero().getCasillas();
-        for (int i = 1; i < 49; i++) {
+        int maxPos = gestorPartida.getPartida().getTablero().getTamaño();
+
+        for (int i = 0; i < maxPos; i++) {
             StackPane cell = new StackPane();
             cell.getStyleClass().add("board-cell");
             
             String tipo = "Normal";
-            for (Casilla c : casillas) {
-                if (c.getPosicion() == i) {
-                    tipo = c.getClass().getSimpleName();
-                    break;
+            if (i == 0) tipo = "Inicio";
+            else if (i == 49) tipo = "Final";
+            else {
+                for (Casilla c : casillas) {
+                    if (c.getPosicion() == i) {
+                        tipo = c.getClass().getSimpleName();
+                        break;
+                    }
                 }
             }
 
-            String imgFile;
+            String imgFile = "casilla_normal.png";
+            String labelText = "";
+            
             switch (tipo) {
-                case "MotoNieve":       imgFile = "casilla_motonieve.png"; break;
-                case "Oso":             imgFile = "casilla_oso.png";       break;
-                case "Agujero":         imgFile = "casilla_agujero.png";   break;
-                case "SueloQuebradizo": imgFile = "casilla_agujero.png";   break;
-                default:                imgFile = "casilla_normal.png";    break;
+                case "Inicio":
+                    labelText = "SALIDA";
+                    break;
+                case "Final":
+                    labelText = "META";
+                    break;
+                case "MotoNieve":
+                    imgFile = "casilla_motonieve.png";
+                    break;
+                case "Oso":
+                    imgFile = "casilla_oso.png";
+                    break;
+                case "Agujero":
+                    imgFile = "casilla_agujero.png";
+                    break;
+                case "SueloQuebradizo":
+                    imgFile = "casilla_agujero.png"; // Usamos la misma de agujero para suelo
+                    break;
+                case "Trineo":
+                    imgFile = "casilla_trineo.png";
+                    break;
+                case "Evento":
+                    imgFile = "casilla_evento.png";
+                    break;
+                default:
+                    imgFile = "casilla_normal.png";
+                    break;
             }
 
             ImageView iv = crearImagenCasilla(imgFile);
             if (iv != null) cell.getChildren().add(iv);
-            else {
-                Text t = new Text(tipo);
-                t.getStyleClass().add("cell-type");
+
+            if (!labelText.isEmpty()) {
+                Text t = new Text(labelText);
+                if (tipo.equals("Inicio")) t.getStyleClass().add("start-title");
+                else if (tipo.equals("Final")) t.getStyleClass().add("finish-title");
+                else t.getStyleClass().add("cell-title");
                 cell.getChildren().add(t);
             }
 
@@ -172,8 +221,8 @@ public class PantallaJuego {
         try {
             Image img = new Image(getClass().getResourceAsStream("/resources/" + fileName));
             ImageView iv = new ImageView(img);
-            iv.setFitWidth(55);
-            iv.setFitHeight(55);
+            iv.setFitWidth(45);
+            iv.setFitHeight(45);
             iv.setPreserveRatio(true);
             return iv;
         } catch (Exception e) {
@@ -217,7 +266,9 @@ public class PantallaJuego {
             peces_t.setText("Peces: " + inv.contarPorTipo("Pez"));
             nieve_t.setText("Bolas: " + inv.contarPorTipo("Bola de Nieve"));
         } else {
-            rapido_t.setText("— IA —");
+            // Es una Foca: no mostrar inventario
+            inventoryTitle.setText("🦭  Turno de la IA");
+            rapido_t.setText("");
             lento_t.setText("");
             peces_t.setText("");
             nieve_t.setText("");
@@ -250,7 +301,7 @@ public class PantallaJuego {
 
     private void iniciarMovimientoAnimado(Jugador j, int avance) {
         int posFisicaInicio = j.getPosicion();
-        eventos.setText("⏳ " + j.getNombre() + " avanza " + avance + " casillas...");
+        appendLog("⏳ " + j.getNombre() + " avanza " + avance + " casillas...");
         
         animarPasoAPaso(j, posFisicaInicio, avance, () -> {
             j.setPosicion(posFisicaInicio);
@@ -262,7 +313,7 @@ public class PantallaJuego {
             comprobarSobornoEnCasilla(j, targetPos);
             
             String log = gestorPartida.procesarTurnoConAvance(j, avance);
-            eventos.setText(log.trim());
+            appendLog(log.trim());
             concluirTurno();
         });
     }
@@ -312,7 +363,7 @@ public class PantallaJuego {
                     gestorPartida.getGestorJugador().jugadorUsaItem(pTarget, "Pez");
                     fTarget.setSoborno(true);
                     fTarget.setTurnosBloqueada(2);
-                    eventos.setText(pTarget.getNombre() + " soborna a la foca con su pescado. 🐟");
+                    appendLog(pTarget.getNombre() + " soborna a la foca con su pescado. 🐟");
                 }
             }
         }
@@ -366,12 +417,12 @@ public class PantallaJuego {
 
     private void concluirTurno() {
         actualizarPosicionesVisuales();
-        actualizarInventarioVisual();
         if (gestorPartida.getPartida().isFinalizada()) {
             mostrarFinDePartida();
         } else {
             gestorPartida.avanzarTurno();
             actualizarLabelTurno();
+            actualizarInventarioVisual();
             if (gestorPartida.getPartida().getJugadorActual() instanceof modelo.jugador.Foca) {
                 jugarTurnoFoca();
             }
@@ -380,7 +431,7 @@ public class PantallaJuego {
 
     private void jugarTurnoFoca() {
         modelo.jugador.Foca foca = (modelo.jugador.Foca) gestorPartida.getPartida().getJugadorActual();
-        eventos.setText("🦭 Turno de la Foca " + foca.getNombre() + "...");
+        appendLog("🦭 Turno de la Foca " + foca.getNombre() + "...");
         
         // Pequeño delay inicial antes de tirar el dado
         new java.util.Timer().schedule(new java.util.TimerTask() {
@@ -388,6 +439,7 @@ public class PantallaJuego {
                 javafx.application.Platform.runLater(() -> {
                     int avance = gestorPartida.tirarDado(foca);
                     dadoResultText.setText("Foca tira: " + avance);
+                    appendLog("🦭 " + foca.getNombre() + " tira el dado: " + avance);
                     iniciarMovimientoAnimado(foca, avance);
                 });
             }
@@ -397,7 +449,7 @@ public class PantallaJuego {
     private void mostrarFinDePartida() {
         Jugador ganador = gestorPartida.getPartida().getGanador();
         String nombre = (ganador != null) ? ganador.getNombre() : "Desconocido";
-        eventos.setText("El ganador es " + nombre);
+        appendLog("🏆 ¡El ganador es " + nombre + "! 🎉");
         turnLabel.setText("PARTIDA FINALIZADA");
         dado.setDisable(true);
     }
@@ -405,7 +457,7 @@ public class PantallaJuego {
     @FXML private void handleSaveGame() {
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
         helper.guardarBBDD(controlador.gestionbbdd.BBDD.conectarPredeterminado(), gestorPartida.getPartida(), usuarioLogueado);
-        eventos.setText("✅ Partida guardada correctamente.");
+        appendLog("✅ Partida guardada correctamente.");
     }
 
     @FXML private void handleLoadGame() { toggleMenu(); handleGoToMenu(); }

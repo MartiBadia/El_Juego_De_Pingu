@@ -155,14 +155,28 @@ public class GestorPartida {
                 if (otro instanceof modelo.jugador.Pinguino && otro != p1 && otro.getPosicion() == p1.getPosicion()) {
                     log.append("¡Batalla " + p1.getNombre() + " vs " + otro.getNombre() + "!\n");
                     gestorJugador.pinguinoLuchaPinguino(p1, (modelo.jugador.Pinguino) otro);
+                    
+                    // Comprobar si tras el desplazamiento alguno cayó con una foca
+                    for (Jugador item : partida.getJugadores()) {
+                        if (item instanceof modelo.jugador.Foca) {
+                            if (item.getPosicion() == p1.getPosicion()) {
+                                log.append("¡" + p1.getNombre() + " cayó en una foca tras la batalla!\n");
+                                gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) item, partida.getTablero());
+                            }
+                            if (item.getPosicion() == otro.getPosicion()) {
+                                log.append("¡" + otro.getNombre() + " cayó en una foca tras la batalla!\n");
+                                gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, (modelo.jugador.Foca) item, partida.getTablero());
+                            }
+                        }
+                    }
                 }
             }
             
-            // Si cae en foca
-            for (Jugador otro : partida.getJugadores()) {
-                if (otro instanceof modelo.jugador.Foca && otro.getPosicion() == p1.getPosicion()) {
-                    log.append("¡Encuentro con Foca!\n");
-                    gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) otro, partida.getTablero());
+            // Encuentro con foca directo si no hubo batalla o si la batalla terminó ahí
+            for (Jugador f : partida.getJugadores()) {
+                if (f instanceof modelo.jugador.Foca && f.getPosicion() == p1.getPosicion()) {
+                    log.append("¡" + p1.getNombre() + " se encontró con una Foca!\n");
+                    gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) f, partida.getTablero());
                 }
             }
         }
