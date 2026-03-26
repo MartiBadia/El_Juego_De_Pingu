@@ -46,29 +46,8 @@ public class Foca extends Jugador {
     }
 
     public void golpearJugador(Pinguino p, modelo.tablero.Tablero tablero) {
-        int posActual = p.getPosicion();
-        int mejorPos = -1; // Posición del agujero más cercano encontrado
-
-        // Recorremos todas las casillas del tablero buscando Agujeros
-        for (modelo.tablero.Casilla c : tablero.getCasillas()) {
-            if (c instanceof modelo.tablero.Agujero) {
-                int posAgujero = c.getPosicion();
-                if (posAgujero < posActual) {
-                    // Nos quedamos con el más cercano (el mayor de los que están detrás)
-                    if (posAgujero > mejorPos) {
-                        mejorPos = posAgujero;
-                    }
-                }
-            }
-        }
-
-        // Si encontramos un agujero hacia atrás, enviamos al jugador ahí;
-        // si no, va al inicio del tablero (posición 0)
-        if (mejorPos != -1) {
-            p.setPosicion(mejorPos);
-        } else {
-            p.setPosicion(0);
-        }
+        p.setPosicion(0);
+        System.out.println("Foca golpea a " + p.getNombre() + " y lo manda al inicio.");
     }
 
     // Devuelve si la foca está sobornada

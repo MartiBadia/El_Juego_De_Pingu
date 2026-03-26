@@ -44,12 +44,20 @@ public class GestorPartida {
         return this.partida;
     }
 
+    public void setPartida(Partida partida) {
+        this.partida = partida;
+    }
+
     public Connection getConexion() {
         return this.con;
     }
 
-    public void setConexion(Connection con) {
-        this.con = con;
+    public GestorJugador getGestorJugador() {
+        return this.gestorJugador;
+    }
+
+    public void setGestorJugador(GestorJugador gestorJugador) {
+        this.gestorJugador = gestorJugador;
     }
 
     // --- Gestión de partida ---
@@ -130,6 +138,8 @@ public class GestorPartida {
         // --- IA de la Foca: Lógica al caer coincidiendo ---
         if (j instanceof modelo.jugador.Foca) {
             modelo.jugador.Foca foca = (modelo.jugador.Foca) j;
+            if (foca.isSoborno()) return log.toString();
+            
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro.getPosicion() == foca.getPosicion()) {
                     log.append("Foca coincide con " + otro.getNombre() + " y golpea!\n");
@@ -186,6 +196,11 @@ public class GestorPartida {
         procesarTurnoConAvance(j, avance);
     }
 
+    public String procesarTurnoFoca(modelo.jugador.Foca f) {
+        int avance = tirarDado(f);
+        return procesarTurnoConAvance(f, avance);
+    }
+
 
     /**
      * Ejecuta la lógica de la casilla actual del jugador y comprueba el fin de turno.
@@ -200,11 +215,15 @@ public class GestorPartida {
 
     
     public void siguienteTurno() {
-        int actual = partida.getJugadorActual().equals(
-                partida.getJugadores().get(partida.getJugadores().size() - 1))
-                ? 0
-                : partida.getJugadores().indexOf(partida.getJugadorActual()) + 1;
+        int actual = (partida.getJugadorActualIndice() + 1) % partida.getJugadores().size();
         partida.setJugadorActual(actual);
+        if (actual == 0) {
+            partida.setTurnos(partida.getTurnos() + 1);
+        }
+    }
+
+    public void avanzarTurno() {
+        siguienteTurno();
     }
 
     public void actualizarEstadoTablero() {
@@ -213,12 +232,12 @@ public class GestorPartida {
 
 
 
-    public void guardarPartida() {
+    public void guardarPartida(String username) {
         if (con == null) {
             System.out.println("No hay conexión activa. Conecta antes con setConexion().");
             return;
         }
-        bbdd.guardarBBDD(con, this.partida);
+        bbdd.guardarBBDD(con, this.partida, username);
     }
 
 

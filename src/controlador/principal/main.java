@@ -24,7 +24,7 @@ public class main extends Application {
 	    primaryStage.setScene(scene);
 	    primaryStage.setTitle("El Juego del Pingüino");
 	    primaryStage.centerOnScreen();
-	    primaryStage.fullScreenProperty();
+	    primaryStage.setFullScreen(true);
 	    primaryStage.show();
 	}
 

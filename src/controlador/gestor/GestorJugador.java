@@ -126,18 +126,14 @@ public class GestorJugador {
 
 
     public void focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
-        int nPeces = p.getInventario().contarPorTipo("Pez");
-        if (nPeces > 0) {
-            // Usar un pez para sobornar a la foca
-            jugadorUsaItem(p, "Pez");
-            f.setSoborno(true);
-            f.setTurnosBloqueada(2);
-            System.out.println(p.getNombre() + " soborna a la foca con un pez. Bloqueada 2 turnos.");
-        } else {
-            // La foca golpea al pingüino → agujero más cercano hacia atrás
-            f.golpearJugador(p, tablero);
-            System.out.println("¡La foca golpea a " + p.getNombre() + "! -> casilla " + p.getPosicion());
+        if (f.isSoborno()) {
+            System.out.println("Foca ya está sobornada (soborno=" + f.isSoborno() + ")");
+            return;
         }
+        
+        // La foca golpea al pingüino → al inicio (posición 0)
+        f.golpearJugador(p, tablero);
+        System.out.println("¡La foca golpea a " + p.getNombre() + "! -> casilla " + p.getPosicion());
     }
 
     // Versión sin tablero (compatibilidad con firma anterior)
