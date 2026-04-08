@@ -1,8 +1,8 @@
 .root {
     -fx-font-family: "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
-    -fx-background-color: #3b1e5a; /* Color que combina con el cielo de la imagen */
-    -fx-background-image: url("/resources/fondo_menu_widescreen.png");
-    -fx-background-size: cover;
+    -fx-background-color: #1a3557;
+    -fx-background-image: url("pantallamenu_widescreen.png");
+    -fx-background-size: 100% 100%;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
 }
@@ -20,14 +20,16 @@
     -fx-text-fill: #a8c8e8;
 }
 
-/* CARD - Glassmorphism style */
+/* CARD - Glassmorphism style adjusted for the new background pane */
 .card {
-    -fx-background-color: rgba(17, 34, 64, 0.82);
+    /* Mucho más transparente para dejar ver el cristal de la imagen */
+    -fx-background-color: rgba(17, 34, 64, 0.4); 
     -fx-background-radius: 20;
-    -fx-border-color: rgba(79, 195, 247, 0.4);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
     -fx-border-radius: 20;
-    -fx-border-width: 1.5;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 30, 0, 0, 8);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 4);
+    /* Ajuste de posición si fuera necesario, por ahora centrado */
 }
 
 /* TITLES */

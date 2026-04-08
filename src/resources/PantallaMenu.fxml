@@ -49,16 +49,17 @@
     <center>
         <StackPane>
             <padding>
-                <Insets top="28" right="28" bottom="28" left="28"/>
+                <Insets top="170" right="28" bottom="28" left="80"/>
             </padding>
 
             <!-- CARD DE LOGIN -->
             <VBox fx:id="loginCard" spacing="12" styleClass="card" maxWidth="340" maxHeight="-Infinity" visible="true">
                 <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
+                    <Insets top="30" right="20" bottom="20" left="20"/>
                 </padding>
                 
-                <Label text="Bienvenido" styleClass="title"/>
+                <!-- Título oculto o muy sutil porque ya aparece "MENÚ" en la imagen -->
+                <Label text="IDENTIFICACIÓN" styleClass="title" style="-fx-font-size: 18px; -fx-opacity: 0.7;"/>
                 <Region prefHeight="8"/>
 
                 <VBox spacing="10">
@@ -82,10 +83,10 @@
             <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
             <VBox fx:id="optionsCard" spacing="16" styleClass="card" maxWidth="340" maxHeight="-Infinity" visible="false">
                 <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
+                    <Insets top="30" right="20" bottom="20" left="20"/>
                 </padding>
                 
-                <Label text="Menú Principal" styleClass="title"/>
+                <!-- El título "Menú Principal" se vuelve innecesario por el texto de la imagen -->
                 <Region prefHeight="10"/>
 
                 <Button text="Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
