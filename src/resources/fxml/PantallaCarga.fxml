@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane
+    xmlns="http://javafx.com/javafx/21.0.10"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="vista.PantallaCarga"
+    stylesheets="/resources/css/PantallaCarga.css"
+    styleClass="root"
+    fx:id="rootPane">
+
+    <Region styleClass="scene-background" />
+    <javafx.scene.canvas.Canvas fx:id="snowCanvas" />
+
+    <VBox alignment="CENTER" spacing="30">
+        <padding>
+            <Insets top="60" right="120" bottom="60" left="120"/>
+        </padding>
+
+        <!-- Título CARGANDO -->
+        <Label fx:id="loadingTitle" text="CARGANDO..." styleClass="loading-title"/>
+
+        <!-- Barra de progreso personalizada -->
+        <StackPane fx:id="progressTrack" styleClass="progress-track" maxWidth="600">
+            <HBox alignment="CENTER_LEFT">
+                <Region fx:id="progressFill" styleClass="progress-fill" prefHeight="26">
+                    <!-- El ancho se controla programáticamente -->
+                </Region>
+            </HBox>
+        </StackPane>
+
+        <!-- Porcentaje -->
+        <Label fx:id="percentLabel" text="0%" styleClass="progress-percent"/>
+
+        <!-- Mensaje rotativo (Cuadro de diálogo Pokémon) -->
+        <Label fx:id="messageLabel" text="Preparando la aventura..." styleClass="loading-message"
+               wrapText="true" alignment="CENTER" maxWidth="550" minHeight="80"/>
+
+        <Region prefHeight="20"/>
+
+        <!-- Tip inferior -->
+        <Label text="El Juego de Pingu • Preparando partida..." styleClass="loading-tip"/>
+    </VBox>
+
+</StackPane>

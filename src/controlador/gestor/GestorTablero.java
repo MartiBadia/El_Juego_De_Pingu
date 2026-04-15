@@ -16,17 +16,13 @@ public class GestorTablero {
      */
     public void ejecutarCasilla(Partida partida, Jugador j) {
         Tablero tablero = partida.getTablero();
-        // Busca si la posición actual del jugador tiene una casilla especial
+        // Obtiene la casilla de la posición actual y ejecuta su acción
         Casilla c = tablero.getCasillaEnPosicion(j.getPosicion());
-        if (c != null) {
-            c.realizarAccion(partida, j);
-        }
+        c.realizarAccion(partida, j);
     }
 
     public void ejecutarCasilla(Partida partida, Jugador j, Casilla c) {
-        if (c != null) {
-            c.realizarAccion(partida, j);
-        }
+        c.realizarAccion(partida, j);
     }
 
     

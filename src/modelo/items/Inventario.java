@@ -10,6 +10,7 @@ public class Inventario {
     public static final int MAX_DADOS = 3;    
     public static final int MAX_PECES = 2;        
     public static final int MAX_BOLAS_NIEVE = 6; 
+    public static final int MAX_MOTOS = 1;
 
     public Inventario() {
         this.lista = new ArrayList<>();
@@ -35,6 +36,9 @@ public class Inventario {
         }
         if (item instanceof BolaDeNieve && contarPorTipo("Bola de Nieve") >= MAX_BOLAS_NIEVE) {
         	return false;
+        }
+        if (item instanceof MotoNieve && contarPorTipo("Moto de Nieve") >= MAX_MOTOS) {
+            return false;
         }
         lista.add(item);
         return true;

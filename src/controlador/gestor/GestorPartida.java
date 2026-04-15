@@ -183,11 +183,9 @@ public class GestorPartida {
 
         int posCae = j.getPosicion();
         modelo.tablero.Casilla c = partida.getTablero().getCasillaEnPosicion(posCae);
-        if (c != null) {
-            String logCasilla = c.realizarAccionConLog(partida, j);
-            if (logCasilla != null && !logCasilla.isEmpty()) {
-                log.append(logCasilla).append("\n");
-            }
+        String logCasilla = c.realizarAccionConLog(partida, j);
+        if (logCasilla != null && !logCasilla.isEmpty()) {
+            log.append(logCasilla).append("\n");
         }
 
         // Si la casilla movió al jugador, informamos

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="rootPane"
+    xmlns="http://javafx.com/javafx/21.0.10"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="vista.PantallaMenu"
+    stylesheets="/resources/css/PantallaMenu.css"
+    styleClass="root">
+
+    <!-- CAPA 1: Imagen de fondo que escala con la ventana -->
+    <ImageView fx:id="backgroundImage" preserveRatio="false" pickOnBounds="true" mouseTransparent="true">
+        <Image url="/resources/images/fondos/pantalla_definitiva.png"/>
+    </ImageView>
+
+    <!-- CAPA 2: Canvas para partículas de nieve -->
+    <Canvas fx:id="snowCanvas" mouseTransparent="true"/>
+
+    <!-- CAPA 3: Sin overlay para que brille el arte original -->
+
+    <!-- CAPA 4: Contenido UI -->
+    <BorderPane fx:id="mainContent" pickOnBounds="false">
+
+        <top>
+            <VBox alignment="TOP_CENTER">
+                <MenuBar styleClass="menu-bar">
+                    <menus>
+                        <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
+                            <items>
+                                <MenuItem fx:id="newGame" mnemonicParsing="false" text="New" />
+                                <SeparatorMenuItem mnemonicParsing="false" />
+                                <MenuItem fx:id="saveGame" mnemonicParsing="false" text="Save" />
+                                <MenuItem fx:id="loadGame" mnemonicParsing="false" text="Load" />
+                                <SeparatorMenuItem mnemonicParsing="false" />
+                                <MenuItem fx:id="quitGame" mnemonicParsing="false" text="Quit" />
+                            </items>
+                        </Menu>
+                        <Menu fx:id="languageMenu" mnemonicParsing="false" text="🌍 Idioma">
+                            <items>
+                                <MenuItem onAction="#changeLanguageES" text="Castellano" />
+                                <MenuItem onAction="#changeLanguageCA" text="Català" />
+                                <MenuItem onAction="#changeLanguageEN" text="English" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+
+                <!-- LOGO DEL TÍTULO GRAFICO -->
+                <ImageView fx:id="gameTitleImage" fitWidth="600" preserveRatio="true">
+                    <Image url="/resources/images/fondos/titulo_pingu.png"/>
+                    <VBox.margin>
+                        <javafx.geometry.Insets top="50"/>
+                    </VBox.margin>
+                </ImageView>
+            </VBox>
+        </top>
+
+        <center>
+            <StackPane alignment="CENTER">
+                <padding>
+                    <Insets top="20" right="80" bottom="40" left="80"/>
+                </padding>
+
+                <!-- CARD DE LOGIN -->
+                <VBox fx:id="loginCard" spacing="12" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="true" alignment="CENTER">
+                    <padding>
+                        <Insets top="30" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label fx:id="loginTitle" text="IDENTIFICACIÓN" styleClass="card-title"/>
+                    <Region prefHeight="8"/>
+
+                    <VBox spacing="10">
+                        <Label fx:id="userLabel" text="Usuario" styleClass="field-label"/>
+                        <TextField fx:id="userField" promptText="Usuario..." styleClass="field"/>
+
+                        <Label fx:id="passLabel" text="Contraseña" styleClass="field-label"/>
+                        <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field" onAction="#handleLogin"/>
+                    </VBox>
+
+                    <Region prefHeight="6"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="loginButton" text="Entrar" onAction="#handleLogin" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary"/>
+                        <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <Label fx:id="feedbackLabel" text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+                </VBox>
+
+                <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
+                <VBox fx:id="optionsCard" spacing="16" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="30" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label fx:id="optionsTitle" text="MENÚ PRINCIPAL" styleClass="card-title"/>
+                    <Region prefHeight="10"/>
+
+                    <Button fx:id="createGameBtn" text="🎮  Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
+                    <Button fx:id="loadSavedGameBtn" text="📂  Cargar Partida Guardada" onAction="#handleLoadGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
+                    <javafx.scene.control.MenuButton fx:id="changeLanguageBtn" text="🌍  Cambiar Idioma" maxWidth="Infinity" prefHeight="50">
+                        <items>
+                            <javafx.scene.control.MenuItem fx:id="langEsItem" onAction="#changeLanguageES" text="Castellano" />
+                            <javafx.scene.control.MenuItem fx:id="langCaItem" onAction="#changeLanguageCA" text="Català" />
+                            <javafx.scene.control.MenuItem fx:id="langEnItem" onAction="#changeLanguageEN" text="English" />
+                        </items>
+                    </javafx.scene.control.MenuButton>
+                    <Button fx:id="logoutBtn" text="🚪  Cerrar Sesión" onAction="#handleLogout" maxWidth="Infinity" styleClass="danger" prefHeight="50"/>
+
+                    <Region prefHeight="10"/>
+                    <Label fx:id="optionsHint" text="Elige una opción para comenzar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+                </VBox>
+
+                <!-- CARD DE CONFIGURACIÓN -->
+                <VBox fx:id="configCard" spacing="12" styleClass="card" maxWidth="450" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="24" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label fx:id="configTitle" text="Configurar Partida" styleClass="card-title"/>
+                    <Region prefHeight="8"/>
+
+                    <HBox alignment="CENTER" spacing="20">
+                        <!-- PENGUINS SELECTOR -->
+                        <VBox alignment="CENTER" spacing="10" styleClass="selection-box" HBox.hgrow="ALWAYS">
+                            <ImageView fitWidth="80" fitHeight="80" preserveRatio="true">
+                                <Image url="/resources/images/skins/skin_dino.png"/>
+                            </ImageView>
+                            <Label fx:id="penguinsLabel" text="PINGÜINOS" styleClass="field-label"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button text="−" onAction="#decPlayers" styleClass="selector-btn"/>
+                                <Label fx:id="playerCountLabel" text="2" styleClass="selector-val"/>
+                                <Button text="+" onAction="#incPlayers" styleClass="selector-btn"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- SEALS SELECTOR -->
+                        <VBox alignment="CENTER" spacing="10" styleClass="selection-box" HBox.hgrow="ALWAYS">
+                            <ImageView fitWidth="80" fitHeight="80" preserveRatio="true">
+                                <Image url="/resources/images/skins/foca_skin1.png"/>
+                            </ImageView>
+                            <Label fx:id="sealsLabel" text="FOCAS" styleClass="field-label"/>
+                            <HBox alignment="CENTER" spacing="15">
+                                <Button text="−" onAction="#decSeals" styleClass="selector-btn"/>
+                                <Label fx:id="sealCountLabel" text="1" styleClass="selector-val"/>
+                                <Button text="+" onAction="#incSeals" styleClass="selector-btn"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+
+                    <Label fx:id="errorLabel" text="" style="-fx-text-fill: #ff6b6b; -fx-font-size: 13px; -fx-font-weight: bold;" alignment="CENTER" maxWidth="Infinity"/>
+
+                    <Region prefHeight="10"/>
+
+                    <HBox spacing="10">
+                        <Button fx:id="configBackBtn" text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="configStartBtn" text="Comenzar" onAction="#handleStartGame" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary"/>
+                    </HBox>
+
+                    <Label fx:id="configHint" text="Configura el número de participantes" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+                </VBox>
+
+                <!-- CARD DE SELECCIÓN DE SKINS -->
+                <VBox fx:id="skinSelectionCard" spacing="10" styleClass="card" maxWidth="450" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="24" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label fx:id="skinTitle" text="Jugador 1: Elige tu Skin" styleClass="card-title"/>
+                    <Region prefHeight="8"/>
+
+                    <VBox spacing="8">
+                        <Label fx:id="skinNameLabel" text="Tu Nombre:" styleClass="field-label"/>
+                        <TextField fx:id="playerNameField" promptText="Escribe tu nombre..." styleClass="field"/>
+                    </VBox>
+
+                    <VBox spacing="15" alignment="CENTER">
+                        <StackPane styleClass="skin-preview-container">
+                            <ImageView fx:id="skinPreview" fitWidth="120" fitHeight="120" preserveRatio="true">
+                                <Image url="/resources/images/skins/skin_dino.png"/>
+                            </ImageView>
+                        </StackPane>
+
+                        <HBox spacing="30" alignment="CENTER">
+                            <Button text="◀" onAction="#handlePrevSkin" styleClass="arrow-button"/>
+                            <Button text="▶" onAction="#handleNextSkin" styleClass="arrow-button"/>
+                        </HBox>
+
+                        <Button fx:id="skinConfirmBtn" text="Confirmar Selección" onAction="#handleSelectCurrentSkin" maxWidth="Infinity" styleClass="primary" prefHeight="45"/>
+                    </VBox>
+
+                    <Label fx:id="skinErrorLabel" text="" style="-fx-text-fill: #ff6b6b;" alignment="CENTER" maxWidth="Infinity"/>
+
+                    <Button fx:id="skinCancelBtn" text="Cancelar" onAction="#showConfigCard" maxWidth="Infinity"/>
+                </VBox>
+
+                <!-- CARD DE CARGA (LISTADO DE PARTIDAS) -->
+                <VBox fx:id="loadGameCard" spacing="16" styleClass="card" maxWidth="450" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="24" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label fx:id="loadTitle" text="Partidas Guardadas" styleClass="card-title"/>
+                    <Region prefHeight="8"/>
+
+                    <javafx.scene.control.ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-padding: 5;">
+                        <VBox fx:id="gamesListContainer" spacing="10">
+                        </VBox>
+                    </javafx.scene.control.ScrollPane>
+
+                    <Region prefHeight="10"/>
+
+                    <Button fx:id="loadBackBtn" text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" styleClass="secondary"/>
+                </VBox>
+            </StackPane>
+        </center>
+
+    </BorderPane>
+
+</StackPane>

@@ -43,56 +43,100 @@ public class BBDD {
 		if (con == null) con = conectarBaseDatos("DW2526_GR09_PINGU", "AMBHL00", "CENTRO");
 		
 		if (con != null) {
-			// Aseguramos que la tabla de usuarios del juego exista
-			String sql = "CREATE TABLE USUARIOS_JUEGO (" +
-						 "USERNAME VARCHAR2(50) PRIMARY KEY, " +
-						 "PASSWORD VARCHAR2(50) NOT NULL)";
-			try (Statement st = con.createStatement()) {
-				st.execute(sql);
-				System.out.println("Tabla USUARIOS_JUEGO creada.");
-			} catch (SQLException e) {
-				// Si ya existe, ignoramos el error
-			}
+			try {
+				// 1) Aseguramos que la tabla de usuarios del juego exista
+				if (!existeTabla(con, "USUARIOS_JUEGO")) {
+					String sql = "CREATE TABLE USUARIOS_JUEGO (" +
+								 "USERNAME VARCHAR2(50) PRIMARY KEY, " +
+								 "PASSWORD VARCHAR2(50) NOT NULL)";
+					try (Statement st = con.createStatement()) {
+						st.execute(sql);
+						System.out.println("Tabla USUARIOS_JUEGO creada.");
+					}
+				}
 
-			// Actualizar tabla PARTIDA para incluir el dueño de la partida
-			String sqlAlt = "ALTER TABLE PARTIDA ADD USERNAME VARCHAR2(50) REFERENCES USUARIOS_JUEGO(USERNAME)";
-			try (Statement st = con.createStatement()) {
-				st.execute(sqlAlt);
-				System.out.println("Añadido dueño (USERNAME) a la tabla PARTIDA.");
-			} catch (SQLException e) {
-				// Ignoramos si la columna ya existe
-			}
+				// 2) Actualizar tabla PARTIDA para incluir el dueño de la partida
+				if (!existeColumna(con, "PARTIDA", "USERNAME")) {
+					String sqlAlt = "ALTER TABLE PARTIDA ADD USERNAME VARCHAR2(50) REFERENCES USUARIOS_JUEGO(USERNAME)";
+					try (Statement st = con.createStatement()) {
+						st.execute(sqlAlt);
+						System.out.println("Añadido dueño (USERNAME) a la tabla PARTIDA.");
+					}
+				}
 
-			// Aseguramos que la tabla JUGADOR_ESTADO tenga la columna SKIN
-			String sqlSkin = "ALTER TABLE JUGADOR_ESTADO ADD SKIN VARCHAR2(255)";
-			try (Statement st = con.createStatement()) {
-				st.execute(sqlSkin);
-				System.out.println("Columna SKIN añadida a JUGADOR_ESTADO.");
+				// 3) Aseguramos que la tabla JUGADOR_ESTADO tenga la columna SKIN
+				if (!existeColumna(con, "JUGADOR_ESTADO", "SKIN")) {
+					String sqlSkin = "ALTER TABLE JUGADOR_ESTADO ADD SKIN VARCHAR2(255)";
+					try (Statement st = con.createStatement()) {
+						st.execute(sqlSkin);
+						System.out.println("Columna SKIN añadida a JUGADOR_ESTADO.");
+					}
+				}
 			} catch (SQLException e) {
-				// Ignoramos si ya existe
+				System.err.println("Error durante la inicialización de tablas: " + e.getMessage());
 			}
 		}
 		return con;
 	}
 
+	private static boolean existeTabla(Connection con, String nombreTabla) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM USER_TABLES WHERE TABLE_NAME = '" + nombreTabla.toUpperCase() + "'";
+		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			if (rs.next()) return rs.getInt(1) > 0;
+		}
+		return false;
+	}
+
+	private static boolean existeColumna(Connection con, String nombreTabla, String nombreColumna) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM USER_TAB_COLUMNS WHERE TABLE_NAME = '" + nombreTabla.toUpperCase() + 
+					 "' AND COLUMN_NAME = '" + nombreColumna.toUpperCase() + "'";
+		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			if (rs.next()) return rs.getInt(1) > 0;
+		}
+		return false;
+	}
+
 	public boolean registrarUsuario(Connection con, String user, String pass) {
 		if (con == null) return false;
-		String sql = "INSERT INTO USUARIOS_JUEGO (USERNAME, PASSWORD) VALUES ('" + user + "', '" + pass + "')";
-		return insert(con, sql) > 0;
+		String sql = "INSERT INTO USUARIOS_JUEGO (USERNAME, PASSWORD) VALUES (?, ?)";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, user);
+			pstmt.setString(2, pass);
+			int filas = pstmt.executeUpdate();
+			return filas > 0;
+		} catch (SQLException e) {
+			System.err.println("Error al registrar usuario: " + e.getMessage());
+			return false;
+		}
 	}
 
 	public boolean loginUsuario(Connection con, String user, String pass) {
 		if (con == null) return false;
-		String sql = "SELECT * FROM USUARIOS_JUEGO WHERE USERNAME = '" + user + "' AND PASSWORD = '" + pass + "'";
-		ArrayList<LinkedHashMap<String, String>> res = select(con, sql);
-		return res != null && !res.isEmpty();
+		String sql = "SELECT USERNAME FROM USUARIOS_JUEGO WHERE USERNAME = ? AND PASSWORD = ?";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, user);
+			pstmt.setString(2, pass);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				return rs.next();
+			}
+		} catch (SQLException e) {
+			System.err.println("Error en login: " + e.getMessage());
+			return false;
+		}
 	}
 
 	public boolean existeUsuario(Connection con, String user) {
 		if (con == null) return false;
-		String sql = "SELECT * FROM USUARIOS_JUEGO WHERE USERNAME = '" + user + "'";
-		ArrayList<LinkedHashMap<String, String>> res = select(con, sql);
-		return res != null && !res.isEmpty();
+		String sql = "SELECT USERNAME FROM USUARIOS_JUEGO WHERE USERNAME = ?";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, user);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				return rs.next();
+			}
+		} catch (SQLException e) {
+			System.err.println("Error al verificar existencia: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**
@@ -254,8 +298,25 @@ public class BBDD {
 	 * Devuelve una lista con TODAS las partidas de UN usuario específico.
 	 */
 	public ArrayList<LinkedHashMap<String, String>> listarPartidas(Connection con, String username) {
-		String sql = "SELECT ID_PARTIDA, TURNOS, FINALIZADA FROM PARTIDA WHERE USERNAME = '" + username + "' ORDER BY ID_PARTIDA DESC";
-		return select(con, sql);
+		String sql = "SELECT ID_PARTIDA, TURNOS, FINALIZADA FROM PARTIDA WHERE USERNAME = ? ORDER BY ID_PARTIDA DESC";
+		ArrayList<LinkedHashMap<String, String>> resultados = new ArrayList<>();
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, username);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				ResultSetMetaData meta = rs.getMetaData();
+				int numColumnas = meta.getColumnCount();
+				while (rs.next()) {
+					LinkedHashMap<String, String> fila = new LinkedHashMap<>();
+					for (int i = 1; i <= numColumnas; i++) {
+						fila.put(meta.getColumnLabel(i), rs.getString(i));
+					}
+					resultados.add(fila);
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error al listar partidas: " + e.getMessage());
+		}
+		return resultados;
 	}
 	
 	/*
@@ -351,7 +412,6 @@ public class BBDD {
 	    // 3) INSERT EN CASILLAS_ESPECIALES (Para reconstruir el tablero)
 	    for (modelo.tablero.Casilla c : p.getTablero().getCasillas()) {
 	        int datoExtra = 0;
-	        if (c instanceof modelo.tablero.Trineo)  datoExtra = ((modelo.tablero.Trineo) c).getPosicionSiguienteTrineo();
 	        if (c instanceof modelo.tablero.Agujero) datoExtra = ((modelo.tablero.Agujero) c).getPosicionAgujeroAnterior();
 	        // SueloQuebradizo no necesita dato extra (lógica basada en inventario)
 
@@ -426,6 +486,7 @@ public class BBDD {
 							else if ("Dado Rapido".equals(tipoItem)) ping.getInventario().añadirItem(new modelo.items.Dado("Dado Rapido", 5, 10, true));
 							else if ("Dado Lento".equals(tipoItem))  ping.getInventario().añadirItem(new modelo.items.Dado("Dado Lento", 1, 3, true));
 							else if ("Pez".equals(tipoItem))        ping.getInventario().añadirItem(new modelo.items.Pez());
+							else if ("Moto de Nieve".equals(tipoItem)) ping.getInventario().añadirItem(new modelo.items.MotoNieve());
 							else if ("Bola de Nieve".equals(tipoItem)) ping.getInventario().añadirItem(new modelo.items.BolaDeNieve());
 						}
 					}
@@ -438,7 +499,6 @@ public class BBDD {
 		modelo.tablero.Tablero tablero = new modelo.tablero.Tablero();
 		String sqlCasillas = "SELECT POSICION, TIPO_CASILLA, DATO_EXTRA FROM CASILLAS_ESPECIALES WHERE ID_PARTIDA = " + id + " ORDER BY POSICION";
 		ArrayList<LinkedHashMap<String, String>> filasC = select(con, sqlCasillas);
-		modelo.tablero.Trineo ultimoTrineo = null;
 		for (LinkedHashMap<String, String> fc : filasC) {
 			int pos       = Integer.parseInt(fc.getOrDefault("POSICION", "0"));
 			int datoExtra = Integer.parseInt(fc.getOrDefault("DATO_EXTRA", "0"));
@@ -447,14 +507,9 @@ public class BBDD {
 			switch (tipo) {
 				case "Oso":             c = new modelo.tablero.Oso(pos); break;
 				case "Agujero":         c = new modelo.tablero.Agujero(pos, datoExtra); break;
-				case "Trineo":
-					c = new modelo.tablero.Trineo(pos);
-					if (ultimoTrineo != null) ultimoTrineo.setPosicionSiguienteTrineo(pos);
-					ultimoTrineo = (modelo.tablero.Trineo) c;
-					break;
 				case "Evento":          c = new modelo.tablero.Evento(pos); break;
 				case "SueloQuebradizo": c = new modelo.tablero.SueloQuebradizo(pos); break;
-				case "MotoNieve":       c = new modelo.tablero.MotoNieve(pos); break;
+				case "Trineo":          c = new modelo.tablero.Trineo(pos); break;
 			}
 			if (c != null) tablero.añadirCasilla(c);
 		}

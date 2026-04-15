@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.text.Text?>
+
+<StackPane
+    xmlns="http://javafx.com/javafx/21.0.10"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="vista.PantallaJuego"
+    stylesheets="/resources/css/PantallaJuego.css"
+    styleClass="root"
+    prefWidth="1100" prefHeight="780">
+
+    <Region styleClass="scene-background" />
+
+    <BorderPane pickOnBounds="false">
+
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu mnemonicParsing="false" text="🎮 Partida">
+                    <items>
+                        <MenuItem fx:id="newGame"  mnemonicParsing="false" text="🆕  Nueva Partida" onAction="#handleNewGame"/>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="saveGame" mnemonicParsing="false" text="💾  Guardar"       onAction="#handleSaveGame"/>
+                        <MenuItem fx:id="loadGame" mnemonicParsing="false" text="📂  Cargar"        onAction="#handleLoadGame"/>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="quitGame" mnemonicParsing="false" text="🚪  Salir"         onAction="#handleQuitGame"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
+    <center>
+        <VBox spacing="0">
+            <HBox alignment="CENTER" styleClass="bottom-bar">
+                <padding><Insets top="8" bottom="4"/></padding>
+                <Label text="🐧  EL JUEGO DE PINGU  🐧" styleClass="card-title"
+                       style="-fx-font-size:18px; -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.8), 10, 0.5, 0, 0);"/>
+            </HBox>
+
+            <StackPane VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="4" right="16" bottom="0" left="16"/>
+                </padding>
+
+                <GridPane fx:id="tablero" styleClass="board"
+                          maxHeight="Infinity" maxWidth="Infinity">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                        <ColumnConstraints percentWidth="20.0" />
+                    </columnConstraints>
+
+                    <rowConstraints>
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                        <RowConstraints percentHeight="10.0" />
+                    </rowConstraints>
+
+                    <children>
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="board-cell">
+                             <Text text="🏁 START" styleClass="cell-title" />
+                        </StackPane>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="9" styleClass="board-cell">
+                             <Text text="🏆 FINISH" styleClass="cell-title" />
+                        </StackPane>
+
+                        <!-- Fichas de jugadores (Skins) -->
+                        <ImageView fx:id="P1" id="P1" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false" />
+                        <ImageView fx:id="P2" id="P2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="15.0" /></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="P3" id="P3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="30.0" /></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="P4" id="P4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="45.0" /></GridPane.margin>
+                        </ImageView>
+
+                        <!-- Fichas de focas -->
+                        <ImageView fx:id="PFoca" id="PFoca" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="60.0" /></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="75.0" top="5.0"/></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="90.0" top="10.0"/></GridPane.margin>
+                        </ImageView>
+                        <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false">
+                            <GridPane.margin><Insets left="105.0" top="15.0"/></GridPane.margin>
+                        </ImageView>
+                    </children>
+                </GridPane>
+            </StackPane>
+        </VBox>
+    </center>
+
+    <bottom>
+        <VBox spacing="0">
+            <HBox spacing="14" styleClass="bottom-bar">
+                <padding><Insets top="14" right="16" bottom="16" left="16"/></padding>
+
+                <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
+                    <Label text="🎲  Dado" styleClass="card-title" />
+                    <Text fx:id="dadoResultText" text="— Tira el dado —"
+                          styleClass="big-text" wrappingWidth="185"/>
+                    <Button fx:id="dado" text="🎲  Tirar Dado" onAction="#handleDado"
+                            maxWidth="Infinity" styleClass="primary" />
+                </VBox>
+
+                <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
+                    <Label text="👥  Jugadores" styleClass="card-title" />
+                    <HBox fx:id="rosterContainer" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+                        <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+                        <!-- Se llena dinámicamente -->
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
+                    <Label fx:id="inventoryTitle" text="🎒  Inventario" styleClass="card-title" />
+                    <GridPane hgap="10" vgap="10" VBox.vgrow="ALWAYS">
+                        <padding><Insets top="2" right="2" bottom="2" left="2"/></padding>
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50" />
+                            <ColumnConstraints percentWidth="50" />
+                        </columnConstraints>
+                        
+                        <children>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                <Text fx:id="rapido_t" text="D. Rápido: 0" styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="rapido" text="Usar" onAction="#handleRapido" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                <Text fx:id="lento_t"  text="D. Lento: 0"  styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="lento"  text="Usar" onAction="#handleLento" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                <Text fx:id="peces_t"  text="Peces: 0"        styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="peces"  text="Usar" onAction="#handlePeces" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <Text fx:id="nieve_t"  text="Bolas: 0"         styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="nieve"  text="Usar" onAction="#handleNieve" styleClass="btn-tiny"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                <Text fx:id="moto_t"   text="Moto: 0"         styleClass="stat"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="moto_btn" text="Usar" onAction="#handleMoto" styleClass="btn-tiny"/>
+                            </HBox>
+                        </children>
+                    </GridPane>
+                </VBox>
+
+                <VBox spacing="10" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
+                    <Label text="📋  Eventos" styleClass="card-title"/>
+                    <ScrollPane fx:id="eventosScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                                styleClass="objects-scroll" prefHeight="80" VBox.vgrow="ALWAYS">
+                        <content>
+                            <javafx.scene.text.TextFlow fx:id="eventosContenedor" 
+                                          styleClass="events" prefWidth="220" />
+                        </content>
+                    </ScrollPane>
+                </VBox>
+
+            </HBox>
+        </VBox>
+    </bottom>
+
+    </BorderPane>
+
+    <Button fx:id="hamburgerButton" text="⚙" onAction="#toggleMenu" 
+            StackPane.alignment="TOP_RIGHT" styleClass="hamburger-button">
+        <StackPane.margin>
+            <Insets top="10" right="10"/>
+        </StackPane.margin>
+    </Button>
+
+    <VBox fx:id="menuOverlay" visible="false" managed="false" spacing="15" 
+          alignment="CENTER" styleClass="menu-overlay" maxWidth="300" maxHeight="400">
+        <padding>
+            <Insets top="30" right="30" bottom="30" left="30"/>
+        </padding>
+        <Label text="MENÚ" styleClass="card-title" style="-fx-font-size: 24px;"/>
+        <Region prefHeight="10"/>
+        <Button text="💾 Guardar Partida" onAction="#handleSaveGame" maxWidth="Infinity" styleClass="primary"/>
+        <Button text="🏠 Salir al Menú" onAction="#handleGoToMenu" maxWidth="Infinity"/>
+        <Button text="🚪 Cerrar Juego" onAction="#handleQuitGame" maxWidth="Infinity" style="-fx-opacity: 0.8;"/>
+        <Region prefHeight="10"/>
+        <Button text="Volver al Juego" onAction="#toggleMenu" maxWidth="Infinity" styleClass="secondary"/>
+    </VBox>
+
+    <StackPane fx:id="turnAnimationOverlay" visible="false" mouseTransparent="true" styleClass="turn-overlay">
+        <VBox alignment="CENTER" spacing="20">
+            <Label fx:id="turnAnimationText" text="¡Turno de X!" styleClass="turn-overlay-text"/>
+            <ImageView fx:id="turnAnimationSkin" fitWidth="200" fitHeight="200" preserveRatio="true"/>
+        </VBox>
+    </StackPane>
+
+</StackPane>

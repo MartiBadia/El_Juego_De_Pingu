@@ -23,7 +23,7 @@ public class Tablero {
         for (Casilla c : casillas) {
             if (c.getPosicion() == posicion) return c;
         }
-        return null; // Casilla normal (sin efecto especial)
+        return new CasillaNormal(posicion); // Casilla normal (instancia de CasillaNormal)
     }
 
     // --- SETTER ---
@@ -41,7 +41,6 @@ public class Tablero {
         this.tamano = TAMANO_MINIMO; // Exactamente 50 casillas.
 
         int ultimoAgujeroPos = 0; // Referencia para el retroceso de Agujeros y Suelos
-        Trineo ultimoTrineo = null;
 
         for (int i = 1; i < this.tamano - 1; i++) {
             // Probabilidad de casilla especial (35%)
@@ -57,12 +56,8 @@ public class Tablero {
                         c = new Agujero(i, ultimoAgujeroPos);
                         ultimoAgujeroPos = i; // Este pasa a ser el anterior para el siguiente
                         break;
-                    case 2: // Trineo 
+                    case 2: // Trineo
                         c = new Trineo(i);
-                        if (ultimoTrineo != null) {
-                            ultimoTrineo.setPosicionSiguienteTrineo(i);
-                        }
-                        ultimoTrineo = (Trineo) c;
                         break;
                     case 3: // Evento
                         c = new Evento(i);
@@ -70,9 +65,9 @@ public class Tablero {
                     case 4: // Suelo Quebradizo
                         c = new SueloQuebradizo(i);
                         break;
-                    case 5:
-                    	c = new MotoNieve(i);
-                    	break;
+                    case 5: // Casilla normal por ahora (antes Moto de Nieve)
+                        c = new CasillaNormal(i);
+                        break;
                     
                 }
 

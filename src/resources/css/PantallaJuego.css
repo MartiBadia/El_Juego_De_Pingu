@@ -1,0 +1,353 @@
+.root {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-background-color: #0d1b2a;
+}
+
+/* Forzamos la fuente en todos los elementos secundarios */
+.label, .button, .text-field, .text-area, .menu, .menu-item, .check-box, .radio-button {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+
+.scene-background {
+    -fx-background-image: url("/resources/images/fondos/fondo_tablero.png");
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
+/* =================== MENÚ =================== */
+.menu-bar {
+    -fx-background-color: #0a1628;
+    -fx-border-color: #1a3557;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 2 8;
+}
+
+.menu-bar .menu:hover,
+.menu-bar .menu:focused {
+    -fx-background-color: #1a3557;
+}
+
+.menu-bar .label {
+    -fx-text-fill: #a8c8e8;
+    -fx-font-size: 13px;
+}
+
+.context-menu {
+    -fx-background-color: #112240;
+    -fx-border-color: #1a3557;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.menu-item:hover {
+    -fx-background-color: #1a3557;
+}
+
+.menu-item .label {
+    -fx-text-fill: #e8f4fd;
+}
+
+/* =================== TABLERO =================== */
+.board {
+    -fx-background-color: rgba(5, 15, 30, 0.8);
+    -fx-hgap: 6;
+    -fx-vgap: 6;
+    -fx-background-radius: 0;
+    -fx-border-color: #2196f3 #1565c0 #1565c0 #2196f3; /* Pixel shading */
+    -fx-border-width: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 8);
+    -fx-padding: 8;
+}
+
+.board-cell {
+    -fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.15), rgba(79, 195, 247, 0.05));
+    -fx-background-radius: 0;
+    -fx-border-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.2) rgba(255, 255, 255, 0.3);
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+}
+
+.board-cell:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+    -fx-effect: dropshadow(gaussian, #4fc3f7, 10, 0.5, 0, 0);
+}
+
+/* Primer y último hijo del GridPane para redondear esquinas si quieres, 
+   o simplemente que todas se vean bien */
+
+/* Textos de tipo de casilla */
+.cell-title {
+    -fx-fill: #4fc3f7;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.6), 8, 0.5, 0, 0);
+}
+
+.start-title {
+    -fx-fill: linear-gradient(to bottom, #c8e6c9, #2e7d32);
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-stroke: #1b5e20;
+    -fx-stroke-width: 0.8;
+    -fx-effect: dropshadow(two-pass-box, rgba(255,255,255,0.7), 10, 0.4, 0, 0);
+}
+
+.finish-title {
+    -fx-fill: linear-gradient(to bottom, #fff9c4, #f57f17);
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-stroke: #bf360c;
+    -fx-stroke-width: 0.8;
+    -fx-effect: dropshadow(two-pass-box, rgba(255,255,255,0.7), 10, 0.4, 0, 0);
+}
+
+.cell-type {
+    -fx-fill: #81d4fa;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.85;
+}
+
+/* =================== BARRA INFERIOR =================== */
+.bottom-bar {
+    -fx-background-color: #050a14;
+    -fx-border-color: #38bdf8;
+    -fx-border-width: 4 0 0 0;
+    -fx-padding: 6 10;
+}
+
+/* =================== TARJETAS (CARDS) =================== */
+.card {
+    -fx-background-color: linear-gradient(to bottom right, #112240, #0a1b2a);
+    -fx-background-radius: 0;
+    -fx-border-color: #4fc3f7 #1a4a72 #1a4a72 #4fc3f7; /* 3D Pixel border */
+    -fx-border-width: 3;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.6), 10, 0.4, 0, 4);
+}
+
+.card-title {
+    -fx-text-fill: #4fc3f7;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.5), 6, 0.4, 0, 0);
+}
+
+.big-text {
+    -fx-fill: #e8f4fd;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.15), 4, 0.2, 0, 1);
+}
+
+.stat {
+    -fx-fill: #a8c8e8;
+    -fx-font-size: 14px;
+}
+
+.events {
+    -fx-fill: #e8f4fd;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 5;
+    -fx-font-weight: bold;
+}
+
+/* =================== FILAS DE INVENTARIO =================== */
+.row {
+    -fx-background-color: rgba(26, 53, 87, 0.4);
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+}
+
+/* =================== BOTONES =================== */
+.button {
+    -fx-background-radius: 0;
+    -fx-padding: 10 20;
+    -fx-background-color: #1a3a5c;
+    -fx-text-fill: #a8c8e8;
+    -fx-font-weight: 900;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-border-color: #4fc3f7 #0d1b2a #0d1b2a #4fc3f7;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.8), 0, 0, 4, 4);
+}
+
+.button:hover {
+    -fx-background-color: #1f4570;
+    -fx-text-fill: white;
+    -fx-border-color: #81d4fa #0a1628 #0a1628 #81d4fa;
+}
+
+.button:pressed {
+    -fx-translate-x: 2;
+    -fx-translate-y: 2;
+    -fx-effect: none;
+}
+
+.button:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
+/* Botón principal: Tirar Dado */
+.button.primary {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: white;
+    -fx-border-color: #38bdf8 #0369a1 #0369a1 #38bdf8;
+    -fx-border-width: 3;
+}
+
+.button.secondary {
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
+    -fx-border-color: #10b981 #022c22 #022c22 #10b981;
+    -fx-border-width: 3;
+}
+
+.button.secondary:hover {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+}
+
+.btn-tiny {
+    -fx-padding: 4 10;
+    -fx-font-size: 12px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+/* =================== MENÚ HAMBURGUESA =================== */
+.hamburger-button {
+    -fx-background-color: rgba(10, 22, 40, 0.82);
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-text-fill: #4fc3f7;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 4);
+}
+
+.hamburger-button:hover {
+    -fx-background-color: rgba(26, 74, 114, 0.9);
+    -fx-text-fill: white;
+}
+
+.menu-overlay {
+    -fx-background-color: rgba(10, 22, 40, 0.92);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(79, 195, 247, 0.5);
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 100, 0, 0, 0);
+    -fx-padding: 30;
+}
+
+/* =================== SCROLL =================== */
+.objects-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-pref-height: 100;
+}
+
+.objects-scroll>.viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #1a4a72;
+    -fx-background-radius: 6;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+/* =================== FICHAS / TOKENS =================== */
+.player {
+    -fx-stroke: #e8f4fd;
+    -fx-stroke-width: 2.5;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.6), 10, 0.4, 0, 2);
+}
+
+.foca {
+    -fx-stroke: #f87171;
+    -fx-stroke-width: 2.5;
+    -fx-fill: #7f1d1d;
+    -fx-effect: dropshadow(gaussian, rgba(248, 113, 113, 0.6), 10, 0.4, 0, 2);
+}
+
+/* Colores por jugador */
+#P1 {
+    -fx-fill: #0ea5e9;
+}
+
+/* Azul hielo */
+#P2 {
+    -fx-fill: #f97316;
+}
+
+/* Naranja ártico */
+#P3 {
+    -fx-fill: #22c55e;
+}
+
+/* Verde aurora */
+#P4 {
+    -fx-fill: #facc15;
+}
+
+/* Amarillo sol polar */
+#PFoca {
+    -fx-fill: #7f1d1d;
+}
+
+/* Rojo oscuro – Foca villana */
+
+/* Jugador activo — añade/quita esta clase desde Java */
+.current-player {
+    -fx-stroke: #facc15;
+    -fx-stroke-width: 3.5;
+    -fx-effect: dropshadow(gaussian, rgba(250, 204, 21, 0.9), 16, 0.7, 0, 0);
+}
+
+/* =================== CUBOS DE HIELO (ROSTER) =================== */
+.ice-cube {
+    -fx-background-color: #112240;
+    -fx-border-color: #4fc3f7 #0a1b2a #0a1b2a #4fc3f7;
+    -fx-border-width: 3;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 8;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.8), 0, 0, 3, 3);
+}
+
+.ice-cube-active {
+    -fx-background-color: #1a3557;
+    -fx-border-color: #4ade80 #065f46 #065f46 #4ade80;
+    -fx-border-width: 4;
+}
+
+.ice-cube-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e8f4fd;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+}
+
+/* =================== ANIMACIÓN TURNO =================== */
+.turn-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
+}
+
+.turn-overlay-text {
+    -fx-font-size: 64px;
+    -fx-font-weight: 900;
+    -fx-text-fill: linear-gradient(to bottom, #ffffff, #4fc3f7);
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.8), 30, 0, 0, 0);
+}

@@ -3,6 +3,7 @@ package controlador.gestor;
 import modelo.items.BolaDeNieve;
 import modelo.items.Dado;
 import modelo.items.Pez;
+import modelo.items.MotoNieve;
 import modelo.jugador.Foca;
 import modelo.jugador.Jugador;
 import modelo.jugador.Pinguino;
@@ -24,6 +25,11 @@ public class GestorJugador {
             if (item.getNombre().equals(nombreItem)) {
                 p.getInventario().quitarItem(item);
                 System.out.println(p.getNombre() + " usa: " + nombreItem);
+                
+                if (nombreItem.equals("Moto de Nieve")) {
+                    p.moverPosicion(20); // Efecto de la moto: avanza 20 casillas
+                    System.out.println(p.getNombre() + " ruge con la Moto de Nieve y avanza 20 casillas!");
+                }
                 return;
             }
         }
@@ -119,6 +125,19 @@ public class GestorJugador {
     }
 
 
+    /**
+     * Evento: el pingüino obtiene una moto de nieve (máximo 1).
+     */
+    public void pinguinoEventoMotoNieve(Pinguino p) {
+        boolean añadido = p.getInventario().añadirItem(new MotoNieve());
+        if (añadido) {
+            System.out.println(p.getNombre() + " obtiene una Moto de Nieve.");
+        } else {
+            System.out.println(p.getNombre() + " ya tiene una moto de nieve.");
+        }
+    }
+
+
     public void pinguinoLuchaPinguino(Pinguino p1, Pinguino p2) {
         System.out.println("¡Batalla! " + p1.getNombre() + " vs " + p2.getNombre());
         p1.gestionarBatalla(p2);
@@ -152,6 +171,7 @@ public class GestorJugador {
             case "Bola": pinguinoEventoBolaDeNieve(p); break;
             case "DadoRapido": pinguinoEventoDadoRapido(p); break;
             case "DadoLento": pinguinoEventoDadoLento(p); break;
+            case "MotoNieve": pinguinoEventoMotoNieve(p); break;
         }
     }
 

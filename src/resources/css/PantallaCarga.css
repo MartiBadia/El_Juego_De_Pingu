@@ -1,0 +1,75 @@
+/* ══════════════════════════════════════════════════════
+   PANTALLA DE CARGA – El Juego de Pingu
+   ══════════════════════════════════════════════════════ */
+
+.root {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-background-color: #f3f4f6;
+}
+
+.label, .text {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+
+.scene-background {
+    -fx-background-image: url("/resources/images/fondos/pantalla_definitiva.png");
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+}
+
+/* ─── Título "CARGANDO..." ─── */
+.loading-title {
+    -fx-font-size: 64px;
+    -fx-text-fill: #ffcb05; /* Amarillo Pokémon */
+    -fx-font-weight: 900;
+    -fx-effect: dropshadow(three-pass-box, #3b4cca, 8, 1, 0, 0); /* Borde azul Pokémon */
+}
+
+/* ─── Mensaje rotativo ─── */
+.loading-message {
+    -fx-font-size: 20px;
+    -fx-text-fill: #1a1a1a;
+    -fx-background-color: white;
+    -fx-border-color: #3b4cca;
+    -fx-border-width: 4;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 15 30;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);
+}
+
+/* ─── Contenedor de la barra de progreso ─── */
+.progress-track {
+    -fx-background-color: #eee;
+    -fx-background-radius: 0;
+    -fx-border-color: #333;
+    -fx-border-radius: 0;
+    -fx-border-width: 4;
+    -fx-pref-height: 24;
+}
+
+/* ─── Barra de relleno - Estilo Retro ─── */
+.progress-fill {
+    -fx-background-color: linear-gradient(to bottom, #4ade80, #16a34a); /* Verde salud Pokémon */
+    -fx-background-radius: 0;
+}
+
+/* ─── Porcentaje ─── */
+.progress-percent {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e8f4ff;
+}
+
+/* ─── Emoji pingüino decorativo ─── */
+.loading-emoji {
+    -fx-font-size: 60px;
+}
+
+/* ─── Tip inferior ─── */
+.loading-tip {
+    -fx-font-size: 13px;
+    -fx-text-fill: #a8c8e8;
+    -fx-opacity: 0.5;
+}
