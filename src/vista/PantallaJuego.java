@@ -3,13 +3,12 @@ package vista;
 import java.util.ArrayList;
 
 import javafx.animation.TranslateTransition;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
@@ -20,7 +19,9 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.stage.Stage;
+import javafx.geometry.Bounds;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,6 @@ import javafx.animation.ScaleTransition;
 import controlador.gestor.GestorPartida;
 import modelo.jugador.Jugador;
 import modelo.jugador.Pinguino;
-import modelo.items.Inventario;
 import modelo.tablero.Casilla;
 
 public class PantallaJuego {
@@ -53,7 +53,7 @@ public class PantallaJuego {
     @FXML private Text moto_t;
     @FXML private TextFlow eventosContenedor;
 
-    @FXML private GridPane tablero;
+    @FXML private Pane tablero;   // ← ahora es Pane, no GridPane
     @FXML private ImageView P1, P2, P3, P4;
     @FXML private ImageView PFoca, PFoca2, PFoca3, PFoca4;
     @FXML private javafx.scene.control.Label inventoryTitle;
@@ -69,16 +69,57 @@ public class PantallaJuego {
 
     private GestorPartida gestorPartida;
     private String usuarioLogueado;
-    private static final int COLUMNS = 5;
-    
+
+    // ══════════════════════════════════════════════════
+    //  CONFIGURACIÓN DE LA PASARELA HELADA
+    // ══════════════════════════════════════════════════
+
+    /** Dimensiones naturales de la imagen de fondo (tablero_pasarela.png). */
+    /** Dimensiones virtuales para el mapeo de coordenadas (proporción del diseño). */
+    private static final double IMG_W = 1000.0;
+    private static final double IMG_H = 850.0;
+
+    /** Tamaño visual de cada casilla y de cada ficha de jugador (px). */
+    private static final double CELL_SIZE  = 40.0;
+    private static final double TOKEN_SIZE = 38.0;
+
+    /**
+     * Coordenadas del CENTRO de cada una de las 50 casillas
+     * en el espacio de la imagen original (1390×780).
+     *
+     * en el espacio de la imagen original.
+     */
+    private static final double[][] PATH_IMG = {
+        // TRAMO 1: Superior (Y=215) - 10 casillas (Izquierda -> Derecha)
+        {180, 215}, {240, 215}, {300, 215}, {360, 215}, {420, 215}, {480, 215}, {540, 215}, {600, 215}, {660, 215}, {720, 215}, 
+        // CURVA 1: Enlace a derecha - 2 casillas
+        {780, 280}, {820, 360},
+        // TRAMO 2: Medio-Arriba (Y=445) - 10 casillas (Derecha -> Izquierda)
+        {720, 445}, {660, 445}, {600, 445}, {540, 445}, {480, 445}, {420, 445}, {360, 445}, {300, 445}, {240, 445}, {180, 445},
+        // CURVA 2: Enlace a izquierda - 2 casillas
+        {120, 510}, {100, 580},
+        // TRAMO 3: Medio-Abajo (Y=635) - 10 casillas (Izquierda -> Derecha)
+        {180, 635}, {240, 635}, {300, 635}, {360, 635}, {420, 635}, {480, 635}, {540, 635}, {600, 635}, {660, 635}, {720, 635},
+        // CURVA 3: Enlace a derecha - 2 casillas
+        {780, 710}, {820, 780},
+        // TRAMO 4: Inferior (Y=825) - 10 casillas (Derecha -> Izquierda)
+        {720, 825}, {660, 825}, {600, 825}, {540, 825}, {480, 825}, {420, 825}, {360, 825}, {300, 825}, {240, 825}, {180, 825},
+        // TRAMO 5: Final al Castillo (Izquierda -> Derecha) - 4 casillas
+        {250, 880}, {420, 900}, {620, 880}, {880, 775}
+    };
+
     private ArrayList<ImageView> fichasPinguinos;
     private ArrayList<ImageView> fichasFocas;
     private Map<Jugador, VBox> iceCubesMap;
 
+    // ══════════════════════════════════════════════════
+    //  INICIALIZACIÓN
+    // ══════════════════════════════════════════════════
+
     @FXML
     private void initialize() {
         appendLog(null, "🐧 ¡Bienvenido a El Juego de Pingu!");
-        
+
         fichasPinguinos = new ArrayList<>();
         fichasPinguinos.add(P1); fichasPinguinos.add(P2);
         fichasPinguinos.add(P3); fichasPinguinos.add(P4);
@@ -87,77 +128,149 @@ public class PantallaJuego {
         fichasFocas.add(PFoca); fichasFocas.add(PFoca2);
         fichasFocas.add(PFoca3); fichasFocas.add(PFoca4);
 
-        for(ImageView iv : fichasPinguinos) iv.setVisible(false);
-        for(ImageView iv : fichasFocas) iv.setVisible(false);
+        for (ImageView iv : fichasPinguinos) iv.setVisible(false);
+        for (ImageView iv : fichasFocas)    iv.setVisible(false);
 
         gestorPartida = new GestorPartida();
+
+        // RE-POSICIONAMIENTO RESPONSIVO:
+        // Si el tamaño del tablero cambia (ventana <-> pantalla completa), actualizamos todo.
+        tablero.widthProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
+        tablero.heightProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
     }
 
-    /** Añade un mensaje al log con el color del jugador. */
-    private void appendLog(Jugador j, String msg) {
-        if (eventosContenedor == null) return;
-
-        Text textNode = new Text();
-        textNode.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+    private void actualizarTodoVisually() {
+        if (gestorPartida == null || gestorPartida.getPartida() == null) return;
         
-        if (j != null) {
-            String colorHex = getPlayerColorHex(j);
-            textNode.setFill(Color.web(colorHex));
-            textNode.setText("• " + j.getNombre() + ": " + msg + "\n");
-        } else {
-            textNode.setFill(Color.WHITE); // Mensaje de sistema
-            textNode.setText(msg + "\n");
+        // Reposicionar casillas
+        for (Node node : tablero.getChildren()) {
+            if (node.getStyleClass().contains("board-cell")) {
+                // El ID o el orden determina el índice de la casilla
+                // En nuestro caso, las casillas se crearon en orden, pero es mejor usar el orden inverso 
+                // ya que se añadieron con add(0, cell)
+            }
+        }
+        // Para mayor robustez, simplemente reconstruimos la capa visual si cambia el tamaño
+        // o mejor, iteramos y re-posicionamos.
+        
+        // La forma más segura y limpia es reconstruir el mapeo
+        construirTableroVisual();
+        actualizarPosicionesVisuales();
+    }
+
+    // ══════════════════════════════════════════════════
+    //  CONVERSIÓN DE COORDENADAS IMAGEN → PANE
+    // ══════════════════════════════════════════════════
+
+    /**
+     * Convierte un punto en coordenadas de la imagen original
+     * a coordenadas locales del Pane del tablero, teniendo en
+     * cuenta el escalado "cover" del fondo de pantalla.
+     */
+    private double[] imageToPaneCoords(double imgX, double imgY) {
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
+
+        if (boardW <= 0 || boardH <= 0) {
+            // Fallback razonable para inicialización
+            return new double[]{ imgX, imgY };
         }
 
-        eventosContenedor.getChildren().add(textNode);
+        // Lógica "contain": la imagen se escala al tamaño máximo posible sin recortarse
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
 
-        // Scroll automático al final
+        // Alineación "center center" (sincronizado con el CSS)
+        // Calculamos el espacio sobrante a los lados (X) y arriba/abajo (Y) para centrar
+        double imgOffX = (boardW - IMG_W * scale) / 2.0;
+        double imgOffY = (boardH - IMG_H * scale) / 2.0;
+
+        double bpX = imgX * scale + imgOffX;
+        double bpY = imgY * scale + imgOffY;
+
+        return new double[]{ bpX, bpY };
+    }
+
+    /** Posiciona cualquier nodo en el centro de la casilla i. */
+    private void posicionarEnCasilla(Node node, int i, double nodeSize) {
+        double[] pos = imageToPaneCoords(PATH_IMG[i][0], PATH_IMG[i][1]);
+        node.setLayoutX(pos[0] - nodeSize / 2.0);
+        node.setLayoutY(pos[1] - nodeSize / 2.0);
+    }
+
+    /** Posiciona una ficha en su casilla con un pequeño offset por índice. */
+    private void posicionarFicha(ImageView ficha, int cellPos, int tokenOffset) {
+        int safePos = Math.min(cellPos, PATH_IMG.length - 1);
+        double[] pos = imageToPaneCoords(PATH_IMG[safePos][0], PATH_IMG[safePos][1]);
+        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + tokenOffset * 8.0);
+        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 - tokenOffset * 5.0);
+    }
+
+    // ══════════════════════════════════════════════════
+    //  LOG DE EVENTOS
+    // ══════════════════════════════════════════════════
+
+    private void appendLog(Jugador j, String msg) {
+        if (eventosContenedor == null) return;
+        Text textNode = new Text();
+        textNode.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
+        if (j != null) {
+            textNode.setFill(Color.web(getPlayerColorHex(j)));
+            textNode.setText("• " + j.getNombre() + ": " + msg + "\n");
+        } else {
+            textNode.setFill(Color.WHITE);
+            textNode.setText(msg + "\n");
+        }
+        eventosContenedor.getChildren().add(textNode);
         if (eventosScroll != null) {
             javafx.application.Platform.runLater(() -> eventosScroll.setVvalue(1.0));
         }
     }
 
     private String getPlayerColorHex(Jugador j) {
-        if (j instanceof modelo.jugador.Foca) return "#00ffa3"; // Verde Neón (IA)
-        
+        if (j instanceof modelo.jugador.Foca) return "#00ffa3";
         String color = j.getColor() != null ? j.getColor().toLowerCase() : "";
-        
-        // Mapeo específico solicitado: P1 azul, P2 rojo, otros según su nombre/color
-        if (j.getNombre().toLowerCase().contains("1") || color.contains("azul")) return "#00e5ff"; // Celeste Neón
-        if (j.getNombre().toLowerCase().contains("2") || color.contains("rojo")) return "#ff1744"; // Rojo Vibrante
-        
+        if (j.getNombre().toLowerCase().contains("1") || color.contains("azul"))    return "#00e5ff";
+        if (j.getNombre().toLowerCase().contains("2") || color.contains("rojo"))    return "#ff1744";
         switch (color) {
-            case "verde": return "#00ffa3";
+            case "verde":    return "#00ffa3";
             case "amarillo": return "#ffd740";
-            default: return "#ffffff";
+            default:         return "#ffffff";
         }
     }
 
-    public void setConexion(java.sql.Connection con) {
-        // La conexión se usa internamente en el gestor a través de BBDD si es necesario
-    }
+    // ══════════════════════════════════════════════════
+    //  SETTERS PÚBLICOS
+    // ══════════════════════════════════════════════════
 
-    public void setUsuario(String user) {
-        this.usuarioLogueado = user;
-    }
+    public void setConexion(java.sql.Connection con) { /* gestionado por BBDD */ }
+    public void setUsuario(String user) { this.usuarioLogueado = user; }
+
+    // ══════════════════════════════════════════════════
+    //  PREPARAR PARTIDA
+    // ══════════════════════════════════════════════════
 
     public void prepararPartidaPersonalizada(modelo.partida.Partida p) {
         gestorPartida.setPartida(p);
-        construirTableroVisual();
         construirRosterVisual();
-        actualizarPosicionesVisuales();
         actualizarInventarioVisual();
         actualizarLabelTurno();
+        
+        // Ejecutamos en el siguiente pulso para asegurar que el layout inicial esté listo
+        javafx.application.Platform.runLater(() -> {
+            actualizarTodoVisually();
+        });
     }
 
     public void cargarPartidaEspecifica(int idPartida) {
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
         java.sql.Connection con = controlador.gestionbbdd.BBDD.conectarPredeterminado();
         modelo.partida.Partida p = helper.cargarBBDD(con, idPartida);
-        if (p != null) {
-            prepararPartidaPersonalizada(p);
-        }
+        if (p != null) prepararPartidaPersonalizada(p);
     }
+
+    // ══════════════════════════════════════════════════
+    //  ROSTER VISUAL (panel inferior de jugadores)
+    // ══════════════════════════════════════════════════
 
     private void construirRosterVisual() {
         if (rosterContainer == null) return;
@@ -167,26 +280,26 @@ public class PantallaJuego {
         for (Jugador j : gestorPartida.getPartida().getJugadores()) {
             VBox cube = new VBox(5);
             cube.getStyleClass().add("ice-cube");
-            
+
             ImageView img = new ImageView(new Image("/resources/images/skins/" + j.getSkin()));
-            img.setFitWidth(50);
-            img.setFitHeight(50);
-            img.setPreserveRatio(true);
-            
+            img.setFitWidth(50); img.setFitHeight(50); img.setPreserveRatio(true);
+
             Label nameLabel = new Label(j.getNombre());
             nameLabel.getStyleClass().add("ice-cube-label");
-            
+
             cube.getChildren().addAll(img, nameLabel);
             iceCubesMap.put(j, cube);
             rosterContainer.getChildren().add(cube);
         }
     }
 
+    // ══════════════════════════════════════════════════
+    //  CONSTRUCCIÓN DEL TABLERO VISUAL
+    // ══════════════════════════════════════════════════
+
     private void construirTableroVisual() {
-        tablero.getChildren().removeIf(node -> 
-            !(node instanceof ImageView && (node.getId() != null && node.getId().startsWith("P"))) && 
-            !(node instanceof Text && ((Text)node).getStyleClass().contains("cell-title"))
-        );
+        // Eliminar casillas antiguas pero conservar las fichas de jugadores
+        tablero.getChildren().removeIf(node -> !(node instanceof ImageView));
 
         ArrayList<Casilla> casillas = gestorPartida.getPartida().getTablero().getCasillas();
         int maxPos = gestorPartida.getPartida().getTablero().getTamaño();
@@ -194,74 +307,55 @@ public class PantallaJuego {
         for (int i = 0; i < maxPos; i++) {
             StackPane cell = new StackPane();
             cell.getStyleClass().add("board-cell");
-            
+            cell.setPrefSize(CELL_SIZE, CELL_SIZE);
+            cell.setMaxSize(CELL_SIZE, CELL_SIZE);
+            cell.setMinSize(CELL_SIZE, CELL_SIZE);
+
+            // Determinar tipo de casilla
             String tipo = "Normal";
-            if (i == 0) tipo = "Inicio";
-            else if (i == 49) tipo = "Final";
+            if      (i == 0)          tipo = "Inicio";
+            else if (i == maxPos - 1) tipo = "Final";
             else {
                 for (Casilla c : casillas) {
-                    if (c.getPosicion() == i) {
-                        tipo = c.getClass().getSimpleName();
-                        break;
-                    }
+                    if (c.getPosicion() == i) { tipo = c.getClass().getSimpleName(); break; }
                 }
             }
 
-            String imgFile = "casilla_normal.png";
-            String labelText = "";
-            
+            // Imagen de la casilla
+            String imgFile;
             switch (tipo) {
-                case "Inicio":
-                    labelText = "SALIDA";
-                    break;
-                case "Final":
-                    labelText = "META";
-                    break;
-                case "MotoNieve":
-                    imgFile = "casilla_motonieve.png";
-                    break;
-                case "Oso":
-                    imgFile = "casilla_oso.png";
-                    break;
+                case "MotoNieve":       imgFile = "casilla_motonieve.png"; break;
+                case "Oso":             imgFile = "casilla_oso.png";       break;
                 case "Agujero":
-                    imgFile = "casilla_agujero.png";
-                    break;
-                case "SueloQuebradizo":
-                    imgFile = "casilla_agujero.png"; // Usamos la misma de agujero para suelo
-                    break;
-                case "Trineo":
-                    imgFile = "casilla_trineo.png";
-                    break;
-                case "Evento":
-                    imgFile = "casilla_evento.png";
-                    break;
-                default:
-                    imgFile = "casilla_normal.png";
-                    break;
+                case "SueloQuebradizo": imgFile = "casilla_agujero.png";   break;
+                case "Trineo":          imgFile = "casilla_trineo.png";    break;
+                case "Evento":          imgFile = "casilla_evento.png";    break;
+                default:                imgFile = "casilla_normal.png";    break;
             }
 
             ImageView iv = crearImagenCasilla(imgFile);
             if (iv != null) cell.getChildren().add(iv);
 
-            if (!labelText.isEmpty()) {
-                Text t = new Text(labelText);
-                if (tipo.equals("Inicio")) t.getStyleClass().add("start-title");
-                else if (tipo.equals("Final")) t.getStyleClass().add("finish-title");
-                else t.getStyleClass().add("cell-title");
+            if (tipo.equals("Inicio")) {
+                Text t = new Text("START");
+                t.getStyleClass().add("start-title");
+                cell.getChildren().add(t);
+            } else if (tipo.equals("Final")) {
+                Text t = new Text("META");
+                t.getStyleClass().add("finish-title");
                 cell.getChildren().add(t);
             }
 
-            int row = i / COLUMNS;
-            int col = i % COLUMNS;
-            GridPane.setRowIndex(cell, row);
-            GridPane.setColumnIndex(cell, col);
-            tablero.getChildren().add(cell);
+            // Posición absoluta sobre la pasarela
+            posicionarEnCasilla(cell, i, CELL_SIZE);
+
+            // Añadir detrás de las fichas
+            tablero.getChildren().add(0, cell);
         }
-        
-        // Colocar skins a las fichas
+
+        // Asignar skins a las fichas y traerlas al frente
         ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
-        int pingIdx = 0;
-        int focaIdx = 0;
+        int pingIdx = 0, focaIdx = 0;
         for (Jugador j : jugadores) {
             if (j instanceof Pinguino) {
                 fichasPinguinos.get(pingIdx).setImage(new Image("/resources/images/skins/" + j.getSkin()));
@@ -273,32 +367,33 @@ public class PantallaJuego {
                 focaIdx++;
             }
         }
-
-        for(ImageView iv : fichasPinguinos) { iv.toFront(); iv.setMouseTransparent(true); }
-        for(ImageView iv : fichasFocas) { iv.toFront(); iv.setMouseTransparent(true); }
+        for (ImageView iv : fichasPinguinos) { iv.toFront(); iv.setMouseTransparent(true); }
+        for (ImageView iv : fichasFocas)     { iv.toFront(); iv.setMouseTransparent(true); }
     }
 
     private ImageView crearImagenCasilla(String fileName) {
         try {
             Image img = new Image(getClass().getResourceAsStream("/resources/images/casillas/" + fileName));
             ImageView iv = new ImageView(img);
-            iv.setFitWidth(45);
-            iv.setFitHeight(45);
+            iv.setFitWidth(CELL_SIZE);
+            iv.setFitHeight(CELL_SIZE);
             iv.setPreserveRatio(true);
             return iv;
-        } catch (Exception e) {
-            return null;
-        }
+        } catch (Exception e) { return null; }
     }
+
+    // ══════════════════════════════════════════════════
+    //  ACTUALIZAR POSICIONES DE FICHAS
+    // ══════════════════════════════════════════════════
 
     private void actualizarPosicionesVisuales() {
         ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
-        int pIdx = 0; int fIdx = 0;
+        int pIdx = 0, fIdx = 0, tokenOffset = 0;
         for (Jugador j : jugadores) {
-            ImageView ficha = (j instanceof Pinguino) ? fichasPinguinos.get(pIdx++) : fichasFocas.get(fIdx++);
-            GridPane.setColumnIndex(ficha, j.getPosicion() % COLUMNS);
-            GridPane.setRowIndex(ficha, j.getPosicion() / COLUMNS);
-            // Al refrescar todas, ponemos traslación a 0 por si había alguna animación
+            ImageView ficha = (j instanceof Pinguino)
+                    ? fichasPinguinos.get(pIdx++)
+                    : fichasFocas.get(fIdx++);
+            posicionarFicha(ficha, j.getPosicion(), tokenOffset++);
             ficha.setTranslateX(0);
             ficha.setTranslateY(0);
             ficha.toFront();
@@ -307,52 +402,53 @@ public class PantallaJuego {
 
     private ImageView getFichaDeJugador(Jugador j) {
         ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
-        int pIdx = 0; int fIdx = 0;
+        int pIdx = 0, fIdx = 0;
         for (Jugador item : jugadores) {
-            if (item == j) {
-                return (j instanceof Pinguino) ? fichasPinguinos.get(pIdx) : fichasFocas.get(fIdx);
-            }
+            if (item == j) return (j instanceof Pinguino)
+                    ? fichasPinguinos.get(pIdx)
+                    : fichasFocas.get(fIdx);
             if (item instanceof Pinguino) pIdx++; else fIdx++;
         }
         return null;
     }
 
+    // ══════════════════════════════════════════════════
+    //  INVENTARIO Y TURNO
+    // ══════════════════════════════════════════════════
+
     private void actualizarInventarioVisual() {
         Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        inventoryTitle.setText("🎒  Mochila de " + actual.getNombre());
         if (actual instanceof Pinguino) {
             modelo.items.Inventario inv = ((Pinguino) actual).getInventario();
+            inventoryTitle.setText("🎒  Mochila de " + actual.getNombre());
             rapido_t.setText("D. Rápido: " + inv.contarPorTipo("Dado Rapido"));
-            lento_t.setText("D. Lento: " + inv.contarPorTipo("Dado Lento"));
-            peces_t.setText("Peces: " + inv.contarPorTipo("Pez"));
-            nieve_t.setText("Bolas: " + inv.contarPorTipo("Bola de Nieve"));
-            moto_t.setText("Moto: " + inv.contarPorTipo("Moto de Nieve"));
+            lento_t.setText("D. Lento: "  + inv.contarPorTipo("Dado Lento"));
+            peces_t.setText("Peces: "    + inv.contarPorTipo("Pez"));
+            nieve_t.setText("Bolas: "    + inv.contarPorTipo("Bola de Nieve"));
+            moto_t.setText("Moto: "     + inv.contarPorTipo("Moto de Nieve"));
         } else {
-            // Es una Foca: no mostrar inventario
             inventoryTitle.setText("🦭  Turno de la IA");
-            rapido_t.setText("");
-            lento_t.setText("");
-            peces_t.setText("");
-            nieve_t.setText("");
-            moto_t.setText("");
+            rapido_t.setText(""); lento_t.setText(""); peces_t.setText("");
+            nieve_t.setText(""); moto_t.setText("");
         }
     }
 
     private void actualizarLabelTurno() {
         if (!gestorPartida.getPartida().isFinalizada()) {
             Jugador jActual = gestorPartida.getPartida().getJugadorActual();
-
-            // Actualizar estilo de cubos de hielo
             if (iceCubesMap != null) {
                 for (Map.Entry<Jugador, VBox> entry : iceCubesMap.entrySet()) {
                     entry.getValue().getStyleClass().remove("ice-cube-active");
-                    if (entry.getKey() == jActual) {
+                    if (entry.getKey() == jActual)
                         entry.getValue().getStyleClass().add("ice-cube-active");
-                    }
                 }
             }
         }
     }
+
+    // ══════════════════════════════════════════════════
+    //  LÓGICA DE DADO Y MOVIMIENTO
+    // ══════════════════════════════════════════════════
 
     @FXML
     public void handleDado() {
@@ -362,73 +458,105 @@ public class PantallaJuego {
 
         int res = gestorPartida.tirarDado(j);
         dadoResultText.setText("Ha salido: " + res);
-        
         iniciarMovimientoAnimado(j, res);
     }
 
     private void iniciarMovimientoAnimado(Jugador j, int avance) {
         int posFisicaInicio = j.getPosicion();
         appendLog(j, "avanza " + avance + " casillas...");
-        
+
         animarPasoAPaso(j, posFisicaInicio, avance, () -> {
             j.setPosicion(posFisicaInicio);
-            
-            // Calculamos la posición destino esperada
-            int targetPos = Math.min(posFisicaInicio + avance, gestorPartida.getPartida().getTablero().getTamaño() - 1);
-            
-            // Gestión del soborno por UI: preguntamos al jugador involucrado
+
+            int targetPos = Math.min(posFisicaInicio + avance,
+                    gestorPartida.getPartida().getTablero().getTamaño() - 1);
             comprobarSobornoEnCasilla(j, targetPos);
-            
+
             String log = gestorPartida.procesarTurnoConAvance(j, avance);
-            if (log != null && !log.isEmpty()) {
-                appendLog(j, log.trim());
-            }
+            if (log != null && !log.isEmpty()) appendLog(j, log.trim());
             concluirTurno();
         });
     }
 
+    // ══════════════════════════════════════════════════
+    //  ANIMACIÓN PASO A PASO SOBRE LA PASARELA
+    // ══════════════════════════════════════════════════
+
+    private void animarPasoAPaso(Jugador j, int posActual, int pasosRestantes, Runnable onFinish) {
+        if (pasosRestantes <= 0) { onFinish.run(); return; }
+
+        int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
+        if (j.getPosicion() >= maxPos) { onFinish.run(); return; }
+
+        int posNueva = j.getPosicion() + 1;
+        ImageView ficha = getFichaDeJugador(j);
+        if (ficha == null) { onFinish.run(); return; }
+
+        // Posición visual actual (layout + translate)
+        double startX = ficha.getLayoutX() + ficha.getTranslateX();
+        double startY = ficha.getLayoutY() + ficha.getTranslateY();
+
+        // Destino en coordenadas del pane
+        double[] target = imageToPaneCoords(PATH_IMG[posNueva][0], PATH_IMG[posNueva][1]);
+        double newLayoutX = target[0] - TOKEN_SIZE / 2.0;
+        double newLayoutY = target[1] - TOKEN_SIZE / 2.0;
+
+        // Mover lógicamente y reposicionar la ficha de forma invisible en el destino
+        j.setPosicion(posNueva);
+        ficha.setLayoutX(newLayoutX);
+        ficha.setLayoutY(newLayoutY);
+        // Desplazarse visualmente de vuelta al origen para animar
+        ficha.setTranslateX(startX - newLayoutX);
+        ficha.setTranslateY(startY - newLayoutY);
+
+        // Animar hasta la posición destino
+        TranslateTransition tt = new TranslateTransition(Duration.millis(280), ficha);
+        tt.setToX(0); tt.setToY(0);
+        tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        tt.setOnFinished(e -> animarPasoAPaso(j, posNueva, pasosRestantes - 1, onFinish));
+        tt.play();
+        ficha.toFront();
+    }
+
+    // ══════════════════════════════════════════════════
+    //  SOBORNO / INTERACCIÓN FOCA
+    // ══════════════════════════════════════════════════
+
     private void comprobarSobornoEnCasilla(Jugador j, int targetPos) {
         Pinguino pTarget = null;
         modelo.jugador.Foca fTarget = null;
-        
-        // 1. Identificar quién es quién en esta colisión
+
         if (j instanceof Pinguino) {
             pTarget = (Pinguino) j;
-            // Buscamos si hay una foca en la casilla destino
             for (Jugador item : gestorPartida.getPartida().getJugadores()) {
                 if (item instanceof modelo.jugador.Foca && item.getPosicion() == targetPos) {
-                    fTarget = (modelo.jugador.Foca) item;
-                    break;
+                    fTarget = (modelo.jugador.Foca) item; break;
                 }
             }
         } else if (j instanceof modelo.jugador.Foca) {
             fTarget = (modelo.jugador.Foca) j;
-            // Buscamos si hay un pingüino en la casilla destino
             for (Jugador item : gestorPartida.getPartida().getJugadores()) {
                 if (item instanceof Pinguino && item.getPosicion() == targetPos) {
-                    pTarget = (Pinguino) item;
-                    break;
+                    pTarget = (Pinguino) item; break;
                 }
             }
         }
 
-        // 2. Si hay colisión de especies distinta y foca no sobornada, preguntar
         if (pTarget != null && fTarget != null && !fTarget.isSoborno()) {
             int nPeces = pTarget.getInventario().contarPorTipo("Pez");
             if (nPeces > 0) {
-                // Interrupción por UI
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.CONFIRMATION);
                 alert.setTitle("¡Interacción con la Foca!");
                 alert.setHeaderText(null);
                 alert.setContentText(pTarget.getNombre() + " ¡tienes un pescado! ¿Quieres sobornar a la foca?");
-                
+
                 javafx.scene.control.ButtonType btnSi = new javafx.scene.control.ButtonType("Sí (Sobornar)");
                 javafx.scene.control.ButtonType btnNo = new javafx.scene.control.ButtonType("No");
                 alert.getButtonTypes().setAll(btnSi, btnNo);
 
                 java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == btnSi) {
-                    // Acción de soborno
                     gestorPartida.getGestorJugador().jugadorUsaItem(pTarget, "Pez");
                     fTarget.setSoborno(true);
                     fTarget.setTurnosBloqueada(2);
@@ -438,51 +566,9 @@ public class PantallaJuego {
         }
     }
 
-    private void animarPasoAPaso(Jugador j, int posActual, int pasosRestantes, Runnable onFinish) {
-        if (pasosRestantes <= 0) {
-            onFinish.run();
-            return;
-        }
-
-        int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
-        if (j.getPosicion() < maxPos) {
-            int posNueva = j.getPosicion() + 1;
-            ImageView ficha = getFichaDeJugador(j);
-            if (ficha == null) { onFinish.run(); return; }
-
-            // 1. Guardar la posición visual actual en la escena antes del salto
-            double startX = ficha.getLayoutX() + ficha.getTranslateX();
-            double startY = ficha.getLayoutY() + ficha.getTranslateY();
-
-            // 2. Mover lógicamente y cambiar índices en el GridPane (esto "teletransporta")
-            j.setPosicion(posNueva);
-            GridPane.setColumnIndex(ficha, posNueva % COLUMNS);
-            GridPane.setRowIndex(ficha, posNueva / COLUMNS);
-            
-            // 3. Forzar layout para que el ImageView calcule su nueva posición objetivo
-            ficha.getParent().layout();
-            
-            // 4. Calcular el salto relativo para reponer la ficha visualmente donde estaba
-            double newLayoutX = ficha.getLayoutX();
-            double newLayoutY = ficha.getLayoutY();
-            
-            ficha.setTranslateX(startX - newLayoutX);
-            ficha.setTranslateY(startY - newLayoutY);
-
-            // 5. Animar suavemente hacia (0,0) (que es su posición en el GridPane)
-            TranslateTransition tt = new TranslateTransition(Duration.millis(350), ficha);
-            tt.setToX(0);
-            tt.setToY(0);
-            tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
-            tt.setOnFinished(e -> {
-                animarPasoAPaso(j, posNueva, pasosRestantes - 1, onFinish);
-            });
-            tt.play();
-            ficha.toFront();
-        } else {
-            onFinish.run();
-        }
-    }
+    // ══════════════════════════════════════════════════
+    //  CONCLUSIÓN DE TURNO Y ANIMACIÓN
+    // ══════════════════════════════════════════════════
 
     private void concluirTurno() {
         actualizarPosicionesVisuales();
@@ -494,65 +580,45 @@ public class PantallaJuego {
             mostrarAnimacionTurno(jNuevo, () -> {
                 actualizarLabelTurno();
                 actualizarInventarioVisual();
-                if (jNuevo instanceof modelo.jugador.Foca) {
-                    jugarTurnoFoca();
-                }
+                if (jNuevo instanceof modelo.jugador.Foca) jugarTurnoFoca();
             });
         }
     }
 
     private void mostrarAnimacionTurno(Jugador j, Runnable onFinish) {
-        if (turnAnimationOverlay == null) {
-            onFinish.run();
-            return;
-        }
-        
+        if (turnAnimationOverlay == null) { onFinish.run(); return; }
+
         turnAnimationText.setText("¡Es el turno de " + j.getNombre() + "!");
         turnAnimationSkin.setImage(new Image("/resources/images/skins/" + j.getSkin()));
         turnAnimationOverlay.setVisible(true);
         turnAnimationOverlay.toFront();
 
-        // Animación de entrada (escala)
         ScaleTransition stIn = new ScaleTransition(Duration.millis(400), turnAnimationSkin);
         stIn.setFromX(0); stIn.setFromY(0);
         stIn.setToX(1.3); stIn.setToY(1.3);
         stIn.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
-        
-        // Animación de salto divertido (Translate)
-        TranslateTransition ttJump = new TranslateTransition(Duration.millis(250), turnAnimationSkin);
-        ttJump.setByY(-60);
-        ttJump.setAutoReverse(true);
-        ttJump.setCycleCount(4);
-        ttJump.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
 
-        // Animación de rebote (escala)
+        javafx.animation.TranslateTransition ttJump =
+                new javafx.animation.TranslateTransition(Duration.millis(250), turnAnimationSkin);
+        ttJump.setByY(-60); ttJump.setAutoReverse(true); ttJump.setCycleCount(4);
+
         ScaleTransition stBounce = new ScaleTransition(Duration.millis(250), turnAnimationSkin);
         stBounce.setToX(1.1); stBounce.setToY(1.1);
-        stBounce.setAutoReverse(true);
-        stBounce.setCycleCount(4);
+        stBounce.setAutoReverse(true); stBounce.setCycleCount(4);
 
-        stIn.setOnFinished(e -> {
-            ttJump.play();
-            stBounce.play();
-        });
-
+        stIn.setOnFinished(e -> { ttJump.play(); stBounce.play(); });
         ttJump.setOnFinished(e -> {
-            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(600));
-            pause.setOnFinished(ev -> {
-                turnAnimationOverlay.setVisible(false);
-                onFinish.run();
-            });
+            javafx.animation.PauseTransition pause =
+                    new javafx.animation.PauseTransition(Duration.millis(600));
+            pause.setOnFinished(ev -> { turnAnimationOverlay.setVisible(false); onFinish.run(); });
             pause.play();
         });
-
         stIn.play();
     }
 
     private void jugarTurnoFoca() {
         modelo.jugador.Foca foca = (modelo.jugador.Foca) gestorPartida.getPartida().getJugadorActual();
         appendLog(foca, "Turno de la IA...");
-        
-        // Pequeño delay inicial antes de tirar el dado
         new java.util.Timer().schedule(new java.util.TimerTask() {
             @Override public void run() {
                 javafx.application.Platform.runLater(() -> {
@@ -571,15 +637,21 @@ public class PantallaJuego {
         dado.setDisable(true);
     }
 
+    // ══════════════════════════════════════════════════
+    //  ACCIONES DE MENÚ
+    // ══════════════════════════════════════════════════
+
     @FXML private void handleSaveGame() {
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
-        helper.guardarBBDD(controlador.gestionbbdd.BBDD.conectarPredeterminado(), gestorPartida.getPartida(), usuarioLogueado);
+        helper.guardarBBDD(controlador.gestionbbdd.BBDD.conectarPredeterminado(),
+                gestorPartida.getPartida(), usuarioLogueado);
         appendLog(null, "✅ Partida guardada correctamente.");
     }
 
     @FXML private void handleLoadGame() { toggleMenu(); handleGoToMenu(); }
-    @FXML private void handleNewGame() { toggleMenu(); handleGoToMenu(); }
+    @FXML private void handleNewGame()  { toggleMenu(); handleGoToMenu(); }
     @FXML private void handleQuitGame() { System.exit(0); }
+
     @FXML private void handleGoToMenu() {
         try {
             FXMLLoader l = new FXMLLoader(getClass().getResource("/resources/fxml/PantallaMenu.fxml"));
@@ -593,13 +665,16 @@ public class PantallaJuego {
         menuOverlay.setVisible(!menuOverlay.isVisible());
         menuOverlay.setManaged(menuOverlay.isVisible());
     }
-    
-    // Handlers para el uso de items del inventario
+
+    // ══════════════════════════════════════════════════
+    //  ÍTEMS DEL INVENTARIO
+    // ══════════════════════════════════════════════════
+
     @FXML private void handleRapido() { usarItemEnTurno("Dado Rapido"); }
-    @FXML private void handleLento() { usarItemEnTurno("Dado Lento"); }
-    @FXML private void handlePeces() { usarItemEnTurno("Pez"); }
-    @FXML private void handleNieve() { usarItemEnTurno("Bola de Nieve"); }
-    @FXML private void handleMoto() { usarItemEnTurno("Moto de Nieve"); }
+    @FXML private void handleLento()  { usarItemEnTurno("Dado Lento");  }
+    @FXML private void handlePeces()  { usarItemEnTurno("Pez");         }
+    @FXML private void handleNieve()  { usarItemEnTurno("Bola de Nieve"); }
+    @FXML private void handleMoto()   { usarItemEnTurno("Moto de Nieve"); }
 
     private void usarItemEnTurno(String nombreItem) {
         if (gestorPartida.getPartida().isFinalizada()) return;
@@ -608,16 +683,12 @@ public class PantallaJuego {
 
         Pinguino p = (Pinguino) actual;
         int posPrevia = p.getPosicion();
-        
-        // El GestorJugador ya maneja la lógica de movimiento (+12, +20, etc)
         gestorPartida.getGestorJugador().jugadorUsaItem(p, nombreItem);
-        
-        // Si el ítem causó un movimiento (ej: Trineo, Moto), actualizamos la vista
+
         if (p.getPosicion() != posPrevia) {
-            actualizarPosicionesVisuales();
+            javafx.application.Platform.runLater(this::actualizarPosicionesVisuales);
             appendLog(p, "ha usado " + nombreItem + "!");
         }
-        
         actualizarInventarioVisual();
     }
 }

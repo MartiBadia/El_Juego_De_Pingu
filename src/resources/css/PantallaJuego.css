@@ -1,23 +1,27 @@
 .root {
     -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-background-color: #0d1b2a;
+    -fx-background-color: #000000;
 }
 
 /* Forzamos la fuente en todos los elementos secundarios */
-.label, .button, .text-field, .text-area, .menu, .menu-item, .check-box, .radio-button {
+.label,
+.button,
+.text-field,
+.text-area,
+.menu,
+.menu-item,
+.check-box,
+.radio-button {
     -fx-font-family: "Consolas", "Courier New", monospace;
 }
 
 .scene-background {
-    -fx-background-image: url("/resources/images/fondos/fondo_tablero.png");
-    -fx-background-size: cover;
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center center;
+    -fx-background-color: #000000;
 }
 
 /* =================== MENÚ =================== */
 .menu-bar {
-    -fx-background-color: #0a1628;
+    -fx-background-color: #000000;
     -fx-border-color: #1a3557;
     -fx-border-width: 0 0 1 0;
     -fx-padding: 2 8;
@@ -50,38 +54,34 @@
 
 /* =================== TABLERO =================== */
 .board {
-    -fx-background-color: rgba(5, 15, 30, 0.8);
-    -fx-hgap: 6;
-    -fx-vgap: 6;
-    -fx-background-radius: 0;
-    -fx-border-color: #2196f3 #1565c0 #1565c0 #2196f3; /* Pixel shading */
-    -fx-border-width: 4;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 15, 0, 0, 8);
-    -fx-padding: 8;
+    -fx-background-color: transparent;
+    -fx-background-image: url("/resources/images/ui/Gemini_Generated_Image_byc22obyc22obyc2.png");
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
 }
 
 .board-cell {
-    -fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.15), rgba(79, 195, 247, 0.05));
-    -fx-background-radius: 0;
-    -fx-border-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.2) rgba(255, 255, 255, 0.3);
-    -fx-border-width: 2;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 0, 1);
+    -fx-background-color: rgba(180, 235, 255, 0.18);
+    -fx-background-radius: 6;
+    -fx-border-color: rgba(100, 215, 255, 0.55);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(100, 215, 255, 0.40), 6, 0.3, 0, 0);
 }
 
 .board-cell:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.25);
+    -fx-background-color: rgba(200, 245, 255, 0.35);
     -fx-effect: dropshadow(gaussian, #4fc3f7, 10, 0.5, 0, 0);
-}
-
-/* Primer y último hijo del GridPane para redondear esquinas si quieres, 
-   o simplemente que todas se vean bien */
 
 /* Textos de tipo de casilla */
 .cell-title {
     -fx-fill: #4fc3f7;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(79,195,247,0.6), 8, 0.5, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.6), 8, 0.5, 0, 0);
 }
 
 .start-title {
@@ -90,7 +90,7 @@
     -fx-font-weight: 900;
     -fx-stroke: #1b5e20;
     -fx-stroke-width: 0.8;
-    -fx-effect: dropshadow(two-pass-box, rgba(255,255,255,0.7), 10, 0.4, 0, 0);
+    -fx-effect: dropshadow(two-pass-box, rgba(255, 255, 255, 0.7), 10, 0.4, 0, 0);
 }
 
 .finish-title {
@@ -99,7 +99,7 @@
     -fx-font-weight: 900;
     -fx-stroke: #bf360c;
     -fx-stroke-width: 0.8;
-    -fx-effect: dropshadow(two-pass-box, rgba(255,255,255,0.7), 10, 0.4, 0, 0);
+    -fx-effect: dropshadow(two-pass-box, rgba(255, 255, 255, 0.7), 10, 0.4, 0, 0);
 }
 
 .cell-type {
@@ -111,67 +111,81 @@
 
 /* =================== BARRA INFERIOR =================== */
 .bottom-bar {
-    -fx-background-color: #050a14;
-    -fx-border-color: #38bdf8;
-    -fx-border-width: 4 0 0 0;
+    -fx-background-color: #001f3f;
+    -fx-border-color: #4fc3f7;
+    -fx-border-width: 2 0 0 0;
     -fx-padding: 6 10;
+}
+
+/* =================== PANEL LATERAL DERECHO =================== */
+.side-panel {
+    -fx-background-color: #001f3f;
+    -fx-border-color: #4fc3f7;
+    -fx-border-width: 0 0 0 2;
+    -fx-pref-width: 220;
+    -fx-min-width: 200;
+    -fx-max-width: 240;
 }
 
 /* =================== TARJETAS (CARDS) =================== */
 .card {
-    -fx-background-color: linear-gradient(to bottom right, #112240, #0a1b2a);
+    -fx-background-color: #001f3f;
     -fx-background-radius: 0;
-    -fx-border-color: #4fc3f7 #1a4a72 #1a4a72 #4fc3f7; /* 3D Pixel border */
-    -fx-border-width: 3;
+    -fx-border-color: #1a4a72;
+    -fx-border-width: 1;
     -fx-padding: 10;
-    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.6), 10, 0.4, 0, 4);
+    -fx-effect: dropshadow(two-pass-box, rgba(0, 0, 0, 0.5), 10, 0.4, 0, 4);
 }
 
 .card-title {
-    -fx-text-fill: #4fc3f7;
-    -fx-font-size: 15px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.5), 6, 0.4, 0, 0);
+    -fx-padding: 0 0 5 0;
 }
 
 .big-text {
-    -fx-fill: #e8f4fd;
-    -fx-font-size: 24px;
+    -fx-fill: #ffffff;
+    -fx-font-size: 32px;
     -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.15), 4, 0.2, 0, 1);
 }
 
 .stat {
-    -fx-fill: #a8c8e8;
-    -fx-font-size: 14px;
+    -fx-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
 }
 
 .events {
-    -fx-fill: #e8f4fd;
-    -fx-font-size: 14px;
+    -fx-fill: #ffffff;
+    -fx-font-size: 15px;
     -fx-line-spacing: 5;
     -fx-font-weight: bold;
 }
 
 /* =================== FILAS DE INVENTARIO =================== */
 .row {
-    -fx-background-color: rgba(26, 53, 87, 0.4);
-    -fx-background-radius: 8;
+    -fx-background-color: #111111;
+    -fx-background-radius: 4;
+    -fx-border-color: #1a3557;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
     -fx-padding: 8 12;
 }
 
 /* =================== BOTONES =================== */
 .button {
-    -fx-background-radius: 0;
-    -fx-padding: 10 20;
-    -fx-background-color: #1a3a5c;
-    -fx-text-fill: #a8c8e8;
+    -fx-background-radius: 4;
+    -fx-padding: 12 24;
+    -fx-background-color: #112240;
+    -fx-text-fill: #00e5ff;
     -fx-font-weight: 900;
-    -fx-font-size: 14px;
+    -fx-font-size: 16px;
     -fx-cursor: hand;
-    -fx-border-color: #4fc3f7 #0d1b2a #0d1b2a #4fc3f7;
-    -fx-border-width: 3;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.8), 0, 0, 4, 4);
+    -fx-border-color: #00e5ff;
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.3), 8, 0, 0, 0);
 }
 
 .button:hover {
@@ -317,20 +331,20 @@
 
 /* =================== CUBOS DE HIELO (ROSTER) =================== */
 .ice-cube {
-    -fx-background-color: #112240;
-    -fx-border-color: #4fc3f7 #0a1b2a #0a1b2a #4fc3f7;
-    -fx-border-width: 3;
+    -fx-background-color: #000000;
+    -fx-border-color: #1a3557 #0a0a0a #0a0a0a #1a3557;
+    -fx-border-width: 2;
     -fx-border-radius: 0;
     -fx-background-radius: 0;
     -fx-padding: 8;
     -fx-alignment: center;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.8), 0, 0, 3, 3);
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.9), 0, 0, 3, 3);
 }
 
 .ice-cube-active {
-    -fx-background-color: #1a3557;
-    -fx-border-color: #4ade80 #065f46 #065f46 #4ade80;
-    -fx-border-width: 4;
+    -fx-background-color: #0a1010;
+    -fx-border-color: #4ade80 #022c22 #022c22 #4ade80;
+    -fx-border-width: 3;
 }
 
 .ice-cube-label {
@@ -350,4 +364,4 @@
     -fx-font-weight: 900;
     -fx-text-fill: linear-gradient(to bottom, #ffffff, #4fc3f7);
     -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.8), 30, 0, 0, 0);
-}
+}

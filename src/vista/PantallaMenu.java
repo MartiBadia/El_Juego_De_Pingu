@@ -121,6 +121,8 @@ public class PantallaMenu {
     private static final int MAX_SNOWFLAKES = 150;
     private double[] snowX, snowY, snowSpeed, snowSize, snowDrift;
 
+    private ResourceBundle messages;
+
     @FXML
     private void initialize() {
         // Animación de entrada: Fade-In (Suavizado total)
@@ -188,7 +190,7 @@ public class PantallaMenu {
 
     private void updateUITexts() {
         // Enlace sync con TranslationManager
-        ResourceBundle messages = utils.TranslationManager.getBundle();
+        messages = utils.TranslationManager.getBundle();
         if (messages == null) return;
         
         Locale currentLocale = utils.TranslationManager.getLocale();
@@ -311,7 +313,7 @@ public class PantallaMenu {
         String password = passField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            feedbackLabel.setText("Introduce usuario y contraseña.");
+            feedbackLabel.setText(messages.getString("login.empty"));
             return;
         }
 
@@ -519,10 +521,10 @@ public class PantallaMenu {
             currentCarouselIdx = 0;
             skinPreview.setImage(new javafx.scene.image.Image("/resources/images/skins/" + SKIN_FILES[0]));
             actualizarEstadoSeleccionSkin();
-            skinTitle.setText("Jugador " + currentSkinPlayerIndex + ": Elige tu Skin");
+            skinTitle.setText(messages.getString("card.skin.title") + " (" + currentSkinPlayerIndex + ")");
             skinErrorLabel.setText("");
             playerNameField.clear();
-            playerNameField.setPromptText("Nombre del Jugador " + currentSkinPlayerIndex);
+            playerNameField.setPromptText(messages.getString("card.skin.name"));
 
         } catch (NumberFormatException e) {
             errorLabel.setText("Introduce números válidos");

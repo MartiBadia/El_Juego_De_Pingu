@@ -6,16 +6,41 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.base.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.controls.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.fxml.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.graphics.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.media.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFX">
+	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.swing.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/hugolaib14/Documents/GitHub/El_Juego_De_Pingu/ojdbc8.jar"/>
+	<classpathentry exported="true" kind="lib" path="javafx-sdk-21.0.10/lib/javafx.web.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="ojdbc8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
