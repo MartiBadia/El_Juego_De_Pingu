@@ -80,8 +80,8 @@ public class PantallaJuego {
     private static final double IMG_H = 1000.0;
 
     /** Tamaño visual de cada casilla y de cada ficha de jugador (px). */
-    private static final double CELL_SIZE  = 35.0;
-    private static final double TOKEN_SIZE = 28.0;
+    private static final double CELL_SIZE  = 50.0;
+    private static final double TOKEN_SIZE = 40.0;
 
     /**
      * Coordenadas del CENTRO de cada una de las 50 casillas
@@ -318,13 +318,12 @@ public class PantallaJuego {
             // Imagen de la casilla
             String imgFile;
             switch (tipo) {
-                case "MotoNieve":       imgFile = "casilla_motonieve.png"; break;
                 case "Oso":             imgFile = "casilla_oso.png";       break;
-                case "Agujero":
-                case "SueloQuebradizo": imgFile = "casilla_agujero.png";   break;
-                case "Trineo":          imgFile = "casilla_trineo.png";    break;
-                case "Evento":          imgFile = "casilla_evento.png";    break;
-                default:                imgFile = "casilla_normal.png";    break;
+                case "Agujero":         imgFile = "casilla_agujero.png";    break;
+                case "SueloQuebradizo": imgFile = "casilla_agrietada.png";  break;
+                case "Trineo":          imgFile = "casilla_trineo.png";     break;
+                case "Evento":          imgFile = "casilla_interrogante.png"; break;
+                default:                imgFile = "casilla_normal.png";     break;
             }
 
             ImageView iv = crearImagenCasilla(imgFile);

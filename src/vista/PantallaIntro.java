@@ -54,15 +54,23 @@ public class PantallaIntro {
 
     private void cargarVideo() {
         try {
-            java.net.URL videoUrl = getClass().getResource("/resources/video/pingu_intro.mp4");
-            String videoPath = (videoUrl != null) ? videoUrl.toExternalForm() : null;
-
-            if (videoPath == null) {
+            String videoPath = null;
+            java.net.URL resource = getClass().getResource("/resources/video/pingu_intro.mp4");
+            
+            if (resource != null) {
+                videoPath = resource.toExternalForm();
+            } else {
+                // Fallback a ruta de sistema de archivos si no está en recursos
                 File f = new File("src/resources/video/pingu_intro.mp4");
-                if (f.exists()) videoPath = f.toURI().toString();
+                if (f.exists()) {
+                    videoPath = f.toURI().toString();
+                }
             }
 
             if (videoPath != null) {
+                // Normalizar URI para evitar problemas con GStreamer
+                videoPath = videoPath.replace(" ", "%20");
+                
                 Media media = new Media(videoPath);
                 mediaPlayer = new MediaPlayer(media);
                 mediaView.setMediaPlayer(mediaPlayer);
@@ -71,10 +79,11 @@ public class PantallaIntro {
                 playerEvents(mediaPlayer);
                 mediaPlayer.play();
             } else {
+                System.err.println("No se encontró el video en ninguna ubicación.");
                 showStartPrompt();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Excepción cargando video: " + e.getMessage());
             showStartPrompt();
         }
     }
