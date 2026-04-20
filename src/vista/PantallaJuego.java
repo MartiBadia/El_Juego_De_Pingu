@@ -80,8 +80,8 @@ public class PantallaJuego {
     private static final double IMG_H = 1000.0;
 
     /** Tamaño visual de cada casilla y de cada ficha de jugador (px). */
-    private static final double CELL_SIZE  = 22.0;
-    private static final double TOKEN_SIZE = 20.0;
+    private static final double CELL_SIZE  = 35.0;
+    private static final double TOKEN_SIZE = 28.0;
 
     /**
      * Coordenadas del CENTRO de cada una de las 50 casillas
@@ -195,8 +195,8 @@ public class PantallaJuego {
     private void posicionarFicha(ImageView ficha, int cellPos, int tokenOffset) {
         int safePos = Math.min(cellPos, PATH_IMG.length - 1);
         double[] pos = imageToPaneCoords(PATH_IMG[safePos][0], PATH_IMG[safePos][1]);
-        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + tokenOffset * 8.0);
-        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 - tokenOffset * 5.0);
+        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + tokenOffset * 6.0);
+        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 - tokenOffset * 4.0);
     }
 
     // ══════════════════════════════════════════════════
