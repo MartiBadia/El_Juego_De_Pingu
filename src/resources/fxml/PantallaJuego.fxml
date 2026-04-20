@@ -24,19 +24,34 @@
     fx:controller="vista.PantallaJuego"
     stylesheets="/resources/css/PantallaJuego.css"
     styleClass="root"
-    prefWidth="1100" prefHeight="780" minWidth="600" minHeight="400">
+    prefWidth="1100" prefHeight="780">
 
     <Region styleClass="scene-background" />
 
     <BorderPane pickOnBounds="false">
 
+    <top>
+        <MenuBar>
+            <menus>
+                <Menu mnemonicParsing="false" text="🎮 Partida">
+                    <items>
+                        <MenuItem fx:id="newGame"  mnemonicParsing="false" text="🆕  Nueva Partida" onAction="#handleNewGame"/>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="saveGame" mnemonicParsing="false" text="💾  Guardar"       onAction="#handleSaveGame"/>
+                        <MenuItem fx:id="loadGame" mnemonicParsing="false" text="📂  Cargar"        onAction="#handleLoadGame"/>
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem fx:id="quitGame" mnemonicParsing="false" text="🚪  Salir"         onAction="#handleQuitGame"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
 
     <center>
         <!-- 'tablero' is now a Pane; cells are placed at absolute coords by Java -->
         <Pane fx:id="tablero" styleClass="board"
               maxHeight="1.7976931348623157E308"
-              maxWidth="1.7976931348623157E308"
-              minWidth="0" minHeight="0">
+              maxWidth="1.7976931348623157E308">
 
             <!-- Player tokens – positioned dynamically -->
             <ImageView fx:id="P1"    id="P1"    fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
@@ -52,8 +67,7 @@
 
     <!-- ===== PANEL DERECHO: Dado + Jugadores ===== -->
     <right>
-        <VBox spacing="10" styleClass="side-panel"
-              prefWidth="220" minWidth="180" maxWidth="260"
+        <VBox spacing="10" styleClass="side-panel" prefWidth="220"
               BorderPane.alignment="TOP_RIGHT">
             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
@@ -67,69 +81,76 @@
             </VBox>
 
             <!-- Jugadores -->
-            <VBox spacing="6" styleClass="card">
-                <Label text="👥  Jugadores" styleClass="card-title" />
-                <HBox fx:id="rosterContainer" alignment="CENTER" spacing="6">
-                    <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
-                </HBox>
-            </VBox>
-
-            <!-- Inventario (Desplegable) -->
-            <javafx.scene.control.TitledPane animated="true" text="🎒 INVENTARIO" expanded="false" styleClass="inventory-dropdown">
-                <content>
-                    <VBox spacing="6" styleClass="card-inner">
-                        <Label fx:id="inventoryTitle" text="Mochila" styleClass="card-subtitle" />
-                        <GridPane hgap="8" vgap="6">
-                            <columnConstraints>
-                                <ColumnConstraints percentWidth="100" />
-                            </columnConstraints>
-                            <children>
-                                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row-small" GridPane.rowIndex="0">
-                                    <Text fx:id="rapido_t" text="D. Rápido: 0" styleClass="stat-small"/>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="rapido" text="U" onAction="#handleRapido" styleClass="btn-tiny"/>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row-small" GridPane.rowIndex="1">
-                                    <Text fx:id="lento_t"  text="D. Lento: 0"  styleClass="stat-small"/>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="lento"  text="U" onAction="#handleLento" styleClass="btn-tiny"/>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row-small" GridPane.rowIndex="2">
-                                    <Text fx:id="peces_t"  text="Peces: 0"  styleClass="stat-small"/>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="peces"  text="U" onAction="#handlePeces" styleClass="btn-tiny"/>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row-small" GridPane.rowIndex="3">
-                                    <Text fx:id="nieve_t"  text="Bolas: 0"  styleClass="stat-small"/>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="nieve"  text="U" onAction="#handleNieve" styleClass="btn-tiny"/>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row-small" GridPane.rowIndex="4">
-                                    <Text fx:id="moto_t"   text="Moto: 0"  styleClass="stat-small"/>
-                                    <Region HBox.hgrow="ALWAYS"/>
-                                    <Button fx:id="moto_btn" text="U" onAction="#handleMoto" styleClass="btn-tiny"/>
-                                </HBox>
-                            </children>
-                        </GridPane>
-                    </VBox>
-                </content>
-            </javafx.scene.control.TitledPane>
-
-            <!-- Historial de Eventos (Ahora a la derecha) -->
             <VBox spacing="6" styleClass="card" VBox.vgrow="ALWAYS">
-                <Label text="📋  Eventos" styleClass="card-title" />
-                <ScrollPane fx:id="eventosScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                            styleClass="objects-scroll" VBox.vgrow="ALWAYS">
-                    <content>
-                        <javafx.scene.text.TextFlow fx:id="eventosContenedor" styleClass="events-side" />
-                    </content>
-                </ScrollPane>
+                <Label text="👥  Jugadores" styleClass="card-title" />
+                <HBox fx:id="rosterContainer" alignment="CENTER" spacing="6"
+                      VBox.vgrow="ALWAYS">
+                    <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+                    <!-- Se llena dinámicamente -->
+                </HBox>
             </VBox>
 
         </VBox>
     </right>
 
     <!-- ===== BARRA INFERIOR: Inventario + Eventos ===== -->
+    <bottom>
+        <HBox spacing="10" styleClass="bottom-bar">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+            <!-- Inventario -->
+            <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
+                <Label fx:id="inventoryTitle" text="🎒  Inventario" styleClass="card-title" />
+                <GridPane hgap="10" vgap="8" VBox.vgrow="ALWAYS">
+                    <padding><Insets top="2" right="2" bottom="2" left="2"/></padding>
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50" />
+                        <ColumnConstraints percentWidth="50" />
+                    </columnConstraints>
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Text fx:id="rapido_t" text="D. Rápido: 0" styleClass="stat"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="rapido" text="Usar" onAction="#handleRapido" styleClass="btn-tiny"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Text fx:id="lento_t"  text="D. Lento: 0"  styleClass="stat"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="lento"  text="Usar" onAction="#handleLento" styleClass="btn-tiny"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Text fx:id="peces_t"  text="Peces: 0"  styleClass="stat"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="peces"  text="Usar" onAction="#handlePeces" styleClass="btn-tiny"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Text fx:id="nieve_t"  text="Bolas: 0"  styleClass="stat"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="nieve"  text="Usar" onAction="#handleNieve" styleClass="btn-tiny"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="6" styleClass="row" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <Text fx:id="moto_t"   text="Moto: 0"  styleClass="stat"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Button fx:id="moto_btn" text="Usar" onAction="#handleMoto" styleClass="btn-tiny"/>
+                        </HBox>
+                    </children>
+                </GridPane>
+            </VBox>
+
+            <!-- Eventos -->
+            <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
+                <Label text="📋  Eventos" styleClass="card-title"/>
+                <ScrollPane fx:id="eventosScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                            styleClass="objects-scroll" prefHeight="100" VBox.vgrow="ALWAYS">
+                    <content>
+                        <javafx.scene.text.TextFlow fx:id="eventosContenedor"
+                                      styleClass="events" prefWidth="220" />
+                    </content>
+                </ScrollPane>
+            </VBox>
+
+        </HBox>
+    </bottom>
 
     </BorderPane>
 

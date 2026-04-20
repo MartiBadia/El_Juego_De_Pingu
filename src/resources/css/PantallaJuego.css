@@ -61,16 +61,15 @@
     -fx-background-position: center center;
     -fx-border-color: transparent;
     -fx-padding: 0;
-    -fx-margin: 0;
 }
 
 .board-cell {
-    -fx-background-color: rgba(255, 255, 255, 0.15); /* Más transparente para ver el camino */
-    -fx-background-radius: 12;
-    -fx-border-color: rgba(79, 195, 247, 0.6);
-    -fx-border-width: 1.2;
-    -fx-border-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.4), 8, 0.5, 0, 0);
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(79, 195, 247, 0.8);
+    -fx-border-width: 1.8;
+    -fx-border-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.6), 12, 0.5, 0, 0);
     -fx-cursor: hand;
 }
 
@@ -92,7 +91,7 @@
 
 .start-title {
     -fx-fill: linear-gradient(to bottom, #c8e6c9, #2e7d32);
-    -fx-font-size: 14px;
+    -fx-font-size: 18px;
     -fx-font-weight: 900;
     -fx-stroke: #1b5e20;
     -fx-stroke-width: 0.8;
@@ -101,7 +100,7 @@
 
 .finish-title {
     -fx-fill: linear-gradient(to bottom, #fff9c4, #f57f17);
-    -fx-font-size: 14px;
+    -fx-font-size: 18px;
     -fx-font-weight: 900;
     -fx-stroke: #bf360c;
     -fx-stroke-width: 0.8;
@@ -115,23 +114,12 @@
     -fx-opacity: 0.85;
 }
 
-/* =================== BARRA INFERIOR COMPACTA =================== */
-.bottom-bar-compact {
-    -fx-background-color: rgba(0, 31, 63, 0.85); /* Semi-transparente para ver más board si hace falta */
+/* =================== BARRA INFERIOR =================== */
+.bottom-bar {
+    -fx-background-color: #001f3f;
     -fx-border-color: #4fc3f7;
-    -fx-border-width: 1 0 0 0;
-    -fx-padding: 4;
-}
-
-.objects-scroll-mini {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-}
-
-.events-mini {
-    -fx-fill: #ffffff;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-border-width: 2 0 0 0;
+    -fx-padding: 6 10;
 }
 
 /* =================== PANEL LATERAL DERECHO =================== */
@@ -177,58 +165,6 @@
     -fx-fill: #ffffff;
     -fx-font-size: 15px;
     -fx-line-spacing: 5;
-    -fx-font-weight: bold;
-}
-
-.events-side {
-    -fx-fill: #ffffff;
-    -fx-font-size: 13px;
-    -fx-line-spacing: 3;
-    -fx-font-weight: bold;
-}
-
-/* =================== INVENTARIO DESPLEGABLE =================== */
-.inventory-dropdown {
-    -fx-animated: true;
-    -fx-font-family: "Consolas", monospace;
-}
-
-.inventory-dropdown > .title {
-    -fx-background-color: #112240;
-    -fx-text-fill: #00e5ff;
-    -fx-font-weight: bold;
-    -fx-border-color: #00e5ff;
-    -fx-border-width: 0 0 1 0;
-}
-
-.inventory-dropdown > .content {
-    -fx-background-color: #001f3f;
-    -fx-padding: 5;
-    -fx-border-color: #1a4a72;
-    -fx-border-width: 0 1 1 1;
-}
-
-.card-inner {
-    -fx-padding: 5;
-}
-
-.card-subtitle {
-    -fx-text-fill: #a8c8e8;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.row-small {
-    -fx-background-color: #0a0a0a;
-    -fx-padding: 4 8;
-    -fx-border-color: #1a3557;
-    -fx-border-width: 1;
-    -fx-background-radius: 2;
-}
-
-.stat-small {
-    -fx-fill: #ffffff;
-    -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
 
