@@ -214,11 +214,11 @@ public class PantallaCarga {
                 controller.cargarPartidaEspecifica(idPartidaCargar);
             }
 
-            Scene scene = new Scene(root);
             Stage stage = (Stage) loadingTitle.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setFullScreen(true);
-            stage.show();
+            Scene scene = stage.getScene();
+            
+            // Usar setRoot en lugar de setScene para evitar parpadeos y que desaparezca el modo pantalla completa
+            scene.setRoot(root);
         } catch (Exception e) {
             e.printStackTrace();
         }

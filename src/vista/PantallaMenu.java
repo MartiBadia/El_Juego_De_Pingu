@@ -430,11 +430,9 @@ public class PantallaMenu {
             controller.setUsuario(usuarioLogueado);
             controller.setIdPartidaCargar(idPartida);
 
-            Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setFullScreen(true);
-            stage.show();
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
 
             controller.iniciarCarga();
         } catch (Exception e) {
@@ -639,11 +637,9 @@ public class PantallaMenu {
             controller.setUsuario(usuarioLogueado);
             controller.setPartidaNueva(partida);
 
-            Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setFullScreen(true);
-            stage.show();
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
 
             controller.iniciarCarga();
         } catch (Exception e) {

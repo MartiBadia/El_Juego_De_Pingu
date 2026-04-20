@@ -649,9 +649,9 @@ public class PantallaJuego {
     @FXML private void handleGoToMenu() {
         try {
             FXMLLoader l = new FXMLLoader(getClass().getResource("/resources/fxml/PantallaMenu.fxml"));
-            Scene s = new Scene(l.load());
             Stage st = (Stage) tablero.getScene().getWindow();
-            st.setScene(s); st.setFullScreen(true); st.show();
+            Scene s = st.getScene();
+            s.setRoot(l.load());
         } catch (Exception e) { e.printStackTrace(); }
     }
 

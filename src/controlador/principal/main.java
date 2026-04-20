@@ -13,7 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -24,6 +24,7 @@ public class Main extends Application {
 	    primaryStage.setScene(scene);
 	    primaryStage.setTitle("El Juego del Pingüino");
 	    primaryStage.centerOnScreen();
+	    primaryStage.setFullScreenExitHint("");
 	    primaryStage.setFullScreen(true);
 	    primaryStage.show();
 	}
