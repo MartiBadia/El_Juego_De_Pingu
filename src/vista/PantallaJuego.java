@@ -1,6 +1,7 @@
 package vista;
 
 import java.util.ArrayList;
+import javafx.application.Platform;
 
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
@@ -10,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -77,11 +79,11 @@ public class PantallaJuego {
     /** Dimensiones naturales de la imagen de fondo (tablero_pasarela.png). */
     /** Dimensiones virtuales para el mapeo de coordenadas (proporción del diseño). */
     private static final double IMG_W = 1000.0;
-    private static final double IMG_H = 850.0;
+    private static final double IMG_H = 1000.0;
 
     /** Tamaño visual de cada casilla y de cada ficha de jugador (px). */
-    private static final double CELL_SIZE  = 40.0;
-    private static final double TOKEN_SIZE = 38.0;
+    private static final double CELL_SIZE  = 34.0;
+    private static final double TOKEN_SIZE = 30.0;
 
     /**
      * Coordenadas del CENTRO de cada una de las 50 casillas
@@ -90,26 +92,23 @@ public class PantallaJuego {
      * en el espacio de la imagen original.
      */
     private static final double[][] PATH_IMG = {
-        // TRAMO 1: Superior (Y=215) - 10 casillas (Izquierda -> Derecha)
-        {180, 215}, {240, 215}, {300, 215}, {360, 215}, {420, 215}, {480, 215}, {540, 215}, {600, 215}, {660, 215}, {720, 215}, 
-        // CURVA 1: Enlace a derecha - 2 casillas
-        {780, 280}, {820, 360},
-        // TRAMO 2: Medio-Arriba (Y=445) - 10 casillas (Derecha -> Izquierda)
-        {720, 445}, {660, 445}, {600, 445}, {540, 445}, {480, 445}, {420, 445}, {360, 445}, {300, 445}, {240, 445}, {180, 445},
-        // CURVA 2: Enlace a izquierda - 2 casillas
-        {120, 510}, {100, 580},
-        // TRAMO 3: Medio-Abajo (Y=635) - 10 casillas (Izquierda -> Derecha)
-        {180, 635}, {240, 635}, {300, 635}, {360, 635}, {420, 635}, {480, 635}, {540, 635}, {600, 635}, {660, 635}, {720, 635},
-        // CURVA 3: Enlace a derecha - 2 casillas
-        {780, 710}, {820, 780},
-        // TRAMO 4: Inferior (Y=825) - 10 casillas (Derecha -> Izquierda)
-        {720, 825}, {660, 825}, {600, 825}, {540, 825}, {480, 825}, {420, 825}, {360, 825}, {300, 825}, {240, 825}, {180, 825},
-        // TRAMO 5: Final al Castillo (Izquierda -> Derecha) - 4 casillas
-        {250, 880}, {420, 900}, {620, 880}, {880, 775}
+        // 1-10
+        {245, 180}, {305, 180}, {442, 215}, {520, 215}, {598, 215}, {677, 215}, {755, 215}, {824, 245}, {889, 289}, {840, 349},
+        // 11-20
+        {779, 385}, {700, 385}, {622, 385}, {544, 385}, {465, 385}, {387, 385}, {309, 385}, {234, 396}, {170, 442}, {150, 491},
+        // 21-30
+        {204, 548}, {271, 575}, {349, 575}, {428, 575}, {506, 575}, {584, 575}, {663, 575}, {741, 575}, {820, 575}, {890, 590},
+        // 31-40
+        {931, 656}, {885, 699}, {816, 736}, {740, 745}, {661, 745}, {583, 745}, {505, 745}, {426, 745}, {348, 745}, {270, 745},
+        // 41-50
+        {194, 751}, {141, 809}, {205, 851}, {275, 880}, {353, 880}, {432, 880}, {510, 880}, {588, 880}, {667, 880}, {745, 880}
     };
 
     private ArrayList<ImageView> fichasPinguinos;
     private ArrayList<ImageView> fichasFocas;
+    private ArrayList<StackPane> celdasVisuales = new ArrayList<>();
+    private double lastW = -1, lastH = -1;
+	
     private Map<Jugador, VBox> iceCubesMap;
 
     // ══════════════════════════════════════════════════
@@ -120,6 +119,17 @@ public class PantallaJuego {
     private void initialize() {
         appendLog(null, "🐧 ¡Bienvenido a El Juego de Pingu!");
 
+        prepararFichas();
+
+        gestorPartida = new GestorPartida();
+
+        // RE-POSICIONAMIENTO RESPONSIVO:
+        // Si el tamaño del tablero cambia (ventana <-> pantalla completa), actualizamos todo.
+        tablero.widthProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
+        tablero.heightProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
+    }
+
+    private void prepararFichas() {
         fichasPinguinos = new ArrayList<>();
         fichasPinguinos.add(P1); fichasPinguinos.add(P2);
         fichasPinguinos.add(P3); fichasPinguinos.add(P4);
@@ -130,32 +140,56 @@ public class PantallaJuego {
 
         for (ImageView iv : fichasPinguinos) iv.setVisible(false);
         for (ImageView iv : fichasFocas)    iv.setVisible(false);
-
-        gestorPartida = new GestorPartida();
-
-        // RE-POSICIONAMIENTO RESPONSIVO:
-        // Si el tamaño del tablero cambia (ventana <-> pantalla completa), actualizamos todo.
-        tablero.widthProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
-        tablero.heightProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
     }
 
+    /** Redibuja o ajusta el tablero según el nuevo tamaño del panel. */
     private void actualizarTodoVisually() {
-        if (gestorPartida == null || gestorPartida.getPartida() == null) return;
+        double w = tablero.getWidth();
+        double h = tablero.getHeight();
         
-        // Reposicionar casillas
-        for (Node node : tablero.getChildren()) {
-            if (node.getStyleClass().contains("board-cell")) {
-                // El ID o el orden determina el índice de la casilla
-                // En nuestro caso, las casillas se crearon en orden, pero es mejor usar el orden inverso 
-                // ya que se añadieron con add(0, cell)
+        // Evitamos recalcular si el tamaño no ha cambiado realmente o es inválido
+        if (w <= 0 || h <= 0 || (Math.abs(w - lastW) < 0.1 && Math.abs(h - lastH) < 0.1)) return;
+        lastW = w; lastH = h;
+
+        // Usamos runLater para asegurar que el motor de layout de JavaFX haya terminado de propagar tamaños
+        Platform.runLater(() -> {
+            // Si ya hay celdas, solo las reposicionamos y escalamos
+            if (!celdasVisuales.isEmpty()) {
+                actualizarEscalaYPosicionDeElementos();
+            } else {
+                // Primera vez: construir
+                tablero.getChildren().clear();
+                celdasVisuales.clear();
+                prepararFichas();
+                construirTableroVisual();
+            }
+            actualizarPosicionesVisuales();
+        });
+    }
+
+    /** Escala y reposiciona los elementos existentes sin volver a crearlos. */
+    private void actualizarEscalaYPosicionDeElementos() {
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
+        double scaledSize = CELL_SIZE * scale;
+
+        // 1. Actualizar Celdas
+        for (int i = 0; i < celdasVisuales.size(); i++) {
+            StackPane cell = celdasVisuales.get(i);
+            posicionarEnCasilla(cell, i, CELL_SIZE);
+
+            // Actualizar imagen interna de la casilla si existe
+            for (Node child : cell.getChildren()) {
+                if (child instanceof ImageView) {
+                    ImageView iv = (ImageView) child;
+                    iv.setFitWidth(scaledSize);
+                    iv.setFitHeight(scaledSize);
+                } else if (child instanceof Text) {
+                    child.setStyle("-fx-font-size: " + (14 * scale) + "px;");
+                }
             }
         }
-        // Para mayor robustez, simplemente reconstruimos la capa visual si cambia el tamaño
-        // o mejor, iteramos y re-posicionamos.
-        
-        // La forma más segura y limpia es reconstruir el mapeo
-        construirTableroVisual();
-        actualizarPosicionesVisuales();
     }
 
     // ══════════════════════════════════════════════════
@@ -176,7 +210,7 @@ public class PantallaJuego {
             return new double[]{ imgX, imgY };
         }
 
-        // Lógica "contain": la imagen se escala al tamaño máximo posible sin recortarse
+        // Lógica "contain" base
         double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
 
         // Alineación "center center" (sincronizado con el CSS)
@@ -190,19 +224,43 @@ public class PantallaJuego {
         return new double[]{ bpX, bpY };
     }
 
-    /** Posiciona cualquier nodo en el centro de la casilla i. */
-    private void posicionarEnCasilla(Node node, int i, double nodeSize) {
+    /** Posiciona cualquier nodo en el centro de la casilla i, escalando el nodo según el tamaño del tablero. */
+    private void posicionarEnCasilla(Node node, int i, double baseSize) {
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
+        
+        double scaledSize = baseSize * scale;
+        if (node instanceof Region) {
+            Region r = (Region) node;
+            r.setPrefSize(scaledSize, scaledSize);
+            r.setMaxSize(scaledSize, scaledSize);
+            r.setMinSize(scaledSize, scaledSize);
+        }
+
         double[] pos = imageToPaneCoords(PATH_IMG[i][0], PATH_IMG[i][1]);
-        node.setLayoutX(pos[0] - nodeSize / 2.0);
-        node.setLayoutY(pos[1] - nodeSize / 2.0);
+        node.setLayoutX(pos[0] - scaledSize / 2.0);
+        node.setLayoutY(pos[1] - scaledSize / 2.0);
     }
 
-    /** Posiciona una ficha en su casilla con un pequeño offset por índice. */
+    /** Posiciona una ficha en su casilla con un pequeño offset por índice, escalando según el tablero. */
     private void posicionarFicha(ImageView ficha, int cellPos, int tokenOffset) {
         int safePos = Math.min(cellPos, PATH_IMG.length - 1);
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
+        
+        double scaledTokenSize = TOKEN_SIZE * scale;
+        ficha.setFitWidth(scaledTokenSize);
+        ficha.setFitHeight(scaledTokenSize);
+
         double[] pos = imageToPaneCoords(PATH_IMG[safePos][0], PATH_IMG[safePos][1]);
-        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + tokenOffset * 8.0);
-        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 - tokenOffset * 5.0);
+        // Offset también escalado
+        double offsetScale = 8.0 * scale;
+        double offsetVY = 5.0 * scale;
+
+        ficha.setLayoutX(pos[0] - scaledTokenSize / 2.0 + tokenOffset * offsetScale);
+        ficha.setLayoutY(pos[1] - scaledTokenSize / 2.0 - tokenOffset * offsetVY);
     }
 
     // ══════════════════════════════════════════════════
@@ -304,12 +362,17 @@ public class PantallaJuego {
         ArrayList<Casilla> casillas = gestorPartida.getPartida().getTablero().getCasillas();
         int maxPos = gestorPartida.getPartida().getTablero().getTamaño();
 
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
+        double scaledSize = CELL_SIZE * scale;
+
         for (int i = 0; i < maxPos; i++) {
             StackPane cell = new StackPane();
             cell.getStyleClass().add("board-cell");
-            cell.setPrefSize(CELL_SIZE, CELL_SIZE);
-            cell.setMaxSize(CELL_SIZE, CELL_SIZE);
-            cell.setMinSize(CELL_SIZE, CELL_SIZE);
+            cell.setPrefSize(scaledSize, scaledSize);
+            cell.setMaxSize(scaledSize, scaledSize);
+            cell.setMinSize(scaledSize, scaledSize);
 
             // Determinar tipo de casilla
             String tipo = "Normal";
@@ -333,23 +396,28 @@ public class PantallaJuego {
                 default:                imgFile = "casilla_normal.png";    break;
             }
 
-            ImageView iv = crearImagenCasilla(imgFile);
+            ImageView iv = crearImagenCasilla(imgFile, scaledSize);
             if (iv != null) cell.getChildren().add(iv);
 
             if (tipo.equals("Inicio")) {
                 Text t = new Text("START");
                 t.getStyleClass().add("start-title");
+                t.setStyle("-fx-font-size: " + (14 * scale) + "px;");
                 cell.getChildren().add(t);
             } else if (tipo.equals("Final")) {
                 Text t = new Text("META");
                 t.getStyleClass().add("finish-title");
+                t.setStyle("-fx-font-size: " + (14 * scale) + "px;");
                 cell.getChildren().add(t);
             }
 
             // Posición absoluta sobre la pasarela
             posicionarEnCasilla(cell, i, CELL_SIZE);
 
-            // Añadir detrás de las fichas
+            // Guardar referencia para redimensionado
+            celdasVisuales.add(cell);
+
+            // Añadir al tablero - nos aseguramos de que estén por debajo de los pingüinos
             tablero.getChildren().add(0, cell);
         }
 
@@ -371,12 +439,12 @@ public class PantallaJuego {
         for (ImageView iv : fichasFocas)     { iv.toFront(); iv.setMouseTransparent(true); }
     }
 
-    private ImageView crearImagenCasilla(String fileName) {
+    private ImageView crearImagenCasilla(String fileName, double size) {
         try {
             Image img = new Image(getClass().getResourceAsStream("/resources/images/casillas/" + fileName));
             ImageView iv = new ImageView(img);
-            iv.setFitWidth(CELL_SIZE);
-            iv.setFitHeight(CELL_SIZE);
+            iv.setFitWidth(size);
+            iv.setFitHeight(size);
             iv.setPreserveRatio(true);
             return iv;
         } catch (Exception e) { return null; }
@@ -496,10 +564,15 @@ public class PantallaJuego {
         double startX = ficha.getLayoutX() + ficha.getTranslateX();
         double startY = ficha.getLayoutY() + ficha.getTranslateY();
 
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
+        double scaledTokenSize = TOKEN_SIZE * scale;
+
         // Destino en coordenadas del pane
         double[] target = imageToPaneCoords(PATH_IMG[posNueva][0], PATH_IMG[posNueva][1]);
-        double newLayoutX = target[0] - TOKEN_SIZE / 2.0;
-        double newLayoutY = target[1] - TOKEN_SIZE / 2.0;
+        double newLayoutX = target[0] - scaledTokenSize / 2.0;
+        double newLayoutY = target[1] - scaledTokenSize / 2.0;
 
         // Mover lógicamente y reposicionar la ficha de forma invisible en el destino
         j.setPosicion(posNueva);
