@@ -33,8 +33,8 @@ public class GestorTablero {
         int totalCasillas = partida.getTablero().getTamaño();
 
         for (Jugador j : partida.getJugadores()) {
-            if (j.getPosicion() >= 49) {
-                // El primero que llega a la casilla 49 (la última) gana.
+            if (j.getPosicion() >= totalCasillas - 1) {
+                // El primero que llega a la última casilla gana.
                 partida.setFinalizada(true);
                 partida.setGanador(j);
                 System.out.println("¡" + j.getNombre() + " ha ganado la partida!");

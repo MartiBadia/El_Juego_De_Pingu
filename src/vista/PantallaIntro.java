@@ -34,11 +34,16 @@ public class PantallaIntro {
         fallbackImage.fitWidthProperty().bind(rootPane.widthProperty());
         fallbackImage.fitHeightProperty().bind(rootPane.heightProperty());
         
-        cargarVideo();
-
-        // Listener de teclado
+        // Listener de escena: cargamos el video solo cuando el rootPane esté en escena
         rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
+                // Ajustar el MediaView al tamaño de la pantalla
+                mediaView.fitWidthProperty().bind(rootPane.widthProperty());
+                mediaView.fitHeightProperty().bind(rootPane.heightProperty());
+                
+                cargarVideo();
+
+                // Listener de teclado
                 newScene.setOnKeyPressed(event -> {
                     if (event.getCode() == KeyCode.SPACE) {
                         if (videoFinished || mediaPlayer == null) {
@@ -60,39 +65,53 @@ public class PantallaIntro {
             if (resource != null) {
                 videoPath = resource.toExternalForm();
             } else {
-                // Fallback a ruta de sistema de archivos si no está en recursos
                 File f = new File("src/resources/video/pingu_intro.mp4");
-                if (f.exists()) {
-                    videoPath = f.toURI().toString();
-                }
+                if (!f.exists()) f = new File("resources/video/pingu_intro.mp4");
+                if (f.exists()) videoPath = f.toURI().toString();
             }
 
             if (videoPath != null) {
-                // Normalizar URI para evitar problemas con GStreamer
+                // Normalización de URI
+                if (videoPath.startsWith("file:/") && !videoPath.startsWith("file:///")) {
+                    videoPath = videoPath.replaceFirst("file:/", "file:///");
+                }
                 videoPath = videoPath.replace(" ", "%20");
                 
+                System.out.println("[INFO] Intentando cargar Media: " + videoPath);
+                
                 Media media = new Media(videoPath);
+                media.setOnError(() -> System.err.println("[ERROR] Error en el objeto Media: " + media.getError().getMessage()));
+                
                 mediaPlayer = new MediaPlayer(media);
                 mediaView.setMediaPlayer(mediaPlayer);
 
+                // Configurar eventos
+                mediaPlayer.setOnError(() -> {
+                    System.err.println("[ERROR] Error en MediaPlayer: " + mediaPlayer.getError().getMessage());
+                    showStartPrompt();
+                });
+
                 mediaPlayer.setOnEndOfMedia(this::showStartPrompt);
-                playerEvents(mediaPlayer);
-                mediaPlayer.play();
+                
+                // IMPORTANTE: Esperar a que el player esté listo antes de llamar a play
+                mediaPlayer.setOnReady(() -> {
+                    System.out.println("[INFO] MediaPlayer listo. Iniciando reproducción.");
+                    mediaPlayer.play();
+                });
+
             } else {
-                System.err.println("No se encontró el video en ninguna ubicación.");
+                System.err.println("[ERROR] No se encontró el video.");
                 showStartPrompt();
             }
         } catch (Exception e) {
-            System.err.println("Excepción cargando video: " + e.getMessage());
+            System.err.println("[ERROR] Fallo al inicializar carga: " + e.getMessage());
+            e.printStackTrace();
             showStartPrompt();
         }
     }
 
     private void playerEvents(MediaPlayer player) {
-        player.setOnError(() -> {
-            System.err.println("Error en video: " + player.getError().getMessage());
-            showStartPrompt();
-        });
+        // Redundante con los listeners configurados arriba, pero mantenemos por compatibilidad si es necesario
     }
 
     private void skipVideo() {

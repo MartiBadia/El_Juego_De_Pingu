@@ -95,11 +95,11 @@ public class PantallaJuego {
         //   11         12          13          14          15          16          17          18          19         20
         {798, 380}, {714, 388}, {629, 390}, {545, 376}, {461, 359}, {376, 342}, {291, 325}, {200, 340}, {130, 393}, {129, 468},
         //   21         22          23          24          25          26          27          28          29         30
-        {195, 528}, {275, 542}, {360, 542}, {446, 534}, {531, 525}, {617, 521}, {702, 510}, {785, 520}, {857, 560}, {877, 625},
+        {195, 528}, {275, 542}, {360, 542}, {446, 534}, {531, 525}, {617, 521}, {702, 510}, {805, 520}, {870, 560}, {883, 625},
         //   31         32          33          34          35          36          37          38          39         40
-        {809, 673}, {727, 694}, {641, 689}, {556, 677}, {470, 679}, {385, 684}, {299, 681}, {216, 687}, {145, 728}, {162, 797},
+        {809, 683}, {727, 694}, {641, 689}, {556, 677}, {470, 679}, {385, 684}, {299, 681}, {216, 687}, {145, 728}, {162, 797},
         //   41         42          43          44          45          46          47          48          49         50
-        {236, 831}, {322, 841}, {407, 845}, {493, 843}, {579, 843}, {664, 854}, {749, 865}, {835, 867}, {920, 867}, {1000, 840}
+        {236, 831}, {322, 841}, {407, 845}, {493, 838}, {579, 840}, {664, 854}, {749, 861}, {835, 863}, {920, 860}, {1000, 840}
     };
 
     private ArrayList<ImageView> fichasPinguinos;
@@ -307,11 +307,10 @@ public class PantallaJuego {
 
             // Determinar tipo de casilla
             String tipo = "Normal";
-            if      (i == 0)          tipo = "Inicio";
-            else if (i == maxPos - 1) tipo = "Final";
-            else {
-                for (Casilla c : casillas) {
-                    if (c.getPosicion() == i) { tipo = c.getClass().getSimpleName(); break; }
+            for (Casilla c : casillas) {
+                if (c.getPosicion() == i) { 
+                    tipo = c.getClass().getSimpleName(); 
+                    break; 
                 }
             }
 
@@ -323,21 +322,15 @@ public class PantallaJuego {
                 case "SueloQuebradizo": imgFile = "casilla_agrietada.png";  break;
                 case "Trineo":          imgFile = "casilla_trineo.png";     break;
                 case "Evento":          imgFile = "casilla_interrogante.png"; break;
+                case "CasillaSalida":   imgFile = "casilla_salida.png";     break;
+                case "CasillaMeta":     imgFile = "casilla_meta.png";       break;
                 default:                imgFile = "casilla_normal.png";     break;
             }
 
             ImageView iv = crearImagenCasilla(imgFile);
             if (iv != null) cell.getChildren().add(iv);
 
-            if (tipo.equals("Inicio")) {
-                Text t = new Text("START");
-                t.getStyleClass().add("start-title");
-                cell.getChildren().add(t);
-            } else if (tipo.equals("Final")) {
-                Text t = new Text("META");
-                t.getStyleClass().add("finish-title");
-                cell.getChildren().add(t);
-            }
+            // No añadimos texto extra ya que las nuevas imágenes ya son descriptivas
 
             // Posición absoluta sobre la pasarela
             posicionarEnCasilla(cell, i, CELL_SIZE);

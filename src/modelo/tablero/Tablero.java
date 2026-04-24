@@ -76,6 +76,10 @@ public class Tablero {
                 }
             }
         }
+        
+        // Añadir casillas de salida y meta explícitamente
+        casillas.add(new CasillaSalida(0));
+        casillas.add(new CasillaMeta(this.tamano - 1));
     }
 
     public void actualizarTablero() {
