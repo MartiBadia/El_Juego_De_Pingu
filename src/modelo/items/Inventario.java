@@ -50,10 +50,16 @@ public class Inventario {
     }
     
     public Item obtenerItemPorNombre(String nombre) {
-        for (Item i : lista) {
-            if (i.getNombre().equals(nombre)) return i;
+        Item encontrado = null;
+        int i = 0;
+        while (i < lista.size() && encontrado == null) {
+            Item item = lista.get(i);
+            if (item.getNombre().equals(nombre)) {
+                encontrado = item;
+            }
+            i++;
         }
-        return null;
+        return encontrado;
     }
 
     // Cuenta ítems de un tipo concreto por nombre

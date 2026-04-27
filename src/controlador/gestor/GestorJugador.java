@@ -10,6 +10,7 @@ import modelo.jugador.Pinguino;
 import modelo.tablero.Tablero;
 
 import java.util.Random;
+import java.util.ArrayList;
 
 public class GestorJugador {
 
@@ -21,19 +22,29 @@ public class GestorJugador {
 
 
     public void jugadorUsaItem(Pinguino p, String nombreItem) {
-        for (modelo.items.Item item : new java.util.ArrayList<>(p.getInventario().getLista())) {
-            if (item.getNombre().equals(nombreItem)) {
-                p.getInventario().quitarItem(item);
-                System.out.println(p.getNombre() + " usa: " + nombreItem);
-                
-                if (nombreItem.equals("Moto de Nieve")) {
-                    p.moverPosicion(20); // Efecto de la moto: avanza 20 casillas
-                    System.out.println(p.getNombre() + " ruge con la Moto de Nieve y avanza 20 casillas!");
-                }
-                return;
+        ArrayList<modelo.items.Item> listaItems = p.getInventario().getLista();
+        modelo.items.Item itemAUsar = null;
+        
+        int i = 0;
+        while (i < listaItems.size() && itemAUsar == null) {
+            modelo.items.Item it = listaItems.get(i);
+            if (it.getNombre().equals(nombreItem)) {
+                itemAUsar = it;
             }
+            i++;
         }
-        System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
+
+        if (itemAUsar != null) {
+            p.getInventario().quitarItem(itemAUsar);
+            System.out.println(p.getNombre() + " usa: " + nombreItem);
+            
+            if (nombreItem.equals("Moto de Nieve")) {
+                p.moverPosicion(20); // Efecto de la moto: avanza 20 casillas
+                System.out.println(p.getNombre() + " ruge con la Moto de Nieve y avanza 20 casillas!");
+            }
+        } else {
+            System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
+        }
     }
 
     public void jugadorUsaNuevo(Pinguino p, String nombreItem) {

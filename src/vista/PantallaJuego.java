@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
@@ -81,7 +82,7 @@ public class PantallaJuego {
 
     /** Tamaño visual de cada casilla y de cada ficha de jugador (px). */
     private static final double CELL_SIZE  = 50.0;
-    private static final double TOKEN_SIZE = 40.0;
+    private static final double TOKEN_SIZE = 45.0;
 
     /**
      * Coordenadas del CENTRO de cada una de las 50 casillas
@@ -105,6 +106,7 @@ public class PantallaJuego {
     private ArrayList<ImageView> fichasPinguinos;
     private ArrayList<ImageView> fichasFocas;	
     private Map<Jugador, VBox> iceCubesMap;
+    private Map<Jugador, Map<String, Label>> rosterLabelsMap;
 
     // ══════════════════════════════════════════════════
     //  INICIALIZACIÓN
@@ -191,12 +193,27 @@ public class PantallaJuego {
         node.setLayoutY(pos[1] - nodeSize / 2.0);
     }
 
-    /** Posiciona una ficha en su casilla con un pequeño offset por índice. */
+    /** Posiciona una ficha en su casilla con una mejor separación entre jugadores. */
     private void posicionarFicha(ImageView ficha, int cellPos, int tokenOffset) {
         int safePos = Math.min(cellPos, PATH_IMG.length - 1);
         double[] pos = imageToPaneCoords(PATH_IMG[safePos][0], PATH_IMG[safePos][1]);
-        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + tokenOffset * 6.0);
-        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 - tokenOffset * 4.0);
+
+        // Lógica de separación: distribuimos las fichas en una pequeña cuadrícula/cruz
+        double offsetX = 0;
+        double offsetY = 0;
+        double spread = 8.0; // Distancia de separación mínima
+
+        switch (tokenOffset % 4) {
+            case 0: offsetX = -spread; offsetY = -spread/1.5; break;
+            case 1: offsetX = spread;  offsetY = -spread/1.5; break;
+            case 2: offsetX = -spread; offsetY = spread/1.5;  break;
+            case 3: offsetX = spread;  offsetY = spread/1.5;  break;
+        }
+
+        ficha.setFitWidth(TOKEN_SIZE);
+        ficha.setFitHeight(TOKEN_SIZE);
+        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + offsetX);
+        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 + offsetY);
     }
 
     // ══════════════════════════════════════════════════
@@ -221,7 +238,7 @@ public class PantallaJuego {
     }
 
     private String getPlayerColorHex(Jugador j) {
-        if (j instanceof modelo.jugador.Foca) return "#00ffa3";
+        if (j instanceof modelo.jugador.Foca) return "#ff1744"; // Foca = Rojo brillante
         String color = j.getColor() != null ? j.getColor().toLowerCase() : "";
         if (j.getNombre().toLowerCase().contains("1") || color.contains("azul"))    return "#00e5ff";
         if (j.getNombre().toLowerCase().contains("2") || color.contains("rojo"))    return "#ff1744";
@@ -230,6 +247,16 @@ public class PantallaJuego {
             case "amarillo": return "#ffd740";
             default:         return "#ffffff";
         }
+    }
+
+    private void aplicarEfectoBrillo(ImageView iv, Jugador j) {
+        String hex = getPlayerColorHex(j);
+        javafx.scene.effect.DropShadow ds = new javafx.scene.effect.DropShadow();
+        // Reducimos la opacidad para que no sea tan luminoso
+        ds.setColor(Color.web(hex).deriveColor(0, 1, 1, 0.6));
+        ds.setRadius(10);
+        ds.setSpread(0.3);
+        iv.setEffect(ds);
     }
 
     // ══════════════════════════════════════════════════
@@ -270,20 +297,73 @@ public class PantallaJuego {
         if (rosterContainer == null) return;
         rosterContainer.getChildren().clear();
         iceCubesMap = new HashMap<>();
+        rosterLabelsMap = new HashMap<>();
 
         for (Jugador j : gestorPartida.getPartida().getJugadores()) {
-            VBox cube = new VBox(5);
-            cube.getStyleClass().add("ice-cube");
+            // Contenedor principal: VBox vertical
+            VBox card = new VBox(12);
+            card.getStyleClass().add("ice-cube");
+            card.setMinWidth(200);
+            card.setAlignment(javafx.geometry.Pos.CENTER);
 
+            // FILA SUPERIOR: HBox para Skin (Izquierda) e Inventario (Derecha)
+            javafx.scene.layout.HBox topRow = new javafx.scene.layout.HBox(15);
+            topRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // 1. Skin del Jugador
             ImageView img = new ImageView(new Image("/resources/images/skins/" + j.getSkin()));
-            img.setFitWidth(50); img.setFitHeight(50); img.setPreserveRatio(true);
+            img.setFitWidth(55); img.setFitHeight(55); img.setPreserveRatio(true);
 
-            Label nameLabel = new Label(j.getNombre());
+            // 2. Rejilla de mini-inventario (A LA DERECHA de la skin)
+            GridPane miniInv = new GridPane();
+            miniInv.setHgap(10); miniInv.setVgap(4);
+            miniInv.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            
+            Map<String, Label> jLabels = new HashMap<>();
+            miniInv.add(crearMiniEtiqueta("🐟", "Pez", jLabels), 0, 0);
+            miniInv.add(crearMiniEtiqueta("❄️", "Bola de Nieve", jLabels), 1, 0);
+            miniInv.add(crearMiniEtiqueta("🏎️", "Moto de Nieve", jLabels), 0, 1);
+            miniInv.add(crearMiniEtiqueta("⏩", "Dado Rapido", jLabels), 1, 1);
+            miniInv.add(crearMiniEtiqueta("⏪", "Dado Lento", jLabels), 0, 2);
+
+            topRow.getChildren().addAll(img, miniInv);
+
+            // SECCIÓN INFERIOR: Nombre centrado
+            Label nameLabel = new Label(j.getNombre().toUpperCase());
             nameLabel.getStyleClass().add("ice-cube-label");
+            nameLabel.setMaxWidth(Double.MAX_VALUE);
+            nameLabel.setAlignment(javafx.geometry.Pos.CENTER);
 
-            cube.getChildren().addAll(img, nameLabel);
-            iceCubesMap.put(j, cube);
-            rosterContainer.getChildren().add(cube);
+            card.getChildren().addAll(topRow, nameLabel);
+
+            iceCubesMap.put(j, card);
+            rosterLabelsMap.put(j, jLabels);
+            rosterContainer.getChildren().add(card);
+        }
+        actualizarRosterInventarios();
+    }
+
+    private Label crearMiniEtiqueta(String icono, String tipo, Map<String, Label> map) {
+        Label l = new Label(icono + " 0");
+        l.setStyle("-fx-font-size: 11px; -fx-text-fill: #a8c8e8; -fx-font-weight: bold;");
+        map.put(tipo, l);
+        return l;
+    }
+
+    private void actualizarRosterInventarios() {
+        if (rosterLabelsMap == null) return;
+        for (Jugador j : gestorPartida.getPartida().getJugadores()) {
+            if (j instanceof Pinguino) {
+                Map<String, Label> labels = rosterLabelsMap.get(j);
+                if (labels != null) {
+                    modelo.items.Inventario inv = ((Pinguino) j).getInventario();
+                    labels.get("Pez").setText("🐟 " + inv.contarPorTipo("Pez"));
+                    labels.get("Bola de Nieve").setText("❄️ " + inv.contarPorTipo("Bola de Nieve"));
+                    labels.get("Moto de Nieve").setText("🏎️ " + inv.contarPorTipo("Moto de Nieve"));
+                    labels.get("Dado Rapido").setText("⏩ " + inv.contarPorTipo("Dado Rapido"));
+                    labels.get("Dado Lento").setText("⏪ " + inv.contarPorTipo("Dado Lento"));
+                }
+            }
         }
     }
 
@@ -307,11 +387,15 @@ public class PantallaJuego {
 
             // Determinar tipo de casilla
             String tipo = "Normal";
-            for (Casilla c : casillas) {
+            boolean encontrada = false;
+            int idxCasilla = 0;
+            while (idxCasilla < casillas.size() && !encontrada) {
+                Casilla c = casillas.get(idxCasilla);
                 if (c.getPosicion() == i) { 
                     tipo = c.getClass().getSimpleName(); 
-                    break; 
+                    encontrada = true; 
                 }
+                idxCasilla++;
             }
 
             // Imagen de la casilla
@@ -344,12 +428,16 @@ public class PantallaJuego {
         int pingIdx = 0, focaIdx = 0;
         for (Jugador j : jugadores) {
             if (j instanceof Pinguino) {
-                fichasPinguinos.get(pingIdx).setImage(new Image("/resources/images/skins/" + j.getSkin()));
-                fichasPinguinos.get(pingIdx).setVisible(true);
+                ImageView iv = fichasPinguinos.get(pingIdx);
+                iv.setImage(new Image("/resources/images/skins/" + j.getSkin()));
+                iv.setVisible(true);
+                aplicarEfectoBrillo(iv, j);
                 pingIdx++;
             } else {
-                fichasFocas.get(focaIdx).setImage(new Image("/resources/images/skins/" + j.getSkin()));
-                fichasFocas.get(focaIdx).setVisible(true);
+                ImageView iv = fichasFocas.get(focaIdx);
+                iv.setImage(new Image("/resources/images/skins/" + j.getSkin()));
+                iv.setVisible(true);
+                aplicarEfectoBrillo(iv, j);
                 focaIdx++;
             }
         }
@@ -380,6 +468,7 @@ public class PantallaJuego {
                     ? fichasPinguinos.get(pIdx++)
                     : fichasFocas.get(fIdx++);
             posicionarFicha(ficha, j.getPosicion(), tokenOffset++);
+            aplicarEfectoBrillo(ficha, j);
             ficha.setTranslateX(0);
             ficha.setTranslateY(0);
             ficha.toFront();
@@ -417,6 +506,7 @@ public class PantallaJuego {
             rapido_t.setText(""); lento_t.setText(""); peces_t.setText("");
             nieve_t.setText(""); moto_t.setText("");
         }
+        actualizarRosterInventarios();
     }
 
     private void actualizarLabelTurno() {
@@ -514,17 +604,29 @@ public class PantallaJuego {
 
         if (j instanceof Pinguino) {
             pTarget = (Pinguino) j;
-            for (Jugador item : gestorPartida.getPartida().getJugadores()) {
+            ArrayList<Jugador> listaJugadores = gestorPartida.getPartida().getJugadores();
+            boolean focaEncontrada = false;
+            int idx = 0;
+            while (idx < listaJugadores.size() && !focaEncontrada) {
+                Jugador item = listaJugadores.get(idx);
                 if (item instanceof modelo.jugador.Foca && item.getPosicion() == targetPos) {
-                    fTarget = (modelo.jugador.Foca) item; break;
+                    fTarget = (modelo.jugador.Foca) item; 
+                    focaEncontrada = true;
                 }
+                idx++;
             }
         } else if (j instanceof modelo.jugador.Foca) {
             fTarget = (modelo.jugador.Foca) j;
-            for (Jugador item : gestorPartida.getPartida().getJugadores()) {
+            ArrayList<Jugador> listaJugadores = gestorPartida.getPartida().getJugadores();
+            boolean pinguinoEncontrado = false;
+            int idx = 0;
+            while (idx < listaJugadores.size() && !pinguinoEncontrado) {
+                Jugador item = listaJugadores.get(idx);
                 if (item instanceof Pinguino && item.getPosicion() == targetPos) {
-                    pTarget = (Pinguino) item; break;
+                    pTarget = (Pinguino) item; 
+                    pinguinoEncontrado = true;
                 }
+                idx++;
             }
         }
 
@@ -574,47 +676,71 @@ public class PantallaJuego {
     private void mostrarAnimacionTurno(Jugador j, Runnable onFinish) {
         if (turnAnimationOverlay == null) { onFinish.run(); return; }
 
-        turnAnimationText.setText("¡Es el turno de " + j.getNombre() + "!");
+        turnAnimationText.setText("¡Turno de " + j.getNombre() + "!");
         turnAnimationSkin.setImage(new Image("/resources/images/skins/" + j.getSkin()));
+        
+        // Setup inicial transparente y escalado
+        turnAnimationOverlay.setOpacity(0);
         turnAnimationOverlay.setVisible(true);
         turnAnimationOverlay.toFront();
+        
+        turnAnimationSkin.setScaleX(1.8);
+        turnAnimationSkin.setScaleY(1.8);
+        turnAnimationSkin.setTranslateX(0); // Asegurar que esté centrado
+        
+        turnAnimationText.setTranslateY(30);
+        turnAnimationText.setOpacity(0);
 
-        ScaleTransition stIn = new ScaleTransition(Duration.millis(400), turnAnimationSkin);
-        stIn.setFromX(0); stIn.setFromY(0);
-        stIn.setToX(1.3); stIn.setToY(1.3);
-        stIn.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        // 1. Fundido suave del fondo
+        javafx.animation.FadeTransition fadeBg = new javafx.animation.FadeTransition(Duration.millis(400), turnAnimationOverlay);
+        fadeBg.setToValue(1.0);
 
-        javafx.animation.TranslateTransition ttJump =
-                new javafx.animation.TranslateTransition(Duration.millis(250), turnAnimationSkin);
-        ttJump.setByY(-60); ttJump.setAutoReverse(true); ttJump.setCycleCount(4);
+        // 2. Zoom out suave (Cinematic Focus)
+        ScaleTransition zoomOut = new ScaleTransition(Duration.millis(700), turnAnimationSkin);
+        zoomOut.setToX(1.0); zoomOut.setToY(1.0);
+        zoomOut.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
 
-        ScaleTransition stBounce = new ScaleTransition(Duration.millis(250), turnAnimationSkin);
-        stBounce.setToX(1.1); stBounce.setToY(1.1);
-        stBounce.setAutoReverse(true); stBounce.setCycleCount(4);
+        // 3. Entrada del texto (Slide + Fade)
+        javafx.animation.FadeTransition fadeText = new javafx.animation.FadeTransition(Duration.millis(500), turnAnimationText);
+        fadeText.setDelay(Duration.millis(200));
+        fadeText.setToValue(1.0);
+        
+        javafx.animation.TranslateTransition slideText = new javafx.animation.TranslateTransition(Duration.millis(500), turnAnimationText);
+        slideText.setDelay(Duration.millis(200));
+        slideText.setToY(0);
+        slideText.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
 
-        stIn.setOnFinished(e -> { ttJump.play(); stBounce.play(); });
-        ttJump.setOnFinished(e -> {
-            javafx.animation.PauseTransition pause =
-                    new javafx.animation.PauseTransition(Duration.millis(600));
-            pause.setOnFinished(ev -> { turnAnimationOverlay.setVisible(false); onFinish.run(); });
-            pause.play();
+        // 4. Salida elegante
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(1200));
+        javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(Duration.millis(400), turnAnimationOverlay);
+        
+        pause.setOnFinished(e -> fadeOut.play());
+        fadeOut.setOnFinished(e -> {
+            turnAnimationOverlay.setVisible(false);
+            onFinish.run();
         });
-        stIn.play();
+
+        // Iniciar orquestación
+        fadeBg.play();
+        zoomOut.play();
+        fadeText.play();
+        slideText.play();
+        pause.play();
     }
 
     private void jugarTurnoFoca() {
         modelo.jugador.Foca foca = (modelo.jugador.Foca) gestorPartida.getPartida().getJugadorActual();
         appendLog(foca, "Turno de la IA...");
-        new java.util.Timer().schedule(new java.util.TimerTask() {
-            @Override public void run() {
-                javafx.application.Platform.runLater(() -> {
-                    int avance = gestorPartida.tirarDado(foca);
-                    dadoResultText.setText("Foca tira: " + avance);
-                    appendLog(foca, "tira el dado: " + avance);
-                    iniciarMovimientoAnimado(foca, avance);
-                });
-            }
-        }, 1000);
+        
+        // Usamos PauseTransition en lugar de Timer para no crear hilos externos (más limpio para primero)
+        javafx.animation.PauseTransition pausa = new javafx.animation.PauseTransition(Duration.seconds(1));
+        pausa.setOnFinished(e -> {
+            int avance = gestorPartida.tirarDado(foca);
+            dadoResultText.setText("Foca tira: " + avance);
+            appendLog(foca, "tira el dado: " + avance);
+            iniciarMovimientoAnimado(foca, avance);
+        });
+        pausa.play();
     }
 
     private void mostrarFinDePartida() {

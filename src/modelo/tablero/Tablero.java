@@ -20,10 +20,21 @@ public class Tablero {
 
     // Obtiene la casilla que corresponde a una posición concreta del jugador
     public Casilla getCasillaEnPosicion(int posicion) {
-        for (Casilla c : casillas) {
-            if (c.getPosicion() == posicion) return c;
+        Casilla resultado = null;
+        int i = 0;
+        while (i < casillas.size() && resultado == null) {
+            Casilla c = casillas.get(i);
+            if (c.getPosicion() == posicion) {
+                resultado = c;
+            }
+            i++;
         }
-        return new CasillaNormal(posicion); // Casilla normal (instancia de CasillaNormal)
+        
+        if (resultado == null) {
+            resultado = new CasillaNormal(posicion);
+        }
+        
+        return resultado;
     }
 
     // --- SETTER ---

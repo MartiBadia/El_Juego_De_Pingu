@@ -281,43 +281,18 @@
 }
 
 /* =================== FICHAS / TOKENS =================== */
-.player {
-    -fx-stroke: #e8f4fd;
-    -fx-stroke-width: 2.5;
-    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.6), 10, 0.4, 0, 2);
+.player, .foca {
+    /* Los efectos se aplican dinámicamente desde Java para mayor precisión de color */
+    -fx-cursor: default;
 }
 
-.foca {
-    -fx-stroke: #f87171;
-    -fx-stroke-width: 2.5;
-    -fx-fill: #7f1d1d;
-    -fx-effect: dropshadow(gaussian, rgba(248, 113, 113, 0.6), 10, 0.4, 0, 2);
-}
-
-/* Colores por jugador */
-#P1 {
-    -fx-fill: #0ea5e9;
-}
-
-/* Azul hielo */
-#P2 {
-    -fx-fill: #f97316;
-}
-
-/* Naranja ártico */
-#P3 {
-    -fx-fill: #22c55e;
-}
-
-/* Verde aurora */
-#P4 {
-    -fx-fill: #facc15;
-}
-
-/* Amarillo sol polar */
-#PFoca {
-    -fx-fill: #7f1d1d;
-}
+/* Colores por jugador (Se mantienen como referencia o para otros usos, 
+   aunque el brillo principal es dinámico en Java) */
+#P1 { -fx-opacity: 1.0; }
+#P2 { -fx-opacity: 1.0; }
+#P3 { -fx-opacity: 1.0; }
+#P4 { -fx-opacity: 1.0; }
+#PFoca { -fx-opacity: 1.0; }
 
 /* Rojo oscuro – Foca villana */
 
@@ -330,27 +305,31 @@
 
 /* =================== CUBOS DE HIELO (ROSTER) =================== */
 .ice-cube {
-    -fx-background-color: #000000;
-    -fx-border-color: #1a3557 #0a0a0a #0a0a0a #1a3557;
+    -fx-background-color: rgba(10, 22, 40, 0.8);
+    -fx-border-color: #1a4a72;
     -fx-border-width: 2;
-    -fx-border-radius: 0;
-    -fx-background-radius: 0;
-    -fx-padding: 8;
-    -fx-alignment: center;
-    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.9), 0, 0, 3, 3);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 12;
+    -fx-alignment: TOP_CENTER;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 12, 0, 0, 6);
 }
 
 .ice-cube-active {
-    -fx-background-color: #0a1010;
-    -fx-border-color: #4ade80 #022c22 #022c22 #4ade80;
-    -fx-border-width: 3;
+    -fx-background-color: rgba(26, 74, 114, 0.95);
+    -fx-border-color: #00e5ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.5), 20, 0, 0, 0);
 }
 
 .ice-cube-label {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #e8f4fd;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 3, 0, 0, 1);
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #00e5ff;
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
 }
 
 /* =================== ANIMACIÓN TURNO =================== */

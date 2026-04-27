@@ -54,14 +54,14 @@
               maxWidth="1.7976931348623157E308">
 
             <!-- Player tokens – positioned dynamically -->
-            <ImageView fx:id="P1"    id="P1"    fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="P2"    id="P2"    fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="P3"    id="P3"    fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="P4"    id="P4"    fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="PFoca"  id="PFoca"  fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
-            <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="38" fitHeight="38" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="P1"    id="P1"    fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="P2"    id="P2"    fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="P3"    id="P3"    fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="P4"    id="P4"    fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="PFoca"  id="PFoca"  fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="PFoca2" id="PFoca2" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="PFoca3" id="PFoca3" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
+            <ImageView fx:id="PFoca4" id="PFoca4" fitWidth="45" fitHeight="45" preserveRatio="true" visible="false"/>
         </Pane>
     </center>
 
@@ -80,14 +80,16 @@
                         maxWidth="Infinity" styleClass="primary" />
             </VBox>
 
-            <!-- Jugadores -->
+            <!-- Eventos -->
             <VBox spacing="6" styleClass="card" VBox.vgrow="ALWAYS">
-                <Label text="👥  Jugadores" styleClass="card-title" />
-                <HBox fx:id="rosterContainer" alignment="CENTER" spacing="6"
-                      VBox.vgrow="ALWAYS">
-                    <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
-                    <!-- Se llena dinámicamente -->
-                </HBox>
+                <Label text="📋  Eventos" styleClass="card-title"/>
+                <ScrollPane fx:id="eventosScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                            styleClass="objects-scroll" VBox.vgrow="ALWAYS">
+                    <content>
+                        <javafx.scene.text.TextFlow fx:id="eventosContenedor"
+                                      styleClass="events" prefWidth="200" />
+                    </content>
+                </ScrollPane>
             </VBox>
 
         </VBox>
@@ -137,16 +139,13 @@
                 </GridPane>
             </VBox>
 
-            <!-- Eventos -->
+            <!-- Jugadores -->
             <VBox spacing="6" styleClass="card" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308">
-                <Label text="📋  Eventos" styleClass="card-title"/>
-                <ScrollPane fx:id="eventosScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-                            styleClass="objects-scroll" prefHeight="100" VBox.vgrow="ALWAYS">
-                    <content>
-                        <javafx.scene.text.TextFlow fx:id="eventosContenedor"
-                                      styleClass="events" prefWidth="220" />
-                    </content>
-                </ScrollPane>
+                <Label text="👥  Jugadores" styleClass="card-title" />
+                <HBox fx:id="rosterContainer" alignment="CENTER" spacing="6" VBox.vgrow="ALWAYS">
+                    <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+                    <!-- Se llena dinámicamente -->
+                </HBox>
             </VBox>
 
         </HBox>
