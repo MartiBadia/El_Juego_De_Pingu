@@ -46,51 +46,138 @@ public class Tablero {
         casillas.add(c);
     }
 
-    
     public void generarTableroAleatorio() {
         casillas.clear();
         this.tamano = TAMANO_MINIMO; // Exactamente 50 casillas.
 
-        int ultimoAgujeroPos = 0; // Referencia para el retroceso de Agujeros y Suelos
+        int ultimoAgujeroPos = 0; 
+        
+        int[] ultimaPosTipo = {-10, -10, -10, -10, -10}; 
+        int countOsos = 0;
+        int countAgujeros = 0;
+        int countTrineos = 0;
+        int countEventos = 0;
 
         for (int i = 1; i < this.tamano - 1; i++) {
-            // Probabilidad de casilla especial (35%)
             if (Math.random() < 0.35) {
-                int tipo = (int)(Math.random() * 6);
-                Casilla c = null;
-
-                switch (tipo) {
-                    case 0: // Oso 
-                        c = new Oso(i);
-                        break;
-                    case 1: // Agujero 
-                        c = new Agujero(i, ultimoAgujeroPos);
-                        ultimoAgujeroPos = i; // Este pasa a ser el anterior para el siguiente
-                        break;
-                    case 2: // Trineo
-                        c = new Trineo(i);
-                        break;
-                    case 3: // Evento
-                        c = new Evento(i);
-                        break;
-                    case 4: // Suelo Quebradizo
-                        c = new SueloQuebradizo(i);
-                        break;
-                    case 5: // Casilla normal por ahora (antes Moto de Nieve)
-                        c = new CasillaNormal(i);
-                        break;
-                    
+                ArrayList<Integer> tiposDisponibles = new ArrayList<>();
+                for (int t = 0; t < 5; t++) {
+                    if (i - ultimaPosTipo[t] < 4) continue;
+                    if (t == 0 && countOsos >= 3) continue;
+                    tiposDisponibles.add(t);
                 }
+                tiposDisponibles.add(5);
 
-                if (c != null) {
-                    casillas.add(c);
+                if (!tiposDisponibles.isEmpty()) {
+                    int tipo = tiposDisponibles.get((int)(Math.random() * tiposDisponibles.size()));
+                    Casilla c = null;
+
+                    switch (tipo) {
+                        case 0: 
+                            c = new Oso(i);
+                            ultimaPosTipo[0] = i;
+                            countOsos++;
+                            break;
+                        case 1: 
+                            c = new Agujero(i, ultimoAgujeroPos);
+                            ultimoAgujeroPos = i;
+                            ultimaPosTipo[1] = i;
+                            countAgujeros++;
+                            break;
+                        case 2: 
+                            c = new Trineo(i);
+                            ultimaPosTipo[2] = i;
+                            countTrineos++;
+                            break;
+                        case 3: 
+                            c = new Evento(i);
+                            ultimaPosTipo[3] = i;
+                            countEventos++;
+                            break;
+                        case 4: 
+                            c = new SueloQuebradizo(i);
+                            ultimaPosTipo[4] = i;
+                            break;
+                        case 5: 
+                            c = new CasillaNormal(i);
+                            break;
+                    }
+                    if (c != null) casillas.add(c);
                 }
             }
         }
+
+        // --- ASEGURAR MÍNIMOS ---
+        asegurarMinimo(countOsos, 1, "Oso");        // Min 1 Oso
+        asegurarMinimo(countTrineos, 4, "Trineo");   // Min 4 Trineos
+        asegurarMinimo(countEventos, 4, "Evento");   // Min 4 Eventos
+        asegurarMinimo(countAgujeros, 2, "Agujero"); // Min 2 Agujeros
+
+        // Ordenar casillas por posición para que los Agujeros funcionen bien
+        casillas.sort((c1, c2) -> Integer.compare(c1.getPosicion(), c2.getPosicion()));
         
-        // Añadir casillas de salida y meta explícitamente
+        // Re-vincular Agujeros para que apunten al anterior correctamente
+        int prevAgujero = 0;
+        for (Casilla c : casillas) {
+            if (c instanceof Agujero) {
+                ((Agujero)c).setPosicionAgujeroAnterior(prevAgujero);
+                prevAgujero = c.getPosicion();
+            }
+        }
+        
         casillas.add(new CasillaSalida(0));
         casillas.add(new CasillaMeta(this.tamano - 1));
+    }
+
+    private void asegurarMinimo(int actual, int minimo, String tipo) {
+        int count = 0;
+        // Contar cuántos hay realmente (por si acaso los parámetros 'actual' no están actualizados)
+        for(Casilla c : casillas) {
+            if (tipo.equals("Oso") && c instanceof Oso) count++;
+            if (tipo.equals("Trineo") && c instanceof Trineo) count++;
+            if (tipo.equals("Evento") && c instanceof Evento) count++;
+            if (tipo.equals("Agujero") && c instanceof Agujero) count++;
+        }
+
+        while (count < minimo) {
+            int randomPos = 1 + (int)(Math.random() * (this.tamano - 2));
+            boolean ocupada = false;
+            for (Casilla c : casillas) {
+                if (c.getPosicion() == randomPos) {
+                    ocupada = true;
+                    break;
+                }
+            }
+
+            if (!ocupada) {
+                boolean distanciaOk = true;
+                for (Casilla c : casillas) {
+                    boolean mismoTipo = false;
+                    if (tipo.equals("Oso") && c instanceof Oso) mismoTipo = true;
+                    if (tipo.equals("Trineo") && c instanceof Trineo) mismoTipo = true;
+                    if (tipo.equals("Evento") && c instanceof Evento) mismoTipo = true;
+                    if (tipo.equals("Agujero") && c instanceof Agujero) mismoTipo = true;
+                    
+                    if (mismoTipo && Math.abs(c.getPosicion() - randomPos) < 4) {
+                        distanciaOk = false;
+                        break;
+                    }
+                }
+
+                if (distanciaOk) {
+                    Casilla nueva = null;
+                    if (tipo.equals("Oso")) nueva = new Oso(randomPos);
+                    if (tipo.equals("Trineo")) nueva = new Trineo(randomPos);
+                    if (tipo.equals("Evento")) nueva = new Evento(randomPos);
+                    if (tipo.equals("Agujero")) nueva = new Agujero(randomPos, 0); // Se re-vinculará después
+                    
+                    if (nueva != null) {
+                        casillas.add(nueva);
+                        count++;
+                    }
+                }
+            }
+        }
     }
 
     public void actualizarTablero() {

@@ -41,28 +41,6 @@
 
         <top>
             <VBox alignment="TOP_CENTER">
-                <MenuBar styleClass="menu-bar">
-                    <menus>
-                        <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
-                            <items>
-                                <MenuItem fx:id="newGame" mnemonicParsing="false" text="New" />
-                                <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem fx:id="saveGame" mnemonicParsing="false" text="Save" />
-                                <MenuItem fx:id="loadGame" mnemonicParsing="false" text="Load" />
-                                <SeparatorMenuItem mnemonicParsing="false" />
-                                <MenuItem fx:id="quitGame" mnemonicParsing="false" text="Quit" />
-                            </items>
-                        </Menu>
-                        <Menu fx:id="languageMenu" mnemonicParsing="false" text="🌍 Idioma">
-                            <items>
-                                <MenuItem onAction="#changeLanguageES" text="Castellano" />
-                                <MenuItem onAction="#changeLanguageCA" text="Català" />
-                                <MenuItem onAction="#changeLanguageEN" text="English" />
-                            </items>
-                        </Menu>
-                    </menus>
-                </MenuBar>
-
                 <!-- LOGO DEL TÍTULO GRAFICO -->
                 <ImageView fx:id="gameTitleImage" fitWidth="600" preserveRatio="true">
                     <Image url="/resources/images/fondos/titulo_pingu.png"/>
@@ -125,6 +103,7 @@
                         </items>
                     </javafx.scene.control.MenuButton>
                     <Button fx:id="logoutBtn" text="🚪  Cerrar Sesión" onAction="#handleLogout" maxWidth="Infinity" styleClass="danger" prefHeight="50"/>
+                    <Button fx:id="audioConfigBtn" text="🔊  Configurar Audio" onAction="#showAudioCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
 
                     <Region prefHeight="10"/>
                     <Label fx:id="optionsHint" text="Elige una opción para comenzar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
@@ -230,6 +209,29 @@
                     <Region prefHeight="10"/>
 
                     <Button fx:id="loadBackBtn" text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" styleClass="secondary"/>
+                </VBox>
+
+                <!-- CARD DE CONFIGURACIÓN DE AUDIO -->
+                <VBox fx:id="audioCard" spacing="16" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="30" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label text="AJUSTES DE AUDIO" styleClass="card-title"/>
+                    <Region prefHeight="10"/>
+
+                    <VBox spacing="10" alignment="CENTER_LEFT">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label fx:id="volumeIconLabel" text="🔊" style="-fx-font-size: 20px;"/>
+                            <Label text="Volumen Música" styleClass="field-label"/>
+                        </HBox>
+                        <javafx.scene.control.Slider fx:id="volumeSlider" min="0" max="1" value="0.5" blockIncrement="0.1" majorTickUnit="0.2" showTickMarks="true" />
+                    </VBox>
+
+                    <Button fx:id="muteButton" text="🔇 Silenciar" onAction="#handleMute" maxWidth="Infinity" styleClass="secondary"/>
+                    
+                    <Region prefHeight="10"/>
+                    <Button text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" styleClass="primary"/>
                 </VBox>
             </StackPane>
         </center>

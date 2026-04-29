@@ -35,22 +35,20 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.Locale;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 public class PantallaMenu {
 
     private static Connection conexionBBDD;
     private static String usuarioLogueado; 
+    private static MediaPlayer musicPlayer;
 
     @FXML private StackPane rootPane;
     @FXML private BorderPane mainContent;
     @FXML private ImageView gameTitleImage;
     @FXML private ImageView backgroundImage;
     @FXML private Canvas snowCanvas;
-
-    @FXML private MenuItem newGame;
-    @FXML private MenuItem saveGame;
-    @FXML private MenuItem loadGame;
-    @FXML private MenuItem quitGame;
 
     @FXML private TextField userField;
     @FXML private PasswordField passField;
@@ -64,6 +62,7 @@ public class PantallaMenu {
     @FXML private VBox loadGameCard;
     @FXML private VBox skinSelectionCard;
     @FXML private VBox gamesListContainer;
+    @FXML private VBox audioCard;
 
     @FXML private Label playerCountLabel;
     @FXML private Label sealCountLabel;
@@ -75,9 +74,6 @@ public class PantallaMenu {
     @FXML private javafx.scene.image.ImageView skinPreview;
 
     // --- Componentes para traducción ---
-    @FXML private javafx.scene.control.Menu fileMenu;
-    @FXML private javafx.scene.control.Menu languageMenu;
-
     @FXML private Label loginTitle;
     @FXML private Label userLabel;
     @FXML private Label passLabel;
@@ -102,6 +98,10 @@ public class PantallaMenu {
 
     @FXML private Label loadTitle;
     @FXML private Button loadBackBtn;
+
+    @FXML private javafx.scene.control.Slider volumeSlider;
+    @FXML private Button muteButton;
+    @FXML private Label volumeIconLabel;
 
     // --- Estado interno ---
     private Random rand = new Random();
@@ -180,6 +180,49 @@ public class PantallaMenu {
 
         // Cargar idioma inicial
         updateUITexts();
+
+        // Iniciar música de menú
+        playMenuMusic();
+
+        // Configurar slider de volumen
+        if (volumeSlider != null) {
+            volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (musicPlayer != null) {
+                    musicPlayer.setVolume(newVal.doubleValue());
+                    updateVolumeIcon(newVal.doubleValue());
+                }
+            });
+        }
+    }
+
+    private void updateVolumeIcon(double volume) {
+        if (volumeIconLabel == null) return;
+        if (volume == 0) volumeIconLabel.setText("🔇");
+        else if (volume < 0.3) volumeIconLabel.setText("🔈");
+        else if (volume < 0.7) volumeIconLabel.setText("🔉");
+        else volumeIconLabel.setText("🔊");
+    }
+
+    private void playMenuMusic() {
+        try {
+            if (musicPlayer != null) {
+                musicPlayer.stop();
+            }
+            String path = getClass().getResource("/resources/audio/Ascent_to_the_White_Peak (1).mp3").toExternalForm();
+            Media media = new Media(path);
+            musicPlayer = new MediaPlayer(media);
+            musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            musicPlayer.setVolume(0.5);
+            musicPlayer.play();
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar la música de menú: " + e.getMessage());
+        }
+    }
+
+    private void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
     }
 
     // ══════════════ GESTIÓN DE IDIOMAS ══════════════
@@ -195,13 +238,7 @@ public class PantallaMenu {
         
         Locale currentLocale = utils.TranslationManager.getLocale();
 
-        // Menu Bar
-        if (fileMenu != null) fileMenu.setText(messages.getString("menu.file"));
-        if (newGame != null) newGame.setText(messages.getString("menu.new"));
-        if (saveGame != null) saveGame.setText(messages.getString("menu.save"));
-        if (loadGame != null) loadGame.setText(messages.getString("menu.load"));
-        if (quitGame != null) quitGame.setText(messages.getString("menu.quit"));
-        if (languageMenu != null) languageMenu.setText("🌍 " + (currentLocale.getLanguage().equals("es") ? "Idioma" : (currentLocale.getLanguage().equals("ca") ? "Idioma" : "Language")));
+        // Menu Bar - Eliminado
 
         // Login Card
         if (loginTitle != null) loginTitle.setText(messages.getString("card.login.title"));
@@ -305,6 +342,7 @@ public class PantallaMenu {
         if (configCard != null) configCard.setVisible(false);
         if (loadGameCard != null) loadGameCard.setVisible(false);
         if (skinSelectionCard != null) skinSelectionCard.setVisible(false);
+        if (audioCard != null) audioCard.setVisible(false);
     }
 
     @FXML
@@ -421,6 +459,7 @@ public class PantallaMenu {
 
     private void cargarPartidaPorId(ActionEvent event, int idPartida) {
         pararNieve();
+        stopMusic();
         try {
             java.net.URL fxmlUrl = getClass().getResource("/resources/fxml/PantallaCarga.fxml");
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
@@ -628,6 +667,7 @@ public class PantallaMenu {
 
     private void cambiarAPantallaJuego(ActionEvent event, modelo.partida.Partida partida) {
         pararNieve();
+        stopMusic();
         try {
             java.net.URL fxmlUrl = getClass().getResource("/resources/fxml/PantallaCarga.fxml");
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
@@ -666,5 +706,19 @@ public class PantallaMenu {
 
     @FXML public void showOptionsCard() { hideAllCards(); optionsCard.setVisible(true); }
     @FXML public void showConfigCard() { hideAllCards(); configCard.setVisible(true); }
+    @FXML public void showAudioCard() { hideAllCards(); audioCard.setVisible(true); }
+
+    @FXML private void handleMute() {
+        if (volumeSlider != null) {
+            if (volumeSlider.getValue() > 0) {
+                volumeSlider.setValue(0);
+                muteButton.setText("🔊 Activar Sonido");
+            } else {
+                volumeSlider.setValue(0.5);
+                muteButton.setText("🔇 Silenciar");
+            }
+        }
+    }
+
     @FXML private void handleQuitGame() { System.exit(0); }
 }

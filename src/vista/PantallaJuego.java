@@ -23,6 +23,8 @@ import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.stage.Stage;
 import javafx.geometry.Bounds;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +36,6 @@ import modelo.jugador.Pinguino;
 import modelo.tablero.Casilla;
 
 public class PantallaJuego {
-
-    @FXML private MenuItem newGame;
-    @FXML private MenuItem saveGame;
-    @FXML private MenuItem loadGame;
-    @FXML private MenuItem quitGame;
 
     @FXML private Button dado;
     @FXML private Button rapido;
@@ -70,6 +67,10 @@ public class PantallaJuego {
 
     private GestorPartida gestorPartida;
     private String usuarioLogueado;
+    private MediaPlayer musicPlayer;
+
+    @FXML private javafx.scene.control.Slider volumeSlider;
+    @FXML private Label volumeIconLabel;
 
     // ══════════════════════════════════════════════════
     //  CONFIGURACIÓN DE LA PASARELA HELADA
@@ -98,7 +99,7 @@ public class PantallaJuego {
         //   21         22          23          24          25          26          27          28          29         30
         {195, 528}, {275, 542}, {360, 542}, {446, 534}, {531, 525}, {617, 521}, {702, 510}, {805, 520}, {870, 560}, {883, 625},
         //   31         32          33          34          35          36          37          38          39         40
-        {809, 683}, {727, 694}, {641, 689}, {556, 677}, {470, 679}, {385, 684}, {299, 681}, {216, 687}, {145, 728}, {162, 797},
+        {809, 681}, {727, 694}, {641, 689}, {556, 677}, {470, 679}, {385, 684}, {299, 681}, {216, 687}, {145, 728}, {142, 797},
         //   41         42          43          44          45          46          47          48          49         50
         {236, 831}, {322, 841}, {407, 845}, {493, 838}, {579, 840}, {664, 854}, {749, 861}, {835, 863}, {920, 860}, {1000, 840}
     };
@@ -133,6 +134,46 @@ public class PantallaJuego {
         // Si el tamaño del tablero cambia (ventana <-> pantalla completa), actualizamos todo.
         tablero.widthProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
         tablero.heightProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
+
+        // Iniciar música del juego
+        playGameMusic();
+
+        // Configurar slider de volumen
+        if (volumeSlider != null) {
+            volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (musicPlayer != null) {
+                    musicPlayer.setVolume(newVal.doubleValue());
+                    updateVolumeIcon(newVal.doubleValue());
+                }
+            });
+        }
+    }
+
+    private void updateVolumeIcon(double volume) {
+        if (volumeIconLabel == null) return;
+        if (volume == 0) volumeIconLabel.setText("🔇");
+        else if (volume < 0.3) volumeIconLabel.setText("🔈");
+        else if (volume < 0.7) volumeIconLabel.setText("🔉");
+        else volumeIconLabel.setText("🔊");
+    }
+
+    private void playGameMusic() {
+        try {
+            String path = getClass().getResource("/resources/audio/Brillo Sobre el Hielo (1).mp3").toExternalForm();
+            Media media = new Media(path);
+            musicPlayer = new MediaPlayer(media);
+            musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            musicPlayer.setVolume(0.5);
+            musicPlayer.play();
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar la música de juego: " + e.getMessage());
+        }
+    }
+
+    private void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
     }
 
     private void actualizarTodoVisually() {
@@ -765,6 +806,7 @@ public class PantallaJuego {
     @FXML private void handleQuitGame() { System.exit(0); }
 
     @FXML private void handleGoToMenu() {
+        stopMusic();
         try {
             FXMLLoader l = new FXMLLoader(getClass().getResource("/resources/fxml/PantallaMenu.fxml"));
             Stage st = (Stage) tablero.getScene().getWindow();

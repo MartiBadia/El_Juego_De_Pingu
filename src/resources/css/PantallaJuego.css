@@ -19,24 +19,6 @@
     -fx-background-color: #000000;
 }
 
-/* =================== MENÚ =================== */
-.menu-bar {
-    -fx-background-color: #000000;
-    -fx-border-color: #1a3557;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 2 8;
-}
-
-.menu-bar .menu:hover,
-.menu-bar .menu:focused {
-    -fx-background-color: #1a3557;
-}
-
-.menu-bar .label {
-    -fx-text-fill: #a8c8e8;
-    -fx-font-size: 13px;
-}
-
 .context-menu {
     -fx-background-color: #112240;
     -fx-border-color: #1a3557;
@@ -55,7 +37,7 @@
 /* =================== TABLERO =================== */
 .board {
     -fx-background-color: transparent;
-    -fx-background-image: url("/resources/images/ui/Gemini_Generated_Image_byc22obyc22obyc2.png");
+    -fx-background-image: url("/resources/images/ui/Airbrush-IMAGE-ENHANCER-1777299129168-1777299129168.png");
     -fx-background-size: contain;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
