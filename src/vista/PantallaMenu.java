@@ -10,8 +10,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -94,7 +92,6 @@ public class PantallaMenu {
     @FXML private Label skinNameLabel;
     @FXML private Button skinConfirmBtn;
     @FXML private Button skinCancelBtn;
-    @FXML private MenuButton changeLanguageBtn;
 
     @FXML private Label loadTitle;
     @FXML private Button loadBackBtn;
@@ -225,12 +222,6 @@ public class PantallaMenu {
         }
     }
 
-    // ══════════════ GESTIÓN DE IDIOMAS ══════════════
-
-    @FXML private void changeLanguageES() { utils.TranslationManager.setLocale(new Locale("es")); updateUITexts(); }
-    @FXML private void changeLanguageCA() { utils.TranslationManager.setLocale(new Locale("ca")); updateUITexts(); }
-    @FXML private void changeLanguageEN() { utils.TranslationManager.setLocale(new Locale("en")); updateUITexts(); }
-
     private void updateUITexts() {
         // Enlace sync con TranslationManager
         messages = utils.TranslationManager.getBundle();
@@ -252,7 +243,6 @@ public class PantallaMenu {
         if (optionsTitle != null) optionsTitle.setText(messages.getString("card.options.title"));
         if (createGameBtn != null) createGameBtn.setText("🎮  " + messages.getString("card.options.create"));
         if (loadSavedGameBtn != null) loadSavedGameBtn.setText("📂  " + messages.getString("card.options.load"));
-        if (changeLanguageBtn != null) changeLanguageBtn.setText("🌍  " + messages.getString("menu.language"));
         if (logoutBtn != null) logoutBtn.setText("🚪  " + messages.getString("card.options.logout"));
         if (optionsHint != null) optionsHint.setText(messages.getString("card.options.hint"));
 

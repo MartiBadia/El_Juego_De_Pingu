@@ -69,7 +69,8 @@
 
 /* ─── Tip inferior ─── */
 .loading-tip {
-    -fx-font-size: 13px;
-    -fx-text-fill: #a8c8e8;
-    -fx-opacity: 0.5;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+    -fx-opacity: 0.8;
 }
