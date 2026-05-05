@@ -95,15 +95,8 @@
 
                     <Button fx:id="createGameBtn" text="🎮  Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
                     <Button fx:id="loadSavedGameBtn" text="📂  Cargar Partida Guardada" onAction="#handleLoadGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
-                    <javafx.scene.control.MenuButton fx:id="changeLanguageBtn" text="🌍  Cambiar Idioma" maxWidth="Infinity" prefHeight="50">
-                        <items>
-                            <javafx.scene.control.MenuItem fx:id="langEsItem" onAction="#changeLanguageES" text="Castellano" />
-                            <javafx.scene.control.MenuItem fx:id="langCaItem" onAction="#changeLanguageCA" text="Català" />
-                            <javafx.scene.control.MenuItem fx:id="langEnItem" onAction="#changeLanguageEN" text="English" />
-                        </items>
-                    </javafx.scene.control.MenuButton>
-                    <Button fx:id="logoutBtn" text="🚪  Cerrar Sesión" onAction="#handleLogout" maxWidth="Infinity" styleClass="danger" prefHeight="50"/>
                     <Button fx:id="audioConfigBtn" text="🔊  Configurar Audio" onAction="#showAudioCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
+                    <Button fx:id="logoutBtn" text="🚪  Cerrar Sesión" onAction="#handleLogout" maxWidth="Infinity" styleClass="danger" prefHeight="50"/>
 
                     <Region prefHeight="10"/>
                     <Label fx:id="optionsHint" text="Elige una opción para comenzar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>

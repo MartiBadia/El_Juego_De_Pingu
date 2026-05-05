@@ -92,20 +92,57 @@
 
 /* =================== BARRA INFERIOR =================== */
 .bottom-bar {
-    -fx-background-color: #001f3f;
-    -fx-border-color: #4fc3f7;
-    -fx-border-width: 2 0 0 0;
-    -fx-padding: 6 10;
+    -fx-background-image: url("/resources/images/ui/barra_horizontal.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-padding: 40 40 20 40;
+    -fx-min-height: 240;
+}
+
+.bottom-bar .card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: none;
+}
+
+.bottom-bar .card-title,
+.bottom-bar .stat {
+    -fx-text-fill: black;
+    -fx-fill: black;
 }
 
 /* =================== PANEL LATERAL DERECHO =================== */
 .side-panel {
-    -fx-background-color: #001f3f;
-    -fx-border-color: #4fc3f7;
-    -fx-border-width: 0 0 0 2;
-    -fx-pref-width: 220;
-    -fx-min-width: 200;
-    -fx-max-width: 240;
+    -fx-background-image: url("/resources/images/ui/vertical_hielo.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-pref-width: 280;
+    -fx-min-width: 260;
+    -fx-max-width: 320;
+    -fx-padding: 40 25 20 25;
+}
+
+.side-panel .card {
+    -fx-background-color: rgba(255, 255, 255, 0.5);
+    -fx-border-color: rgba(79, 195, 247, 0.4);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-effect: none;
+}
+
+.side-panel .card-title,
+.side-panel .big-text,
+.side-panel .events {
+    -fx-text-fill: black;
+    -fx-fill: black;
+}
+
+.side-panel .events {
+    -fx-effect: dropshadow(three-pass-box, black, 2, 0.9, 0, 0);
 }
 
 /* =================== TARJETAS (CARDS) =================== */
