@@ -352,7 +352,7 @@ public class BBDD {
 	        // 1) UPDATE EN PARTIDA (Sobreescribimos)
 	        String sqlUpdate = "UPDATE PARTIDA SET TURNOS = " + p.getTurnos() + 
 	                           ", JUGADOR_ACTUAL = " + p.getJugadorActualIndice() + 
-	                           ", FINALIZADA = '" + (p.isFinalizada() ? "S" : "N") + "'" +
+	                           ", FINALIZADA = " + (p.isFinalizada() ? 1 : 0) +
 	                           " WHERE ID_PARTIDA = " + idPartida;
 	        update(con, sqlUpdate);
 
@@ -362,7 +362,7 @@ public class BBDD {
 	    } else {
 	        // 1) INSERT EN PARTIDA (Nueva partida)
 	        String sqlPartida = "INSERT INTO PARTIDA (TURNOS, JUGADOR_ACTUAL, FINALIZADA, USERNAME) VALUES ("
-	                + p.getTurnos() + ", " + p.getJugadorActualIndice() + ", '" + (p.isFinalizada() ? "S" : "N") + "', '" + username + "')";
+	                + p.getTurnos() + ", " + p.getJugadorActualIndice() + ", " + (p.isFinalizada() ? 1 : 0) + ", '" + username + "')";
 	        insert(con, sqlPartida);
 
 	        String sqlIdP = "SELECT MAX(ID_PARTIDA) AS ID FROM PARTIDA";
@@ -373,20 +373,19 @@ public class BBDD {
 	    // 2) INSERT EN JUGADOR_ESTADO Y INVENTARIO_ITEMS
 	    for (modelo.jugador.Jugador j : p.getJugadores()) {
 	        String tipo = (j instanceof modelo.jugador.Pinguino) ? "PINGUINO" : "FOCA";
-	        int stop = 0, bloqueo = 0;
-	        String sobornada = "N";
+	        int stop = 0, bloqueo = 0, soborno = 0;
 
 	        if (j instanceof modelo.jugador.Pinguino) {
 	            stop = ((modelo.jugador.Pinguino) j).getTurnosCongelado();
 	        } else if (j instanceof modelo.jugador.Foca) {
-	            sobornada = ((modelo.jugador.Foca) j).isSoborno() ? "S" : "N";
+	            soborno = ((modelo.jugador.Foca) j).isSoborno() ? 1 : 0;
 	            bloqueo = ((modelo.jugador.Foca) j).getTurnosBloqueada();
 	        }
 
 	        // Insertar en JUGADOR_ESTADO
 	        String sqlJ = "INSERT INTO JUGADOR_ESTADO (ID_PARTIDA, NOMBRE_JUGADOR, TIPO_JUGADOR, COLOR, POSICION, TURNOS_STOP, SOBORNADA, TURNOS_BLOQUEO, SKIN) VALUES ("
 	                + idPartida + ", '" + j.getNombre() + "', '" + tipo + "', '" + j.getColor() + "', "
-	                + j.getPosicion() + ", " + stop + ", '" + sobornada + "', " + bloqueo + ", '" + j.getSkin() + "')";
+	                + j.getPosicion() + ", " + stop + ", " + soborno + ", " + bloqueo + ", '" + j.getSkin() + "')";
 	        insert(con, sqlJ);
 
 	        // Si es Pinguino, guardamos sus items en INVENTARIO_ITEMS
@@ -461,7 +460,7 @@ public class BBDD {
 			if ("FOCA".equalsIgnoreCase(tipo)) {
 				modelo.jugador.Foca foca = new modelo.jugador.Foca(nombre, color);
 				foca.setPosicion(posicion);
-				foca.setSoborno("S".equals(fila.getOrDefault("SOBORNADA", "N")));
+				foca.setSoborno("1".equals(fila.getOrDefault("SOBORNADA", "0")));
 				foca.setTurnosBloqueada(Integer.parseInt(fila.getOrDefault("TURNOS_BLOQUEO", "0")));
 				foca.setSkin(fila.getOrDefault("SKIN", "foca.png"));
 				jugadores.add(foca);
@@ -519,7 +518,7 @@ public class BBDD {
 		LinkedHashMap<String, String> filaP = filas.get(0);
 		partida.setTurnos(Integer.parseInt(filaP.getOrDefault("TURNOS", "0")));
 		partida.setJugadorActual(Integer.parseInt(filaP.getOrDefault("JUGADOR_ACTUAL", "0")));
-		partida.setFinalizada("S".equals(filaP.getOrDefault("FINALIZADA", "N")));
+		partida.setFinalizada("1".equals(filaP.getOrDefault("FINALIZADA", "0")));
 
 		System.out.println("Partida " + id + " cargada correctamente.");
 		return partida;
