@@ -17,7 +17,7 @@ public class Oso extends Casilla {
     @Override
     public String realizarAccionConLog(Partida p, Jugador j) {
         realizarAccion(p, j);
-        return "🐻 ¡Un Oso te ataca! Vuelves al inicio del tablero.";
+        return "¡Un Oso te ataca! Vuelves al inicio del tablero.";
     }
 
     @Override

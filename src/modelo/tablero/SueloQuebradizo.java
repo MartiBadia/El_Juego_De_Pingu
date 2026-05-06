@@ -26,7 +26,7 @@ public class SueloQuebradizo extends Casilla {
         Pinguino ping = (Pinguino) j;
         int totalItems = ping.getInventario().getTotalItems();
         StringBuilder log = new StringBuilder();
-        log.append("🧊 Suelo Quebradizo (tienes ").append(totalItems).append(" objeto(s)): ");
+        log.append("Suelo Quebradizo (tienes ").append(totalItems).append(" objeto(s)): ");
 
         if (totalItems > 5) {
             ping.setPosicion(0);

@@ -3,588 +3,905 @@ package vista;
 import java.util.ArrayList;
 
 import javafx.animation.TranslateTransition;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.control.Label;
-import javafx.scene.shape.Circle;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.Node;
+import javafx.stage.Stage;
+import javafx.geometry.Bounds;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
+import java.util.HashMap;
+import java.util.Map;
+import javafx.animation.ScaleTransition;
 
 import controlador.gestor.GestorPartida;
 import modelo.jugador.Jugador;
 import modelo.jugador.Pinguino;
-import modelo.items.Inventario;
-import modelo.items.Dado;
-import modelo.items.Item;
-import modelo.tablero.Tablero;
 import modelo.tablero.Casilla;
 
 public class PantallaJuego {
 
-    // Menu items
-    @FXML private MenuItem newGame;
-    @FXML private MenuItem saveGame;
-    @FXML private MenuItem loadGame;
-    @FXML private MenuItem quitGame;
-
-    // Buttons
     @FXML private Button dado;
-    @FXML private Button rapido;
-    @FXML private Button lento;
-    @FXML private Button peces;
-    @FXML private Button nieve;
-
-    // Texts
     @FXML private Text dadoResultText;
-    @FXML private Text rapido_t;
-    @FXML private Text lento_t;
-    @FXML private Text peces_t;
-    @FXML private Text nieve_t;
-    @FXML private Text eventos;
+    @FXML private TextFlow eventosContenedor;
 
-    // Game board and player pieces
-    @FXML private GridPane tablero;
-    @FXML private Circle P1;
-    @FXML private Circle P2;
-    @FXML private Circle P3;
-    @FXML private Circle P4;
-    @FXML private Circle PFoca;
-    @FXML private Circle PFoca2;
-    @FXML private javafx.scene.control.Label turnLabel;
+    @FXML private Pane tablero;   // ← ahora es Pane, no GridPane
+    @FXML private ImageView P1, P2, P3, P4;
+    @FXML private ImageView PFoca, PFoca2, PFoca3, PFoca4;
+    @FXML private javafx.scene.control.Label inventoryTitle;
 
-    // Elementos del menú hamburguesa
+    @FXML private javafx.scene.layout.HBox rosterContainer;
+    @FXML private StackPane turnAnimationOverlay;
+    @FXML private ImageView turnAnimationSkin;
+    @FXML private Label turnAnimationText;
+
     @FXML private Button hamburgerButton;
     @FXML private VBox menuOverlay;
+    @FXML private ScrollPane eventosScroll;
 
     private GestorPartida gestorPartida;
-    private static final int COLUMNS = 5;
-    private static final String TAG_CASILLA_TEXT = "CASILLA_TEXT";
-    
-    // Listas para acceso dinámico a los círculos
-    private ArrayList<Circle> fichasPinguinos;
-    private ArrayList<Circle> fichasFocas;
+    private String usuarioLogueado;
+    private MediaPlayer musicPlayer;
+
+    @FXML private javafx.scene.control.Slider volumeSlider;
+    @FXML private Label volumeIconLabel;
+
+    // ══════════════════════════════════════════════════
+    //  CONFIGURACIÓN DE LA PASARELA HELADA
+    // ══════════════════════════════════════════════════
+
+    /** Dimensiones naturales de la imagen de fondo (tablero_pasarela.png). */
+    /** Dimensiones virtuales para el mapeo de coordenadas (proporción del diseño). */
+    private static final double IMG_W = 1000.0;
+    private static final double IMG_H = 1000.0;
+
+    /** Tamaño visual de cada casilla y de cada ficha de jugador (px). */
+    private static final double CELL_SIZE  = 50.0;
+    private static final double TOKEN_SIZE = 45.0;
+
+    /**
+     * Coordenadas del CENTRO de cada una de las 50 casillas
+     * en el espacio de la imagen original (1390×780).
+     *
+     * en el espacio de la imagen original.
+     */
+    private static final double[][] PATH_IMG = {
+    	//   1          2           3           4           5           6           7           8           9          10
+        {200, 192}, {286, 189}, {371, 194}, {455, 210}, {540, 217}, {625, 208}, {710, 190}, {796, 190}, {880, 245}, {880, 324},
+        //   11         12          13          14          15          16          17          18          19         20
+        {798, 380}, {714, 388}, {629, 390}, {545, 376}, {461, 359}, {376, 342}, {291, 325}, {200, 340}, {130, 393}, {129, 468},
+        //   21         22          23          24          25          26          27          28          29         30
+        {195, 528}, {275, 542}, {360, 542}, {446, 534}, {531, 525}, {617, 521}, {702, 510}, {805, 520}, {870, 560}, {883, 625},
+        //   31         32          33          34          35          36          37          38          39         40
+        {809, 681}, {727, 694}, {641, 689}, {556, 677}, {470, 679}, {385, 684}, {299, 681}, {216, 687}, {145, 728}, {142, 797},
+        //   41         42          43          44          45          46          47          48          49         50
+        {236, 831}, {322, 841}, {407, 845}, {493, 838}, {579, 840}, {664, 854}, {749, 861}, {835, 863}, {920, 860}, {1000, 840}
+    };
+
+    private ArrayList<ImageView> fichasPinguinos;
+    private ArrayList<ImageView> fichasFocas;	
+    private Map<Jugador, VBox> iceCubesMap;
+    private Map<Jugador, Map<String, Label>> rosterLabelsMap;
+    private Map<Jugador, Map<String, Button>> rosterButtonsMap;
+
+    // ══════════════════════════════════════════════════
+    //  INICIALIZACIÓN
+    // ══════════════════════════════════════════════════
 
     @FXML
     private void initialize() {
-        eventos.setText("Bienvenido a El Juego de Pingu.");
-        
-        // Inicializar listas de fichas
+        appendLog(null, "¡Bienvenido a El Juego de Pingu!");
+
         fichasPinguinos = new ArrayList<>();
-        fichasPinguinos.add(P1);
-        fichasPinguinos.add(P2);
-        fichasPinguinos.add(P3);
-        fichasPinguinos.add(P4);
+        fichasPinguinos.add(P1); fichasPinguinos.add(P2);
+        fichasPinguinos.add(P3); fichasPinguinos.add(P4);
 
         fichasFocas = new ArrayList<>();
-        fichasFocas.add(PFoca);
-        fichasFocas.add(PFoca2);
+        fichasFocas.add(PFoca); fichasFocas.add(PFoca2);
+        fichasFocas.add(PFoca3); fichasFocas.add(PFoca4);
 
-        // Ocultar todas las fichas al inicio
-        for(Circle c : fichasPinguinos) c.setVisible(false);
-        for(Circle c : fichasFocas) c.setVisible(false);
+        for (ImageView iv : fichasPinguinos) iv.setVisible(false);
+        for (ImageView iv : fichasFocas)    iv.setVisible(false);
 
         gestorPartida = new GestorPartida();
-        
-        // No llamamos a iniciarPartida() aquí para que el menú pueda pasar la configuración
-    }
 
-    /**
-     * Permite al menú pasar una partida ya creada.
-     */
-    public void prepararPartidaPersonalizada(modelo.partida.Partida p) {
-        this.gestorPartida.nuevaPartida(p.getJugadores(), p.getTablero());
-        configurarFichasYRefrescar();
-    }
+        // RE-POSICIONAMIENTO RESPONSIVO:
+        // Si el tamaño del tablero cambia (ventana <-> pantalla completa), actualizamos todo.
+        tablero.widthProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
+        tablero.heightProperty().addListener((obs, oldVal, newVal) -> actualizarTodoVisually());
 
-    /**
-     * Permite al menú cargar una partida de la BD.
-     */
-    public void cargarPartidaEspecifica(int id) {
-        this.gestorPartida.cargaPartida(id);
-        configurarFichasYRefrescar();
-    }
+        // Iniciar música del juego
+        playGameMusic();
 
-    private void configurarFichasYRefrescar() {
-        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
-        
-        int pingCount = 0;
-        int sealCount = 0;
-
-        for (Jugador j : jugadores) {
-            if (j instanceof modelo.jugador.Pinguino) {
-                if (pingCount < fichasPinguinos.size()) {
-                    fichasPinguinos.get(pingCount).setVisible(true);
-                    pingCount++;
+        // Configurar slider de volumen
+        if (volumeSlider != null) {
+            volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (musicPlayer != null) {
+                    musicPlayer.setVolume(newVal.doubleValue());
+                    updateVolumeIcon(newVal.doubleValue());
                 }
-            } else if (j instanceof modelo.jugador.Foca) {
-                if (sealCount < fichasFocas.size()) {
-                    fichasFocas.get(sealCount).setVisible(true);
-                    sealCount++;
-                }
+            });
+        }
+    }
+
+    private void updateVolumeIcon(double volume) {
+        if (volumeIconLabel == null) return;
+        if (volume == 0) volumeIconLabel.setText("🔇");
+        else if (volume < 0.3) volumeIconLabel.setText("🔈");
+        else if (volume < 0.7) volumeIconLabel.setText("🔉");
+        else volumeIconLabel.setText("🔊");
+    }
+
+    private void playGameMusic() {
+        try {
+            String path = getClass().getResource("/resources/audio/Brillo Sobre el Hielo (1).mp3").toExternalForm();
+            Media media = new Media(path);
+            musicPlayer = new MediaPlayer(media);
+            musicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            musicPlayer.setVolume(0.5);
+            musicPlayer.play();
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar la música de juego: " + e.getMessage());
+        }
+    }
+
+    private void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
+    }
+
+    private void actualizarTodoVisually() {
+        if (gestorPartida == null || gestorPartida.getPartida() == null) return;
+        
+        // Reposicionar casillas
+        for (Node node : tablero.getChildren()) {
+            if (node.getStyleClass().contains("board-cell")) {
+                // El ID o el orden determina el índice de la casilla
+                // En nuestro caso, las casillas se crearon en orden, pero es mejor usar el orden inverso 
+                // ya que se añadieron con add(0, cell)
             }
         }
-
-        refrescarPartida();
+        // Para mayor robustez, simplemente reconstruimos la capa visual si cambia el tamaño
+        // o mejor, iteramos y re-posicionamos.
         
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        String msg = "¡Partida lista! Turno de: " + actual.getNombre();
-        eventos.setText(msg);
-        if (turnLabel != null) turnLabel.setText("▶ Turno de: " + actual.getNombre());
-        
-        if (actual instanceof modelo.jugador.Foca) {
-            dado.setDisable(true);
-            jugarTurnoFoca();
-        }
+        // La forma más segura y limpia es reconstruir el mapeo
+        construirTableroVisual();
+        actualizarPosicionesVisuales();
     }
+
+    // ══════════════════════════════════════════════════
+    //  CONVERSIÓN DE COORDENADAS IMAGEN → PANE
+    // ══════════════════════════════════════════════════
 
     /**
-     * Requisito: Iniciar la partida configurando jugadores y tablero (Versión por defecto).
+     * Convierte un punto en coordenadas de la imagen original
+     * a coordenadas locales del Pane del tablero, teniendo en
+     * cuenta el escalado "cover" del fondo de pantalla.
      */
-    @FXML
-    public void iniciarPartida() {
-        // Mantenemos este método por compatibilidad si se pulsa "New" desde dentro del juego
-        ArrayList<Jugador> jugadores = new ArrayList<>();
-        
-        Pinguino p1 = new Pinguino("Jugador1", "Azul");
-        p1.getInventario().añadirItem(new Dado()); 
-        jugadores.add(p1);
+    private double[] imageToPaneCoords(double imgX, double imgY) {
+        double boardW = tablero.getWidth();
+        double boardH = tablero.getHeight();
 
-        Pinguino p2 = new Pinguino("Jugador2", "Rojo");
-        p2.getInventario().añadirItem(new Dado());
-        jugadores.add(p2);
-        
-        modelo.jugador.Foca foca = new modelo.jugador.Foca("Morsa CPU", "Gris");
-        jugadores.add(foca);
+        if (boardW <= 0 || boardH <= 0) {
+            // Fallback razonable para inicialización
+            return new double[]{ imgX, imgY };
+        }
 
-        Tablero modeloTablero = new Tablero();
-        modeloTablero.generarTableroAleatorio();
+        // Lógica "contain": la imagen se escala al tamaño máximo posible sin recortarse
+        double scale = Math.min(boardW / IMG_W, boardH / IMG_H);
 
-        gestorPartida.nuevaPartida(jugadores, modeloTablero);
-        
-        prepararPartidaPersonalizada(gestorPartida.getPartida());
+        // Alineación "center center" (sincronizado con el CSS)
+        // Calculamos el espacio sobrante a los lados (X) y arriba/abajo (Y) para centrar
+        double imgOffX = (boardW - IMG_W * scale) / 2.0;
+        double imgOffY = (boardH - IMG_H * scale) / 2.0;
+
+        double bpX = imgX * scale + imgOffX;
+        double bpY = imgY * scale + imgOffY;
+
+        return new double[]{ bpX, bpY };
     }
 
-    /**
-     * Requisito: Refrescar el estado visual del tablero y la interfaz.
-     */
-    @FXML
-    public void refrescarPartida() {
-        if (gestorPartida.getPartida() != null) {
-            mostrarTiposDeCasillasEnTablero(gestorPartida.getPartida().getTablero());
-            actualizarInventarioVisual();
-            actualizarPosicionesVisuales();
+    /** Posiciona cualquier nodo en el centro de la casilla i. */
+    private void posicionarEnCasilla(Node node, int i, double nodeSize) {
+        double[] pos = imageToPaneCoords(PATH_IMG[i][0], PATH_IMG[i][1]);
+        node.setLayoutX(pos[0] - nodeSize / 2.0);
+        node.setLayoutY(pos[1] - nodeSize / 2.0);
+    }
+
+    /** Posiciona una ficha en su casilla con una mejor separación entre jugadores. */
+    private void posicionarFicha(ImageView ficha, int cellPos, int tokenOffset) {
+        int safePos = Math.min(cellPos, PATH_IMG.length - 1);
+        double[] pos = imageToPaneCoords(PATH_IMG[safePos][0], PATH_IMG[safePos][1]);
+
+        // Lógica de separación: distribuimos las fichas en una pequeña cuadrícula/cruz
+        double offsetX = 0;
+        double offsetY = 0;
+        double spread = 8.0; // Distancia de separación mínima
+
+        switch (tokenOffset % 4) {
+            case 0: offsetX = -spread; offsetY = -spread/1.5; break;
+            case 1: offsetX = spread;  offsetY = -spread/1.5; break;
+            case 2: offsetX = -spread; offsetY = spread/1.5;  break;
+            case 3: offsetX = spread;  offsetY = spread/1.5;  break;
+        }
+
+        ficha.setFitWidth(TOKEN_SIZE);
+        ficha.setFitHeight(TOKEN_SIZE);
+        ficha.setLayoutX(pos[0] - TOKEN_SIZE / 2.0 + offsetX);
+        ficha.setLayoutY(pos[1] - TOKEN_SIZE / 2.0 + offsetY);
+    }
+
+    // ══════════════════════════════════════════════════
+    //  LOG DE EVENTOS
+    // ══════════════════════════════════════════════════
+
+    private void appendLog(Jugador j, String msg) {
+        if (eventosContenedor == null) return;
+        Text textNode = new Text();
+        textNode.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+        if (j != null) {
+            textNode.setFill(Color.web(getPlayerColorHex(j)));
+            textNode.setText("• " + j.getNombre() + ": " + msg + "\n");
+        } else {
+            textNode.setFill(Color.WHITE);
+            textNode.setText(msg + "\n");
+        }
+        eventosContenedor.getChildren().add(textNode);
+        if (eventosScroll != null) {
+            javafx.application.Platform.runLater(() -> eventosScroll.setVvalue(1.0));
         }
     }
 
-    private ImageView crearImagenCasilla(String nombreArchivo) {
-        try {
-            Image img = new Image(getClass().getResourceAsStream("/resources/" + nombreArchivo));
-            ImageView iv = new ImageView(img);
-            iv.setPreserveRatio(true);
-            iv.setFitWidth(70);
-            iv.setFitHeight(70);
-            return iv;
-        } catch (Exception e) {
-            return null;
+    private String getPlayerColorHex(Jugador j) {
+        if (j instanceof modelo.jugador.Foca) return "#ff1744"; // Foca = Rojo brillante
+        String color = j.getColor() != null ? j.getColor().toLowerCase() : "";
+        if (j.getNombre().toLowerCase().contains("1") || color.contains("azul"))    return "#00e5ff";
+        if (j.getNombre().toLowerCase().contains("2") || color.contains("rojo"))    return "#ff1744";
+        switch (color) {
+            case "verde":    return "#00ffa3";
+            case "amarillo": return "#ffd740";
+            default:         return "#ffffff";
         }
     }
 
-    private void mostrarTiposDeCasillasEnTablero(Tablero t) {
-        tablero.getChildren().removeIf(node -> TAG_CASILLA_TEXT.equals(node.getUserData()));
+    private void aplicarEfectoBrillo(ImageView iv, Jugador j) {
+        String hex = getPlayerColorHex(j);
+        javafx.scene.effect.DropShadow ds = new javafx.scene.effect.DropShadow();
+        // Reducimos la opacidad para que no sea tan luminoso
+        ds.setColor(Color.web(hex).deriveColor(0, 1, 1, 0.6));
+        ds.setRadius(10);
+        ds.setSpread(0.3);
+        iv.setEffect(ds);
+    }
 
-        for (int i = 1; i < t.getTamaño() - 1; i++) {
-            Casilla casilla = t.getCasillaEnPosicion(i);
-            String tipo = (casilla != null) ? casilla.getClass().getSimpleName() : "";
+    // ══════════════════════════════════════════════════
+    //  SETTERS PÚBLICOS
+    // ══════════════════════════════════════════════════
 
+    public void setConexion(java.sql.Connection con) { /* gestionado por BBDD */ }
+    public void setUsuario(String user) { this.usuarioLogueado = user; }
+
+    // ══════════════════════════════════════════════════
+    //  PREPARAR PARTIDA
+    // ══════════════════════════════════════════════════
+
+    public void prepararPartidaPersonalizada(modelo.partida.Partida p) {
+        gestorPartida.setPartida(p);
+        construirRosterVisual();
+        actualizarInventarioVisual();
+        actualizarLabelTurno();
+        
+        // Ejecutamos en el siguiente pulso para asegurar que el layout inicial esté listo
+        javafx.application.Platform.runLater(() -> {
+            actualizarTodoVisually();
+        });
+    }
+
+    public void cargarPartidaEspecifica(int idPartida) {
+        controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
+        java.sql.Connection con = controlador.gestionbbdd.BBDD.conectarPredeterminado();
+        modelo.partida.Partida p = helper.cargarBBDD(con, idPartida);
+        if (p != null) prepararPartidaPersonalizada(p);
+    }
+
+    // ══════════════════════════════════════════════════
+    //  ROSTER VISUAL (panel inferior de jugadores)
+    // ══════════════════════════════════════════════════
+
+    private void construirRosterVisual() {
+        if (rosterContainer == null) return;
+        rosterContainer.getChildren().clear();
+        iceCubesMap = new HashMap<>();
+        rosterLabelsMap = new HashMap<>();
+        rosterButtonsMap = new HashMap<>();
+
+        for (Jugador j : gestorPartida.getPartida().getJugadores()) {
+            // Contenedor principal: VBox vertical
+            VBox card = new VBox(25);
+            card.getStyleClass().add("ice-cube");
+            javafx.scene.layout.HBox.setHgrow(card, javafx.scene.layout.Priority.ALWAYS);
+            card.setMaxWidth(Double.MAX_VALUE);
+            card.setAlignment(javafx.geometry.Pos.CENTER);
+            card.setPadding(new javafx.geometry.Insets(12));
+
+            // FILA SUPERIOR: HBox para Skin (Izquierda) e Inventario (Derecha)
+            javafx.scene.layout.HBox topRow = new javafx.scene.layout.HBox(15);
+            topRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+            // 1. Skin del Jugador
+            ImageView img = new ImageView(new Image("/resources/images/skins/" + j.getSkin()));
+            img.setFitWidth(65); img.setFitHeight(65); img.setPreserveRatio(true);
+
+            // 2. Rejilla de mini-inventario (A LA DERECHA de la skin)
+            GridPane miniInv = new GridPane();
+            miniInv.setHgap(15); miniInv.setVgap(6);
+            miniInv.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            javafx.scene.layout.HBox.setHgrow(miniInv, javafx.scene.layout.Priority.ALWAYS);
+            
+            javafx.scene.layout.ColumnConstraints col1 = new javafx.scene.layout.ColumnConstraints();
+            col1.setPercentWidth(50);
+            javafx.scene.layout.ColumnConstraints col2 = new javafx.scene.layout.ColumnConstraints();
+            col2.setPercentWidth(50);
+            miniInv.getColumnConstraints().addAll(col1, col2);
+            
+            Map<String, Label> jLabels = new HashMap<>();
+            Map<String, Button> jButtons = new HashMap<>();
+            
+            miniInv.add(crearMiniFila("Pez:", "Pez", jLabels, jButtons), 0, 0);
+            miniInv.add(crearMiniFila("Bola:", "Bola de Nieve", jLabels, jButtons), 1, 0);
+            miniInv.add(crearMiniFila("Moto:", "Moto de Nieve", jLabels, jButtons), 0, 1);
+            miniInv.add(crearMiniFila("Ráp:", "Dado Rapido", jLabels, jButtons), 1, 1);
+            miniInv.add(crearMiniFila("Len:", "Dado Lento", jLabels, jButtons), 0, 2);
+
+            topRow.getChildren().addAll(img, miniInv);
+            rosterButtonsMap.put(j, jButtons);
+
+            // SECCIÓN INFERIOR: Nombre centrado
+            Label nameLabel = new Label(j.getNombre().toUpperCase());
+            nameLabel.getStyleClass().add("ice-cube-label");
+
+            card.getChildren().addAll(topRow, nameLabel);
+
+            iceCubesMap.put(j, card);
+            rosterLabelsMap.put(j, jLabels);
+            rosterContainer.getChildren().add(card);
+        }
+        actualizarRosterInventarios();
+    }
+
+    private javafx.scene.Node crearMiniFila(String texto, String tipo, Map<String, Label> labels, Map<String, Button> buttons) {
+        javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(2);
+        hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        hbox.setMaxWidth(Double.MAX_VALUE);
+        hbox.getStyleClass().add("inventory-item-box");
+        hbox.setPadding(new javafx.geometry.Insets(4, 8, 4, 8));
+        
+        Label l = new Label(texto + " 0");
+        l.setStyle("-fx-font-size: 14px; -fx-text-fill: #a8c8e8; -fx-font-weight: bold;");
+        labels.put(tipo, l);
+        
+        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        
+        Button b = new Button("Usar");
+        b.setStyle("-fx-font-size: 12px; -fx-padding: 3 8;");
+        b.getStyleClass().add("btn-tiny");
+        b.setOnAction(e -> usarItemEnTurno(tipo));
+        b.setDisable(true);
+        buttons.put(tipo, b);
+        
+        hbox.getChildren().addAll(l, spacer, b);
+        return hbox;
+    }
+
+    private void actualizarRosterInventarios() {
+        if (rosterLabelsMap == null) return;
+        Jugador jActual = gestorPartida.getPartida().getJugadorActual();
+
+        for (Jugador j : gestorPartida.getPartida().getJugadores()) {
+            Map<String, Label> labels = rosterLabelsMap.get(j);
+            Map<String, Button> buttons = rosterButtonsMap.get(j);
+
+            if (j instanceof Pinguino && labels != null && buttons != null) {
+                Pinguino p = (Pinguino) j;
+                modelo.items.Inventario inv = p.getInventario();
+                
+                // Actualizar textos de cantidades
+                labels.get("Pez").setText("Pez: " + inv.contarPorTipo("Pez"));
+                labels.get("Bola de Nieve").setText("Bola: " + inv.contarPorTipo("Bola de Nieve"));
+                labels.get("Moto de Nieve").setText("Moto: " + inv.contarPorTipo("Moto de Nieve"));
+                labels.get("Dado Rapido").setText("Ráp: " + inv.contarPorTipo("Dado Rapido"));
+                labels.get("Dado Lento").setText("Len: " + inv.contarPorTipo("Dado Lento"));
+                
+                // Habilitar/Deshabilitar botones: solo el jugador actual puede usar ítems
+                boolean esTurno = (j == jActual && !gestorPartida.getPartida().isFinalizada());
+                buttons.forEach((tipo, btn) -> {
+                    int cant = inv.contarPorTipo(tipo);
+                    btn.setDisable(!esTurno || cant <= 0);
+                });
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  CONSTRUCCIÓN DEL TABLERO VISUAL
+    // ══════════════════════════════════════════════════
+
+    private void construirTableroVisual() {
+        // Eliminar casillas antiguas pero conservar las fichas de jugadores
+        tablero.getChildren().removeIf(node -> !(node instanceof ImageView));
+
+        ArrayList<Casilla> casillas = gestorPartida.getPartida().getTablero().getCasillas();
+        int maxPos = gestorPartida.getPartida().getTablero().getTamaño();
+
+        for (int i = 0; i < maxPos; i++) {
             StackPane cell = new StackPane();
-            cell.setUserData(TAG_CASILLA_TEXT);
             cell.getStyleClass().add("board-cell");
-            cell.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            cell.setPrefSize(CELL_SIZE, CELL_SIZE);
+            cell.setMaxSize(CELL_SIZE, CELL_SIZE);
+            cell.setMinSize(CELL_SIZE, CELL_SIZE);
 
-            // Seleccionar imagen según el tipo de casilla
+            // Determinar tipo de casilla
+            String tipo = "Normal";
+            boolean encontrada = false;
+            int idxCasilla = 0;
+            while (idxCasilla < casillas.size() && !encontrada) {
+                Casilla c = casillas.get(idxCasilla);
+                if (c.getPosicion() == i) { 
+                    tipo = c.getClass().getSimpleName(); 
+                    encontrada = true; 
+                }
+                idxCasilla++;
+            }
+
+            // Imagen de la casilla
             String imgFile;
             switch (tipo) {
-                case "Evento":          imgFile = "casilla_evento.png";    break;
-                case "MotoNieve":       imgFile = "casilla_motonieve.png"; break;
                 case "Oso":             imgFile = "casilla_oso.png";       break;
-                case "Agujero":         imgFile = "casilla_agujero.png";   break;
-                case "SueloQuebradizo": imgFile = "casilla_agujero.png";   break;
-                default:                imgFile = "casilla_normal.png";    break;
+                case "Agujero":         imgFile = "casilla_agujero.png";    break;
+                case "SueloQuebradizo": imgFile = "casilla_agrietada.png";  break;
+                case "Trineo":          imgFile = "casilla_trineo.png";     break;
+                case "Evento":          imgFile = "casilla_interrogante.png"; break;
+                case "CasillaSalida":   imgFile = "casilla_salida.png";     break;
+                case "CasillaMeta":     imgFile = "casilla_meta.png";       break;
+                default:                imgFile = "casilla_normal.png";     break;
             }
 
             ImageView iv = crearImagenCasilla(imgFile);
-            if (iv != null) {
-                cell.getChildren().add(iv);
-            } else {
-                // Fallback: mostrar texto si la imagen no carga
-                Text texto = new Text(tipo);
-                texto.getStyleClass().add("cell-type");
-                cell.getChildren().add(texto);
-            }
+            if (iv != null) cell.getChildren().add(iv);
 
-            int row = i / COLUMNS;
-            int col = i % COLUMNS;
+            // No añadimos texto extra ya que las nuevas imágenes ya son descriptivas
 
-            GridPane.setRowIndex(cell, row);
-            GridPane.setColumnIndex(cell, col);
-            tablero.getChildren().add(cell);
+            // Posición absoluta sobre la pasarela
+            posicionarEnCasilla(cell, i, CELL_SIZE);
+
+            // Añadir al tablero - nos aseguramos de que estén por debajo de los pingüinos
+            tablero.getChildren().add(0, cell);
         }
-        
-        // Traer a los jugadores al frente para que no queden tapados por las nuevas celdas
-        P1.toFront();
-        P1.setMouseTransparent(true);
-        P2.toFront();
-        P2.setMouseTransparent(true);
-        P3.toFront();
-        P3.setMouseTransparent(true);
-        P4.toFront();
-        P4.setMouseTransparent(true);
-        PFoca.toFront();
-        PFoca.setMouseTransparent(true);
+
+        // Asignar skins a las fichas y traerlas al frente
+        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
+        int pingIdx = 0, focaIdx = 0;
+        for (Jugador j : jugadores) {
+            if (j instanceof Pinguino) {
+                ImageView iv = fichasPinguinos.get(pingIdx);
+                iv.setImage(new Image("/resources/images/skins/" + j.getSkin()));
+                iv.setVisible(true);
+                aplicarEfectoBrillo(iv, j);
+                pingIdx++;
+            } else {
+                ImageView iv = fichasFocas.get(focaIdx);
+                iv.setImage(new Image("/resources/images/skins/" + j.getSkin()));
+                iv.setVisible(true);
+                aplicarEfectoBrillo(iv, j);
+                focaIdx++;
+            }
+        }
+        for (ImageView iv : fichasPinguinos) { iv.toFront(); iv.setMouseTransparent(true); }
+        for (ImageView iv : fichasFocas)     { iv.toFront(); iv.setMouseTransparent(true); }
     }
+
+    private ImageView crearImagenCasilla(String fileName) {
+        try {
+            Image img = new Image(getClass().getResourceAsStream("/resources/images/casillas/" + fileName));
+            ImageView iv = new ImageView(img);
+            iv.setFitWidth(CELL_SIZE);
+            iv.setFitHeight(CELL_SIZE);
+            iv.setPreserveRatio(true);
+            return iv;
+        } catch (Exception e) { return null; }
+    }
+
+    // ══════════════════════════════════════════════════
+    //  ACTUALIZAR POSICIONES DE FICHAS
+    // ══════════════════════════════════════════════════
+
+    private void actualizarPosicionesVisuales() {
+        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
+        int pIdx = 0, fIdx = 0, tokenOffset = 0;
+        for (Jugador j : jugadores) {
+            ImageView ficha = (j instanceof Pinguino)
+                    ? fichasPinguinos.get(pIdx++)
+                    : fichasFocas.get(fIdx++);
+            posicionarFicha(ficha, j.getPosicion(), tokenOffset++);
+            aplicarEfectoBrillo(ficha, j);
+            ficha.setTranslateX(0);
+            ficha.setTranslateY(0);
+            ficha.toFront();
+        }
+    }
+
+    private ImageView getFichaDeJugador(Jugador j) {
+        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
+        int pIdx = 0, fIdx = 0;
+        for (Jugador item : jugadores) {
+            if (item == j) return (j instanceof Pinguino)
+                    ? fichasPinguinos.get(pIdx)
+                    : fichasFocas.get(fIdx);
+            if (item instanceof Pinguino) pIdx++; else fIdx++;
+        }
+        return null;
+    }
+
+    // ══════════════════════════════════════════════════
+    //  INVENTARIO Y TURNO
+    // ══════════════════════════════════════════════════
 
     private void actualizarInventarioVisual() {
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        if (actual instanceof Pinguino) {
-            Pinguino p = (Pinguino) actual;
-            Inventario inv = p.getInventario();
-            rapido_t.setText("D. Rápido: " + inv.contarPorTipo("Dado Rapido"));
-            lento_t.setText("D. Lento: " + inv.contarPorTipo("Dado Lento"));
-            peces_t.setText("Peces: " + inv.contarPorTipo("Pez"));
-            nieve_t.setText("Bolas: " + inv.contarPorTipo("Bola de Nieve"));
-        } else {
-            rapido_t.setText("D. Rápido: -");
-            lento_t.setText("D. Lento: -");
-            peces_t.setText("Peces: -");
-            nieve_t.setText("Bolas: -");
+        actualizarRosterInventarios();
+    }
+
+    private void actualizarLabelTurno() {
+        if (!gestorPartida.getPartida().isFinalizada()) {
+            Jugador jActual = gestorPartida.getPartida().getJugadorActual();
+            if (iceCubesMap != null) {
+                for (Map.Entry<Jugador, VBox> entry : iceCubesMap.entrySet()) {
+                    entry.getValue().getStyleClass().remove("ice-cube-active");
+                    if (entry.getKey() == jActual)
+                        entry.getValue().getStyleClass().add("ice-cube-active");
+                }
+            }
         }
     }
 
-    // --- ACCIONES DE BOTONES ---
+    // ══════════════════════════════════════════════════
+    //  LÓGICA DE DADO Y MOVIMIENTO
+    // ══════════════════════════════════════════════════
 
     @FXML
-    public void botonTirarDado() {
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        if (actual instanceof modelo.jugador.Foca) return;
-        
-        dado.setDisable(true);
-        
-        int resultado = gestorPartida.tirarDado(actual);
-        dadoResultText.setText("Ha salido: " + resultado);
-        eventos.setText("⏳ " + actual.getNombre() + " avanza " + resultado + " casillas...");
+    public void handleDado() {
+        if (gestorPartida.getPartida().isFinalizada()) return;
+        Jugador j = gestorPartida.getPartida().getJugadorActual();
+        if (j instanceof modelo.jugador.Foca) return;
 
-        animarPasoAPaso(actual, actual.getPosicion(), resultado, () -> {
-            String log = gestorPartida.procesarTurnoConAvance(actual, resultado);
-            eventos.setText(log.trim());
-            actualizarInventarioVisual();
-            actualizarPosicionesVisuales();
+        int res = gestorPartida.tirarDado(j);
+        dadoResultText.setText("Ha salido: " + res);
+        iniciarMovimientoAnimado(j, res);
+    }
 
-            if (gestorPartida.getPartida().isFinalizada()) {
-                mostrarFinDePartida();
-                return;
-            }
+    private void iniciarMovimientoAnimado(Jugador j, int avance) {
+        int posFisicaInicio = j.getPosicion();
+        appendLog(j, "avanza " + avance + " casillas...");
 
-            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(2.5));
-            pause.setOnFinished(ev -> botonFinalizarTurno());
-            pause.play();
+        animarPasoAPaso(j, posFisicaInicio, avance, () -> {
+            j.setPosicion(posFisicaInicio);
+
+            int targetPos = Math.min(posFisicaInicio + avance,
+                    gestorPartida.getPartida().getTablero().getTamaño() - 1);
+            boolean bribed = comprobarSobornoEnCasilla(j, targetPos);
+
+            String log = gestorPartida.procesarTurnoConAvance(j, avance);
+            if (log != null && !log.isEmpty()) appendLog(j, log.trim());
+            
+            concluirTurno();
         });
     }
 
-    @FXML
-    public void botonUsarObjeto() {
-        System.out.println("Selector de objetos...");
+    // ══════════════════════════════════════════════════
+    //  ANIMACIÓN PASO A PASO SOBRE LA PASARELA
+    // ══════════════════════════════════════════════════
+
+    private void animarPasoAPaso(Jugador j, int posActual, int pasosRestantes, Runnable onFinish) {
+        if (pasosRestantes <= 0) { onFinish.run(); return; }
+
+        int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
+        if (j.getPosicion() >= maxPos) { onFinish.run(); return; }
+
+        int posNueva = j.getPosicion() + 1;
+        ImageView ficha = getFichaDeJugador(j);
+        if (ficha == null) { onFinish.run(); return; }
+
+        // Posición visual actual (layout + translate)
+        double startX = ficha.getLayoutX() + ficha.getTranslateX();
+        double startY = ficha.getLayoutY() + ficha.getTranslateY();
+
+        // Destino en coordenadas del pane
+        double[] target = imageToPaneCoords(PATH_IMG[posNueva][0], PATH_IMG[posNueva][1]);
+        double newLayoutX = target[0] - TOKEN_SIZE / 2.0;
+        double newLayoutY = target[1] - TOKEN_SIZE / 2.0;
+
+        // Mover lógicamente y reposicionar la ficha de forma invisible en el destino
+        j.setPosicion(posNueva);
+        ficha.setLayoutX(newLayoutX);
+        ficha.setLayoutY(newLayoutY);
+        // Desplazarse visualmente de vuelta al origen para animar
+        ficha.setTranslateX(startX - newLayoutX);
+        ficha.setTranslateY(startY - newLayoutY);
+
+        // Animar hasta la posición destino
+        TranslateTransition tt = new TranslateTransition(Duration.millis(280), ficha);
+        tt.setToX(0); tt.setToY(0);
+        tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        tt.setOnFinished(e -> animarPasoAPaso(j, posNueva, pasosRestantes - 1, onFinish));
+        tt.play();
+        ficha.toFront();
     }
 
-    @FXML
-    public void botonFinalizarTurno() {
+    // ══════════════════════════════════════════════════
+    //  SOBORNO / INTERACCIÓN FOCA
+    // ══════════════════════════════════════════════════
+
+    private boolean comprobarSobornoEnCasilla(Jugador j, int targetPos) {
+        Pinguino pTarget = null;
+        modelo.jugador.Foca fTarget = null;
+
+        if (j instanceof Pinguino) {
+            pTarget = (Pinguino) j;
+            ArrayList<Jugador> listaJugadores = gestorPartida.getPartida().getJugadores();
+            boolean focaEncontrada = false;
+            int idx = 0;
+            while (idx < listaJugadores.size() && !focaEncontrada) {
+                Jugador item = listaJugadores.get(idx);
+                if (item instanceof modelo.jugador.Foca && item.getPosicion() == targetPos) {
+                    fTarget = (modelo.jugador.Foca) item; 
+                    focaEncontrada = true;
+                }
+                idx++;
+            }
+        } else if (j instanceof modelo.jugador.Foca) {
+            fTarget = (modelo.jugador.Foca) j;
+            ArrayList<Jugador> listaJugadores = gestorPartida.getPartida().getJugadores();
+            boolean pinguinoEncontrado = false;
+            int idx = 0;
+            while (idx < listaJugadores.size() && !pinguinoEncontrado) {
+                Jugador item = listaJugadores.get(idx);
+                if (item instanceof Pinguino && item.getPosicion() == targetPos) {
+                    pTarget = (Pinguino) item; 
+                    pinguinoEncontrado = true;
+                }
+                idx++;
+            }
+        }
+
+        if (pTarget != null && fTarget != null && !fTarget.isSoborno()) {
+            int nPeces = pTarget.getInventario().contarPorTipo("Pez");
+            if (nPeces > 0) {
+                // Soborno automático
+                gestorPartida.getGestorJugador().jugadorUsaItem(pTarget, "Pez");
+                fTarget.setSoborno(true);
+                fTarget.setTurnosBloqueada(2);
+                appendLog(pTarget, "usa automáticamente un pez para entretener a la foca.");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ══════════════════════════════════════════════════
+    //  CONCLUSIÓN DE TURNO Y ANIMACIÓN
+    // ══════════════════════════════════════════════════
+
+    private void concluirTurno() {
+        actualizarPosicionesVisuales();
         if (gestorPartida.getPartida().isFinalizada()) {
             mostrarFinDePartida();
-            return;
-        }
-        gestorPartida.siguienteTurno();
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        actualizarInventarioVisual();
-        String nombreActual = actual.getNombre();
-        eventos.setText("▶ Turno de: " + nombreActual);
-        if (turnLabel != null) turnLabel.setText("▶ Turno de: " + nombreActual);
-        
-        if (actual instanceof modelo.jugador.Foca) {
-            dado.setDisable(true);
-            jugarTurnoFoca();
         } else {
-            dado.setDisable(false);
+            gestorPartida.avanzarTurno();
+            Jugador jNuevo = gestorPartida.getPartida().getJugadorActual();
+            mostrarAnimacionTurno(jNuevo, () -> {
+                actualizarLabelTurno();
+                actualizarInventarioVisual();
+                if (jNuevo instanceof modelo.jugador.Foca) jugarTurnoFoca();
+            });
         }
     }
 
-    private void jugarTurnoFoca() {
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        eventos.setText("🦭 La Foca está pensando...");
+    private void mostrarAnimacionTurno(Jugador j, Runnable onFinish) {
+        if (turnAnimationOverlay == null) { onFinish.run(); return; }
+
+        turnAnimationText.setText("¡Turno de " + j.getNombre() + "!");
+        turnAnimationSkin.setImage(new Image("/resources/images/skins/" + j.getSkin()));
         
-        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(1));
-        pause.setOnFinished(e -> {
-            int avance = gestorPartida.tirarDado(actual);
-            dadoResultText.setText("Foca: " + avance);
-            eventos.setText("🦭 La Foca avanza " + avance + " casillas...");
+        // Setup inicial transparente y escalado
+        turnAnimationOverlay.setOpacity(0);
+        turnAnimationOverlay.setVisible(true);
+        turnAnimationOverlay.toFront();
+        
+        turnAnimationSkin.setScaleX(1.8);
+        turnAnimationSkin.setScaleY(1.8);
+        turnAnimationSkin.setTranslateX(0); // Asegurar que esté centrado
+        
+        turnAnimationText.setTranslateY(30);
+        turnAnimationText.setOpacity(0);
 
-            animarPasoAPaso(actual, actual.getPosicion(), avance, () -> {
-                String log = gestorPartida.procesarTurnoConAvance(actual, avance);
-                eventos.setText("🦭 FOCA:\n" + log.trim());
-                actualizarPosicionesVisuales();
+        // 1. Fundido suave del fondo
+        javafx.animation.FadeTransition fadeBg = new javafx.animation.FadeTransition(Duration.millis(400), turnAnimationOverlay);
+        fadeBg.setToValue(1.0);
 
-                if (gestorPartida.getPartida().isFinalizada()) {
-                    mostrarFinDePartida();
-                    return;
-                }
+        // 2. Zoom out suave (Cinematic Focus)
+        ScaleTransition zoomOut = new ScaleTransition(Duration.millis(700), turnAnimationSkin);
+        zoomOut.setToX(1.0); zoomOut.setToY(1.0);
+        zoomOut.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
 
-                javafx.animation.PauseTransition pause2 = new javafx.animation.PauseTransition(Duration.seconds(2.5));
-                pause2.setOnFinished(ev -> botonFinalizarTurno());
-                pause2.play();
-            });
+        // 3. Entrada del texto (Slide + Fade)
+        javafx.animation.FadeTransition fadeText = new javafx.animation.FadeTransition(Duration.millis(500), turnAnimationText);
+        fadeText.setDelay(Duration.millis(200));
+        fadeText.setToValue(1.0);
+        
+        javafx.animation.TranslateTransition slideText = new javafx.animation.TranslateTransition(Duration.millis(500), turnAnimationText);
+        slideText.setDelay(Duration.millis(200));
+        slideText.setToY(0);
+        slideText.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+
+        // 4. Salida elegante
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.millis(1200));
+        javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(Duration.millis(400), turnAnimationOverlay);
+        
+        pause.setOnFinished(e -> fadeOut.play());
+        fadeOut.setOnFinished(e -> {
+            turnAnimationOverlay.setVisible(false);
+            onFinish.run();
         });
+
+        // Iniciar orquestación
+        fadeBg.play();
+        zoomOut.play();
+        fadeText.play();
+        slideText.play();
         pause.play();
     }
 
+    private void jugarTurnoFoca() {
+        modelo.jugador.Foca foca = (modelo.jugador.Foca) gestorPartida.getPartida().getJugadorActual();
+        
+        // Si la foca está bloqueada, informamos y pasamos turno rápido
+        if (foca.getTurnosBloqueada() > 0) {
+            String log = gestorPartida.procesarTurnoFoca(foca);
+            appendLog(foca, log.trim());
+            concluirTurno();
+            return;
+        }
+
+        appendLog(foca, "Turno de la IA...");
+        
+        // Usamos PauseTransition en lugar de Timer para no crear hilos externos (más limpio para primero)
+        javafx.animation.PauseTransition pausa = new javafx.animation.PauseTransition(Duration.seconds(1));
+        pausa.setOnFinished(e -> {
+            int avance = gestorPartida.tirarDado(foca);
+            dadoResultText.setText("Foca tira: " + avance);
+            appendLog(foca, "tira el dado: " + avance);
+            iniciarMovimientoAnimado(foca, avance);
+        });
+        pausa.play();
+    }
+
     private void mostrarFinDePartida() {
-        dado.setDisable(true);
-        rapido.setDisable(true);
-        lento.setDisable(true);
-        peces.setDisable(true);
-        nieve.setDisable(true);
         Jugador ganador = gestorPartida.getPartida().getGanador();
-        String nombre = (ganador != null) ? ganador.getNombre() : "Desconocido";
-        dadoResultText.setText("FIN");
-        eventos.setText("🏆 ¡PARTIDA TERMINADA!\n¡" + nombre + " ha ganado la partida!\n\nPulsa 'New' para jugar de nuevo.");
+        appendLog(ganador, "¡HA GANADO LA PARTIDA!");
+        dado.setDisable(true);
+        handleSaveGame(); // Guardado automático al finalizar
+
+        // Pop-up de fin de partida
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("¡Fin de la Partida!");
+            alert.setHeaderText(null);
+            alert.setContentText("🎊 ¡Ha ganado " + ganador.getNombre() + "! 🎊");
+            
+            javafx.scene.control.ButtonType botonMenu = new javafx.scene.control.ButtonType("Salir al Menú");
+            alert.getButtonTypes().setAll(botonMenu);
+
+            alert.showAndWait().ifPresent(response -> {
+                if (response == botonMenu) {
+                    handleGoToMenu();
+                }
+            });
+        });
     }
 
-    @FXML
-    public void guardarPartida() {
-        gestorPartida.guardarPartida();
-        eventos.setText("Partida guardada en BD.");
+    // ══════════════════════════════════════════════════
+    //  ACCIONES DE MENÚ
+    // ══════════════════════════════════════════════════
+
+    @FXML private void handleSaveGame() {
+        controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
+        helper.guardarBBDD(controlador.gestionbbdd.BBDD.conectarPredeterminado(),
+                gestorPartida.getPartida(), usuarioLogueado);
+        appendLog(null, "Partida guardada correctamente.");
     }
 
-    @FXML
-    public void cargarPartida() {
-        // Por simplificación cargamos la ID 1 para el ejemplo
-        gestorPartida.cargaPartida(1);
-        refrescarPartida();
-        eventos.setText("Partida cargada.");
-    }
-
-    // --- Aliases para mantener compatibilidad con FXML actual hasta que se actualice ---
-    @FXML private void handleDado(ActionEvent event) { botonTirarDado(); }
-    @FXML private void handleRapido() { usarItemEspecifico("Dado Rapido"); }
-    @FXML private void handleLento() { usarItemEspecifico("Dado Lento"); }
-    @FXML private void handlePeces() { usarItemEspecifico("Pez"); }
-    @FXML private void handleNieve() { usarItemEspecifico("Bola de Nieve"); }
-    @FXML private void handleNewGame() { iniciarPartida(); }
-    @FXML private void handleSaveGame() { guardarPartida(); }
-    @FXML private void handleLoadGame() { cargarPartida(); }
+    @FXML private void handleLoadGame() { toggleMenu(); handleGoToMenu(); }
+    @FXML private void handleNewGame()  { toggleMenu(); handleGoToMenu(); }
     @FXML private void handleQuitGame() { System.exit(0); }
 
-    @FXML
-    public void toggleMenu() {
-        boolean visible = !menuOverlay.isVisible();
-        menuOverlay.setVisible(visible);
-        menuOverlay.setManaged(visible);
-        if (visible) menuOverlay.toFront();
-    }
-
-    @FXML
-    public void handleGoToMenu(ActionEvent event) {
+    @FXML private void handleGoToMenu() {
+        stopMusic();
         try {
-            java.net.URL fxmlUrl = getClass().getResource("/resources/PantallaMenu.fxml");
-            if (fxmlUrl == null) fxmlUrl = getClass().getClassLoader().getResource("resources/PantallaMenu.fxml");
+            FXMLLoader l = new FXMLLoader(getClass().getResource("/resources/fxml/PantallaMenu.fxml"));
+            Stage st = (Stage) tablero.getScene().getWindow();
+            Scene s = st.getScene();
+            s.setRoot(l.load());
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML private void toggleMenu() {
+        menuOverlay.setVisible(!menuOverlay.isVisible());
+        menuOverlay.setManaged(menuOverlay.isVisible());
+    }
+
+    // ══════════════════════════════════════════════════
+    //  ÍTEMS DEL INVENTARIO
+    // ══════════════════════════════════════════════════
+
+    @FXML private void handleRapido() { usarItemEnTurno("Dado Rapido"); }
+    @FXML private void handleLento()  { usarItemEnTurno("Dado Lento");  }
+    @FXML private void handlePeces()  { usarItemEnTurno("Pez");         }
+    @FXML private void handleNieve()  { usarItemEnTurno("Bola de Nieve"); }
+    @FXML private void handleMoto()   { usarItemEnTurno("Moto de Nieve"); }
+
+    private void usarItemEnTurno(String nombreItem) {
+        if (gestorPartida.getPartida().isFinalizada()) return;
+        Jugador actual = gestorPartida.getPartida().getJugadorActual();
+        if (!(actual instanceof Pinguino)) return;
+
+        Pinguino p = (Pinguino) actual;
+        
+        // Buscar el ítem en el inventario
+        modelo.items.Item item = p.getInventario().obtenerItemPorNombre(nombreItem);
+        if (item == null) return;
+
+        // Lógica especial para DADOS (Rápido o Lento)
+        if (item instanceof modelo.items.Dado) {
+            modelo.items.Dado d = (modelo.items.Dado) item;
+            int avance = d.tirarRandom();
             
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(fxmlUrl);
-            javafx.scene.Parent root = loader.load();
+            // Consumir el ítem y loguear
+            p.getInventario().quitarItem(d);
+            appendLog(p, "usa un " + nombreItem + " y saca un " + avance + "!");
+            dadoResultText.setText("Especial: " + avance);
             
-            javafx.scene.Scene scene = new javafx.scene.Scene(root);
-            javafx.stage.Stage stage = (javafx.stage.Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("El Juego de Pingu - Menú");
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+            // Iniciar movimiento animado (esto al final procesará el turno)
+            iniciarMovimientoAnimado(p, avance);
+        } 
+        else {
+            // Lógica para otros ítems (Moto, Pez, etc.)
+            int posPrevia = p.getPosicion();
+            gestorPartida.getGestorJugador().jugadorUsaItem(p, nombreItem);
 
-    private void usarItemEspecifico(String nombre) {
-        Jugador j = gestorPartida.getPartida().getJugadorActual();
-        if (j instanceof Pinguino) {
-            Pinguino p = (Pinguino) j;
-            Item item = p.getInventario().obtenerItemPorNombre(nombre);
-            
-            if (item != null) {
-                if (nombre.equals("Dado Lento") || nombre.equals("Dado Rapido")) {
-                    p.getInventario().quitarItem(item);
-                    dado.setDisable(true);
-                    
-                    int resultado = ((Dado)item).tirarRandom();
-                    dadoResultText.setText("Dado Especial: " + resultado);
-                    eventos.setText("⏳ " + p.getNombre() + " usa dado especial, avanza " + resultado + " casillas...");
-                    
-                    animarPasoAPaso(j, j.getPosicion(), resultado, () -> {
-                        String log = gestorPartida.procesarTurnoConAvance(j, resultado);
-                        eventos.setText(log.trim());
-                        actualizarInventarioVisual();
-                        actualizarPosicionesVisuales();
-
-                        if (gestorPartida.getPartida().isFinalizada()) {
-                            mostrarFinDePartida();
-                            return;
-                        }
-
-                        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(Duration.seconds(2.5));
-                        pause.setOnFinished(ev -> botonFinalizarTurno());
-                        pause.play();
-                    });
-                } else if (nombre.equals("Bola de Nieve")) {
-                    p.getInventario().quitarItem(item);
-                    eventos.setText("Has lanzado una Bola de Nieve. (Efecto no implementado visual guiado)");
-                } else if (nombre.equals("Pez")) {
-                    eventos.setText("El pez se usa automáticamente al encontrarse con la Foca!");
-                }
-                actualizarInventarioVisual();
-            } else {
-                eventos.setText("No tienes " + nombre);
+            if (p.getPosicion() != posPrevia) {
+                // Caso de la Moto de Nieve: avance directo (podríamos animarlo pero por ahora es instantáneo)
+                javafx.application.Platform.runLater(this::actualizarPosicionesVisuales);
+                appendLog(p, "ha usado " + nombreItem + "!");
             }
         }
-    }
-
-    /**
-     * Anima la ficha casilla a casilla.
-     * Mueve el token visualmente paso a paso (150ms/casilla) y cuando
-     * llega al destino llama a onFinished.
-     */
-    private void animarPasoAPaso(Jugador j, int posOrigen, int pasos, Runnable onFinished) {
-        if (pasos <= 0) {
-            if (onFinished != null) onFinished.run();
-            return;
-        }
-
-        int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
-        int destino = Math.min(posOrigen + pasos, maxPos);
-        int totalPasos = destino - posOrigen;
-
-        avanzarUnPaso(j, posOrigen, totalPasos, 0, onFinished);
-    }
-
-    private void avanzarUnPaso(Jugador j, int inicio, int totalPasos, int pasoActual, Runnable onFinished) {
-        if (pasoActual >= totalPasos) {
-            if (onFinished != null) onFinished.run();
-            return;
-        }
-
-        int posActual = inicio + pasoActual;
-        int maxPos = gestorPartida.getPartida().getTablero().getTamaño() - 1;
-
-        // Si ya estamos en el límite, no hay donde avanzar: terminar
-        if (posActual >= maxPos) {
-            if (onFinished != null) onFinished.run();
-            return;
-        }
-
-        int posSiguienteRaw = posActual + 1;
-        // Clamp: si llegamos al final, animamos este último paso y luego terminamos
-        boolean esUltimoPorLimite = (posSiguienteRaw >= maxPos);
-        final int posSiguiente = Math.min(posSiguienteRaw, maxPos); // final → usable en lambda
-
-        int rowActual = posActual / COLUMNS;
-        int colActual = posActual % COLUMNS;
-        int rowSig    = posSiguiente / COLUMNS;
-        int colSig    = posSiguiente % COLUMNS;
-
-        double cellWidth  = tablero.getWidth()  / COLUMNS;
-        double cellHeight = tablero.getHeight() / 10;
-
-        double dx = (colSig - colActual) * cellWidth;
-        double dy = (rowSig - rowActual) * cellHeight;
-
-        Circle token = getTokenDeJugador(j);
-
-        TranslateTransition slide = new TranslateTransition(Duration.millis(150), token);
-        slide.setByX(dx);
-        slide.setByY(dy);
-        slide.setOnFinished(e -> {
-            // Snap al GridPane
-            token.setTranslateX(0);
-            token.setTranslateY(0);
-            GridPane.setRowIndex(token, rowSig);
-            GridPane.setColumnIndex(token, colSig);
-
-            // Log de la casilla actual
-            modelo.tablero.Casilla c = gestorPartida.getPartida().getTablero().getCasillaEnPosicion(posSiguiente);
-            int total = Math.min(totalPasos, maxPos - inicio); // pasos reales posibles
-            if (c != null) {
-                eventos.setText("Paso " + (pasoActual + 1) + "/" + total
-                        + " — casilla " + posSiguiente + " (" + c.getClass().getSimpleName() + ")");
-            } else {
-                eventos.setText("Paso " + (pasoActual + 1) + "/" + total
-                        + " — casilla " + posSiguiente);
-            }
-
-            // Si alcanzamos el límite del tablero, terminamos
-            if (esUltimoPorLimite || pasoActual + 1 >= totalPasos) {
-                if (onFinished != null) onFinished.run();
-                return;
-            }
-
-            // Pausa de 80ms antes del siguiente paso
-            javafx.animation.PauseTransition gap = new javafx.animation.PauseTransition(Duration.millis(80));
-            gap.setOnFinished(ev -> avanzarUnPaso(j, inicio, totalPasos, pasoActual + 1, onFinished));
-            gap.play();
-        });
-        slide.play();
-    }
-
-    private Circle getTokenDeJugador(Jugador j) {
-        ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
         
-        if (j instanceof modelo.jugador.Foca) {
-            int focaIndex = 0;
-            for (Jugador jug : jugadores) {
-                if (jug == j) break;
-                if (jug instanceof modelo.jugador.Foca) focaIndex++;
-            }
-            if (focaIndex < fichasFocas.size()) return fichasFocas.get(focaIndex);
-            return PFoca;
-        }
-        
-        int pingIndex = 0;
-        for (Jugador jug : jugadores) {
-            if (jug == j) break;
-            if (jug instanceof Pinguino) pingIndex++;
-        }
-        
-        if (pingIndex < fichasPinguinos.size()) {
-            return fichasPinguinos.get(pingIndex);
-        }
-        
-        return P1;
-    }
-
-    private void actualizarPosicionesVisuales() {
-        if (gestorPartida.getPartida() == null) return;
-        
-        for (Jugador j : gestorPartida.getPartida().getJugadores()) {
-            Circle token = getTokenDeJugador(j);
-            if (token != null) {
-                GridPane.setRowIndex(token, j.getPosicion() / COLUMNS);
-                GridPane.setColumnIndex(token, j.getPosicion() % COLUMNS);
-                token.setTranslateX(0);
-                token.setTranslateY(0);
-            }
-        }
-    }
-
-    public void setGestorPartida(GestorPartida gestorPartida) {
-        this.gestorPartida = gestorPartida;
+        actualizarInventarioVisual();
     }
 }

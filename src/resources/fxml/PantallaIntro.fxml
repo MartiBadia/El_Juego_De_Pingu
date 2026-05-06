@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.media.MediaView?>
+
+<StackPane fx:id="rootPane"
+           xmlns="http://javafx.com/javafx/21.0.10"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="vista.PantallaIntro"
+           stylesheets="/resources/css/PantallaIntro.css"
+           styleClass="root">
+
+    <!-- Fondo de respaldo tras el video -->
+    <ImageView fx:id="fallbackImage" preserveRatio="false" styleClass="intro-background">
+        <Image url="/resources/images/fondos/pantalla_definitiva.png"/>
+    </ImageView>
+
+    <!-- Contenedor del video -->
+    <StackPane fx:id="videoContainer">
+        <MediaView fx:id="mediaView" preserveRatio="true"/>
+    </StackPane>
+
+    <!-- Cuadro de mensaje estilo Pokémon (se muestra al final) -->
+    <VBox fx:id="promptContainer" alignment="BOTTOM_CENTER" visible="false">
+        <padding>
+            <javafx.geometry.Insets bottom="100"/>
+        </padding>
+        
+        <StackPane styleClass="message-box" maxWidth="600">
+            <StackPane styleClass="message-inner">
+                <Label text="PULSA LA BARRA ESPACIADORA PARA EMPEZAR A JUGAR"
+                       styleClass="message-text"/>
+            </StackPane>
+        </StackPane>
+    </VBox>
+
+</StackPane>

@@ -1,0 +1,36 @@
+.root {
+    -fx-background-color: black;
+}
+
+/* Fondo que se muestra tras el video */
+.intro-background {
+    -fx-opacity: 0.8;
+}
+
+/* Contenedor del mensaje estilo Pokémon */
+.message-box {
+    -fx-background-color: white;
+    -fx-border-color: #2c3e50;
+    -fx-border-width: 4;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    /* Borde doble estilo retro */
+    -fx-padding: 2;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 10, 0, 0, 5);
+}
+
+.message-inner {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 15 30;
+    -fx-background-color: white;
+}
+
+.message-text {
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}

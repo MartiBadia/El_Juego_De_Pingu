@@ -10,6 +10,7 @@ public class Inventario {
     public static final int MAX_DADOS = 3;    
     public static final int MAX_PECES = 2;        
     public static final int MAX_BOLAS_NIEVE = 6; 
+    public static final int MAX_MOTOS = 1;
 
     public Inventario() {
         this.lista = new ArrayList<>();
@@ -36,6 +37,9 @@ public class Inventario {
         if (item instanceof BolaDeNieve && contarPorTipo("Bola de Nieve") >= MAX_BOLAS_NIEVE) {
         	return false;
         }
+        if (item instanceof MotoNieve && contarPorTipo("Moto de Nieve") >= MAX_MOTOS) {
+            return false;
+        }
         lista.add(item);
         return true;
     }
@@ -46,10 +50,16 @@ public class Inventario {
     }
     
     public Item obtenerItemPorNombre(String nombre) {
-        for (Item i : lista) {
-            if (i.getNombre().equals(nombre)) return i;
+        Item encontrado = null;
+        int i = 0;
+        while (i < lista.size() && encontrado == null) {
+            Item item = lista.get(i);
+            if (item.getNombre().equals(nombre)) {
+                encontrado = item;
+            }
+            i++;
         }
-        return null;
+        return encontrado;
     }
 
     // Cuenta ítems de un tipo concreto por nombre
@@ -63,9 +73,18 @@ public class Inventario {
 
     // Devuelve un ítem aleatorio del inventario (para el evento "perder objeto aleatorio")
     public Item obtenerItemAleatorio() {
-        if (lista.isEmpty()) {
-        	return null;
+        if (lista.isEmpty()) return null;
+        
+        // Intentar no perder el pez si hay otros objetos
+        ArrayList<Item> noPeces = new ArrayList<>();
+        for (Item it : lista) {
+            if (!(it instanceof Pez)) noPeces.add(it);
         }
+        
+        if (!noPeces.isEmpty()) {
+            return noPeces.get(new Random().nextInt(noPeces.size()));
+        }
+        
         return lista.get(new Random().nextInt(lista.size()));
     }
 

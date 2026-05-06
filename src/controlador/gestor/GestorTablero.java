@@ -4,6 +4,7 @@ import modelo.jugador.Jugador;
 import modelo.partida.Partida;
 import modelo.tablero.Casilla;
 import modelo.tablero.Tablero;
+import java.util.ArrayList;
 
 public class GestorTablero {
 
@@ -16,17 +17,13 @@ public class GestorTablero {
      */
     public void ejecutarCasilla(Partida partida, Jugador j) {
         Tablero tablero = partida.getTablero();
-        // Busca si la posición actual del jugador tiene una casilla especial
+        // Obtiene la casilla de la posición actual y ejecuta su acción
         Casilla c = tablero.getCasillaEnPosicion(j.getPosicion());
-        if (c != null) {
-            c.realizarAccion(partida, j);
-        }
+        c.realizarAccion(partida, j);
     }
 
     public void ejecutarCasilla(Partida partida, Jugador j, Casilla c) {
-        if (c != null) {
-            c.realizarAccion(partida, j);
-        }
+        c.realizarAccion(partida, j);
     }
 
     
@@ -35,15 +32,23 @@ public class GestorTablero {
      
     public void comprobarFinTurno(Partida partida) {
         int totalCasillas = partida.getTablero().getTamaño();
-
-        for (Jugador j : partida.getJugadores()) {
-            if (j.getPosicion() >= totalCasillas) {
-                // Este jugador ha llegado al final -> gana
-                partida.setFinalizada(true);
-                partida.setGanador(j);
-                System.out.println("¡" + j.getNombre() + " ha ganado la partida!");
-                return;
+        ArrayList<Jugador> jugadores = partida.getJugadores();
+        
+        Jugador ganador = null;
+        int i = 0;
+        while (i < jugadores.size() && ganador == null) {
+            Jugador j = jugadores.get(i);
+            if (j.getPosicion() >= totalCasillas - 1) {
+                ganador = j;
             }
+            i++;
+        }
+
+        if (ganador != null) {
+            // El primero que llega a la última casilla gana.
+            partida.setFinalizada(true);
+            partida.setGanador(ganador);
+            System.out.println("¡" + ganador.getNombre() + " ha ganado la partida!");
         }
     }
 }

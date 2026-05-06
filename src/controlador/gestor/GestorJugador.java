@@ -3,12 +3,14 @@ package controlador.gestor;
 import modelo.items.BolaDeNieve;
 import modelo.items.Dado;
 import modelo.items.Pez;
+import modelo.items.MotoNieve;
 import modelo.jugador.Foca;
 import modelo.jugador.Jugador;
 import modelo.jugador.Pinguino;
 import modelo.tablero.Tablero;
 
 import java.util.Random;
+import java.util.ArrayList;
 
 public class GestorJugador {
 
@@ -20,14 +22,29 @@ public class GestorJugador {
 
 
     public void jugadorUsaItem(Pinguino p, String nombreItem) {
-        for (modelo.items.Item item : new java.util.ArrayList<>(p.getInventario().getLista())) {
-            if (item.getNombre().equals(nombreItem)) {
-                p.getInventario().quitarItem(item);
-                System.out.println(p.getNombre() + " usa: " + nombreItem);
-                return;
+        ArrayList<modelo.items.Item> listaItems = p.getInventario().getLista();
+        modelo.items.Item itemAUsar = null;
+        
+        int i = 0;
+        while (i < listaItems.size() && itemAUsar == null) {
+            modelo.items.Item it = listaItems.get(i);
+            if (it.getNombre().equals(nombreItem)) {
+                itemAUsar = it;
             }
+            i++;
         }
-        System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
+
+        if (itemAUsar != null) {
+            p.getInventario().quitarItem(itemAUsar);
+            System.out.println(p.getNombre() + " usa: " + nombreItem);
+            
+            if (nombreItem.equals("Moto de Nieve")) {
+                p.moverPosicion(20); // Efecto de la moto: avanza 20 casillas
+                System.out.println(p.getNombre() + " ruge con la Moto de Nieve y avanza 20 casillas!");
+            }
+        } else {
+            System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
+        }
     }
 
     public void jugadorUsaNuevo(Pinguino p, String nombreItem) {
@@ -119,6 +136,19 @@ public class GestorJugador {
     }
 
 
+    /**
+     * Evento: el pingüino obtiene una moto de nieve (máximo 1).
+     */
+    public void pinguinoEventoMotoNieve(Pinguino p) {
+        boolean añadido = p.getInventario().añadirItem(new MotoNieve());
+        if (añadido) {
+            System.out.println(p.getNombre() + " obtiene una Moto de Nieve.");
+        } else {
+            System.out.println(p.getNombre() + " ya tiene una moto de nieve.");
+        }
+    }
+
+
     public void pinguinoLuchaPinguino(Pinguino p1, Pinguino p2) {
         System.out.println("¡Batalla! " + p1.getNombre() + " vs " + p2.getNombre());
         p1.gestionarBatalla(p2);
@@ -126,18 +156,21 @@ public class GestorJugador {
 
 
     public void focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
-        int nPeces = p.getInventario().contarPorTipo("Pez");
-        if (nPeces > 0) {
-            // Usar un pez para sobornar a la foca
+        if (f.isSoborno()) {
+            return;
+        }
+        
+        // AUTO-SOBORNO: Si tiene pez, lo usa automáticamente
+        if (p.getInventario().contarPorTipo("Pez") > 0) {
             jugadorUsaItem(p, "Pez");
             f.setSoborno(true);
             f.setTurnosBloqueada(2);
-            System.out.println(p.getNombre() + " soborna a la foca con un pez. Bloqueada 2 turnos.");
-        } else {
-            // La foca golpea al pingüino → agujero más cercano hacia atrás
-            f.golpearJugador(p, tablero);
-            System.out.println("¡La foca golpea a " + p.getNombre() + "! -> casilla " + p.getPosicion());
+            System.out.println("¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!");
+            return;
         }
+        
+        // Si no tiene pez, la foca golpea al pingüino → al inicio (posición 0)
+        f.golpearJugador(p, tablero);
     }
 
     // Versión sin tablero (compatibilidad con firma anterior)
@@ -156,6 +189,7 @@ public class GestorJugador {
             case "Bola": pinguinoEventoBolaDeNieve(p); break;
             case "DadoRapido": pinguinoEventoDadoRapido(p); break;
             case "DadoLento": pinguinoEventoDadoLento(p); break;
+            case "MotoNieve": pinguinoEventoMotoNieve(p); break;
         }
     }
 

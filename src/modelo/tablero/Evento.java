@@ -26,23 +26,26 @@ public class Evento extends Casilla {
         double azar = Math.random();
         String obtenido;
 
-        if (azar < 0.25) {
+        if (azar < 0.20) {
             gestorJ.pinguinoEventoPez(ping);
-            obtenido = "🐟 ¡Has obtenido un Pez!";
-        } else if (azar < 0.60) {
+            obtenido = "¡Has obtenido un Pez!";
+        } else if (azar < 0.45) {
             int antes = ping.getInventario().contarPorTipo("Bola de Nieve");
             gestorJ.pinguinoEventoBolaDeNieve(ping);
             int despues = ping.getInventario().contarPorTipo("Bola de Nieve");
-            obtenido = "❄️ ¡Has obtenido " + (despues - antes) + " Bola(s) de Nieve!";
-        } else if (azar < 0.70) {
+            obtenido = "¡Has obtenido " + (despues - antes) + " Bola(s) de Nieve!";
+        } else if (azar < 0.60) {
             gestorJ.pinguinoEventoDadoRapido(ping);
-            obtenido = "🎲 ¡Has obtenido un Dado Rápido (5-10)!";
-        } else {
+            obtenido = "¡Has obtenido un Dado Rápido (5-10)!";
+        } else if (azar < 0.80) {
             gestorJ.pinguinoEventoDadoLento(ping);
-            obtenido = "🎲 ¡Has obtenido un Dado Lento (1-3)!";
+            obtenido = "¡Has obtenido un Dado Lento (1-3)!";
+        } else {
+            gestorJ.pinguinoEventoMotoNieve(ping);
+            obtenido = "¡Has obtenido una Moto de Nieve!";
         }
 
-        return "❓ Casilla Evento: " + obtenido;
+        return "Casilla Evento: " + obtenido;
     }
 
     @Override

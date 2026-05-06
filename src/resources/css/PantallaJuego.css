@@ -1,0 +1,419 @@
+.root {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-background-color: #000000;
+}
+
+/* Forzamos la fuente en todos los elementos secundarios */
+.label,
+.button,
+.text-field,
+.text-area,
+.menu,
+.menu-item,
+.check-box,
+.radio-button {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+
+.scene-background {
+    -fx-background-color: #000000;
+}
+
+.context-menu {
+    -fx-background-color: #112240;
+    -fx-border-color: #1a3557;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.menu-item:hover {
+    -fx-background-color: #1a3557;
+}
+
+.menu-item .label {
+    -fx-text-fill: #e8f4fd;
+}
+
+/* =================== TABLERO =================== */
+.board {
+    -fx-background-color: transparent;
+    -fx-background-image: url("/resources/images/ui/Airbrush-IMAGE-ENHANCER-1777299129168-1777299129168.png");
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center center;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.board-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.board-cell:hover {
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+    -fx-effect: dropshadow(gaussian, #00e5ff, 20, 0.7, 0, 0);
+}
+
+/* Textos de tipo de casilla */
+.cell-title {
+    -fx-fill: #4fc3f7;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.6), 8, 0.5, 0, 0);
+}
+
+.start-title {
+    -fx-fill: linear-gradient(to bottom, #c8e6c9, #2e7d32);
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-stroke: #1b5e20;
+    -fx-stroke-width: 0.8;
+    -fx-effect: dropshadow(two-pass-box, rgba(255, 255, 255, 0.7), 10, 0.4, 0, 0);
+}
+
+.finish-title {
+    -fx-fill: linear-gradient(to bottom, #fff9c4, #f57f17);
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-stroke: #bf360c;
+    -fx-stroke-width: 0.8;
+    -fx-effect: dropshadow(two-pass-box, rgba(255, 255, 255, 0.7), 10, 0.4, 0, 0);
+}
+
+.cell-type {
+    -fx-fill: #81d4fa;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.85;
+}
+
+/* =================== BARRA INFERIOR =================== */
+.bottom-bar {
+    -fx-background-image: url("/resources/images/ui/barra_horizontal.png");
+    -fx-background-size: 100% 150%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-padding: 40 40 20 40;
+    -fx-min-height: 250;
+}
+
+.bottom-bar .card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: none;
+}
+
+.bottom-bar .card-title,
+.bottom-bar .stat {
+    -fx-text-fill: white;
+    -fx-fill: white;
+}
+
+/* =================== PANEL LATERAL DERECHO =================== */
+.side-panel {
+    -fx-background-image: url("/resources/images/ui/vertical_hielo.png");
+    -fx-background-size: 100% 100%;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-border-width: 0;
+    -fx-pref-width: 515;
+    -fx-min-width: 515;
+    -fx-max-width: 600;
+    -fx-padding: 40 40 20 60;
+}
+
+.side-panel .card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-effect: none;
+    -fx-alignment: center;
+}
+
+/* Eliminar fondo del ScrollPane de eventos */
+.side-panel .objects-scroll,
+.side-panel .objects-scroll .viewport,
+.side-panel .objects-scroll .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.side-panel .card-title,
+.side-panel .big-text {
+    -fx-text-fill: black;
+    -fx-fill: black;
+    -fx-text-alignment: center;
+}
+
+.side-panel .big-text {
+    -fx-font-size: 28px;
+}
+
+.side-panel .events {
+    -fx-text-fill: white;
+    -fx-fill: white;
+    -fx-font-size: 16px;
+    -fx-text-alignment: left;
+    -fx-effect: dropshadow(three-pass-box, black, 2, 0.9, 0, 0);
+}
+
+/* =================== TARJETAS (CARDS) =================== */
+.card {
+    -fx-background-color: #001f3f;
+    -fx-background-radius: 0;
+    -fx-border-color: #1a4a72;
+    -fx-border-width: 1;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(two-pass-box, rgba(0, 0, 0, 0.5), 10, 0.4, 0, 4);
+}
+
+.card-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0;
+}
+
+.big-text {
+    -fx-fill: #ffffff;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+}
+
+.stat {
+    -fx-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.events {
+    -fx-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-line-spacing: 5;
+    -fx-font-weight: bold;
+}
+
+/* =================== FILAS DE INVENTARIO =================== */
+.row {
+    -fx-background-color: #111111;
+    -fx-background-radius: 4;
+    -fx-border-color: #1a3557;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-padding: 8 12;
+}
+
+/* =================== BOTONES =================== */
+.button {
+    -fx-background-radius: 4;
+    -fx-padding: 12 24;
+    -fx-background-color: #112240;
+    -fx-text-fill: #00e5ff;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+    -fx-border-color: #00e5ff;
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.3), 8, 0, 0, 0);
+}
+
+.button:hover {
+    -fx-background-color: #1f4570;
+    -fx-text-fill: white;
+    -fx-border-color: #81d4fa #0a1628 #0a1628 #81d4fa;
+}
+
+.button:pressed {
+    -fx-translate-x: 2;
+    -fx-translate-y: 2;
+    -fx-effect: none;
+}
+
+.button:disabled {
+    -fx-opacity: 0.4;
+    -fx-cursor: default;
+}
+
+/* Botón principal: Tirar Dado */
+.button.primary {
+    -fx-background-color: #0ea5e9;
+    -fx-text-fill: white;
+    -fx-border-color: #38bdf8 #0369a1 #0369a1 #38bdf8;
+    -fx-border-width: 3;
+}
+
+.btn-dice {
+    -fx-padding: 6 12;
+    -fx-font-size: 14px;
+}
+
+.button.secondary {
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
+    -fx-border-color: #10b981 #022c22 #022c22 #10b981;
+    -fx-border-width: 3;
+}
+
+.button.secondary:hover {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+}
+
+.btn-tiny {
+    -fx-padding: 4 10;
+    -fx-font-size: 12px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+/* =================== MENÚ HAMBURGUESA =================== */
+.hamburger-button {
+    -fx-background-color: rgba(10, 22, 40, 0.82);
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-text-fill: #4fc3f7;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 4);
+}
+
+.hamburger-button:hover {
+    -fx-background-color: rgba(26, 74, 114, 0.9);
+    -fx-text-fill: white;
+}
+
+.menu-overlay {
+    -fx-background-color: rgba(10, 22, 40, 0.92);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(79, 195, 247, 0.5);
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 100, 0, 0, 0);
+    -fx-padding: 30;
+}
+
+/* =================== SCROLL =================== */
+.objects-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-pref-height: 100;
+}
+
+.objects-scroll>.viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #1a4a72;
+    -fx-background-radius: 6;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+/* =================== FICHAS / TOKENS =================== */
+.player,
+.foca {
+    /* Los efectos se aplican dinámicamente desde Java para mayor precisión de color */
+    -fx-cursor: default;
+}
+
+/* Colores por jugador (Se mantienen como referencia o para otros usos, 
+   aunque el brillo principal es dinámico en Java) */
+#P1 {
+    -fx-opacity: 1.0;
+}
+
+#P2 {
+    -fx-opacity: 1.0;
+}
+
+#P3 {
+    -fx-opacity: 1.0;
+}
+
+#P4 {
+    -fx-opacity: 1.0;
+}
+
+#PFoca {
+    -fx-opacity: 1.0;
+}
+
+/* Rojo oscuro – Foca villana */
+
+/* Jugador activo — añade/quita esta clase desde Java */
+.current-player {
+    -fx-stroke: #facc15;
+    -fx-stroke-width: 3.5;
+    -fx-effect: dropshadow(gaussian, rgba(250, 204, 21, 0.9), 16, 0.7, 0, 0);
+}
+
+/* =================== CUBOS DE HIELO (ROSTER) =================== */
+.ice-cube {
+    -fx-background-color: rgba(10, 22, 40, 0.8);
+    -fx-border-color: #1a4a72;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 12;
+    -fx-alignment: TOP_CENTER;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 12, 0, 0, 6);
+}
+
+.ice-cube-active {
+    -fx-background-color: rgba(26, 74, 114, 0.95);
+    -fx-border-color: #00e5ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.5), 20, 0, 0, 0);
+}
+
+.ice-cube-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #00e5ff;
+    -fx-background-color: rgba(0, 0, 0, 0.3);
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+    -fx-alignment: CENTER;
+    -fx-text-alignment: CENTER;
+}
+
+/* =================== ANIMACIÓN TURNO =================== */
+.turn-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
+}
+
+.turn-overlay-text {
+    -fx-font-size: 64px;
+    -fx-font-weight: 900;
+    -fx-text-fill: linear-gradient(to bottom, #ffffff, #4fc3f7);
+    -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.8), 30, 0, 0, 0);
+}
+
+.ice-cube-label {
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #00e5ff;
+    -fx-background-color: rgba(10, 22, 40, 0.6);
+    -fx-padding: 8 20;
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.3), 5, 0, 0, 0);
+}
+
+.inventory-item-box {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-width: 1;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
