@@ -93,12 +93,12 @@
 /* =================== BARRA INFERIOR =================== */
 .bottom-bar {
     -fx-background-image: url("/resources/images/ui/barra_horizontal.png");
-    -fx-background-size: 100% 100%;
+    -fx-background-size: 100% 150%;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
     -fx-border-width: 0;
     -fx-padding: 40 40 20 40;
-    -fx-min-height: 240;
+    -fx-min-height: 250;
 }
 
 .bottom-bar .card {
@@ -109,8 +109,8 @@
 
 .bottom-bar .card-title,
 .bottom-bar .stat {
-    -fx-text-fill: black;
-    -fx-fill: black;
+    -fx-text-fill: white;
+    -fx-fill: white;
 }
 
 /* =================== PANEL LATERAL DERECHO =================== */
@@ -120,28 +120,45 @@
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
     -fx-border-width: 0;
-    -fx-pref-width: 280;
-    -fx-min-width: 260;
-    -fx-max-width: 320;
-    -fx-padding: 40 25 20 25;
+    -fx-pref-width: 515;
+    -fx-min-width: 515;
+    -fx-max-width: 600;
+    -fx-padding: 40 40 20 60;
 }
 
 .side-panel .card {
-    -fx-background-color: rgba(255, 255, 255, 0.5);
-    -fx-border-color: rgba(79, 195, 247, 0.4);
-    -fx-background-radius: 12;
-    -fx-border-radius: 12;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
     -fx-effect: none;
+    -fx-alignment: center;
+}
+
+/* Eliminar fondo del ScrollPane de eventos */
+.side-panel .objects-scroll,
+.side-panel .objects-scroll .viewport,
+.side-panel .objects-scroll .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 
 .side-panel .card-title,
-.side-panel .big-text,
-.side-panel .events {
+.side-panel .big-text {
     -fx-text-fill: black;
     -fx-fill: black;
+    -fx-text-alignment: center;
+}
+
+.side-panel .big-text {
+    -fx-font-size: 28px;
 }
 
 .side-panel .events {
+    -fx-text-fill: white;
+    -fx-fill: white;
+    -fx-font-size: 16px;
+    -fx-text-alignment: left;
     -fx-effect: dropshadow(three-pass-box, black, 2, 0.9, 0, 0);
 }
 
@@ -231,6 +248,11 @@
     -fx-border-width: 3;
 }
 
+.btn-dice {
+    -fx-padding: 6 12;
+    -fx-font-size: 14px;
+}
+
 .button.secondary {
     -fx-background-color: #064e3b;
     -fx-text-fill: #6ee7b7;
@@ -300,18 +322,33 @@
 }
 
 /* =================== FICHAS / TOKENS =================== */
-.player, .foca {
+.player,
+.foca {
     /* Los efectos se aplican dinámicamente desde Java para mayor precisión de color */
     -fx-cursor: default;
 }
 
 /* Colores por jugador (Se mantienen como referencia o para otros usos, 
    aunque el brillo principal es dinámico en Java) */
-#P1 { -fx-opacity: 1.0; }
-#P2 { -fx-opacity: 1.0; }
-#P3 { -fx-opacity: 1.0; }
-#P4 { -fx-opacity: 1.0; }
-#PFoca { -fx-opacity: 1.0; }
+#P1 {
+    -fx-opacity: 1.0;
+}
+
+#P2 {
+    -fx-opacity: 1.0;
+}
+
+#P3 {
+    -fx-opacity: 1.0;
+}
+
+#P4 {
+    -fx-opacity: 1.0;
+}
+
+#PFoca {
+    -fx-opacity: 1.0;
+}
 
 /* Rojo oscuro – Foca villana */
 
@@ -361,4 +398,22 @@
     -fx-font-weight: 900;
     -fx-text-fill: linear-gradient(to bottom, #ffffff, #4fc3f7);
     -fx-effect: dropshadow(gaussian, rgba(79, 195, 247, 0.8), 30, 0, 0, 0);
+}
+
+.ice-cube-label {
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #00e5ff;
+    -fx-background-color: rgba(10, 22, 40, 0.6);
+    -fx-padding: 8 20;
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 229, 255, 0.3), 5, 0, 0, 0);
+}
+
+.inventory-item-box {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-border-color: rgba(79, 195, 247, 0.3);
+    -fx-border-width: 1;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
 }

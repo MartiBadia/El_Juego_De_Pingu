@@ -47,7 +47,7 @@ public class Foca extends Jugador {
 
     public void golpearJugador(Pinguino p, modelo.tablero.Tablero tablero) {
         p.setPosicion(0);
-        System.out.println("Foca golpea a " + p.getNombre() + " y lo manda al inicio.");
+        System.out.println(" Foca golpea a " + p.getNombre() + " y lo manda al inicio.");
     }
 
     // Devuelve si la foca está sobornada

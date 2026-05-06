@@ -48,7 +48,7 @@ public class Agujero extends Casilla {
     @Override
     public String realizarAccionConLog(Partida p, Jugador j) {
         realizarAccion(p, j);
-        return "🕳️ ¡Caíste en un Agujero de Hielo! Te manda a la casilla " + posicionAgujeroAnterior + ".";
+        return "¡Caíste en un Agujero de Hielo! Te manda a la casilla " + posicionAgujeroAnterior + ".";
     }
 
     @Override

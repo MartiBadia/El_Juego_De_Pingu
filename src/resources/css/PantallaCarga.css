@@ -21,45 +21,45 @@
 /* ─── Título "CARGANDO..." ─── */
 .loading-title {
     -fx-font-size: 64px;
-    -fx-text-fill: #ffcb05; /* Amarillo Pokémon */
+    -fx-text-fill: #e8f4ff; 
     -fx-font-weight: 900;
-    -fx-effect: dropshadow(three-pass-box, #3b4cca, 8, 1, 0, 0); /* Borde azul Pokémon */
+    -fx-effect: dropshadow(three-pass-box, #0ea5e9, 8, 1, 0, 0); 
 }
 
 /* ─── Mensaje rotativo ─── */
 .loading-message {
     -fx-font-size: 20px;
-    -fx-text-fill: #1a1a1a;
+    -fx-text-fill: #0a1628;
     -fx-background-color: white;
-    -fx-border-color: #3b4cca;
+    -fx-border-color: #1a4a72;
     -fx-border-width: 4;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
     -fx-padding: 15 30;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);
 }
 
 /* ─── Contenedor de la barra de progreso ─── */
 .progress-track {
-    -fx-background-color: #eee;
-    -fx-background-radius: 0;
-    -fx-border-color: #333;
-    -fx-border-radius: 0;
-    -fx-border-width: 4;
+    -fx-background-color: #d1d5db;
+    -fx-background-radius: 20;
+    -fx-border-color: #1a4a72;
+    -fx-border-radius: 20;
+    -fx-border-width: 2;
     -fx-pref-height: 24;
 }
 
-/* ─── Barra de relleno - Estilo Retro ─── */
+/* ─── Barra de relleno ─── */
 .progress-fill {
-    -fx-background-color: linear-gradient(to bottom, #4ade80, #16a34a); /* Verde salud Pokémon */
-    -fx-background-radius: 0;
+    -fx-background-color: linear-gradient(to right, #0ea5e9, #0284c7); 
+    -fx-background-radius: 20;
 }
 
 /* ─── Porcentaje ─── */
 .progress-percent {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: #e8f4ff;
+    -fx-text-fill: #0a1628;
 }
 
 /* ─── Emoji pingüino decorativo ─── */

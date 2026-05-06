@@ -142,8 +142,8 @@ public class GestorPartida {
             
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro.getPosicion() == foca.getPosicion()) {
-                    log.append("Foca coincide con " + otro.getNombre() + " y golpea!\n");
-                    foca.golpearJugador((modelo.jugador.Pinguino) otro, partida.getTablero());
+                    log.append("Foca coincide con " + otro.getNombre() + "!\n");
+                    gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, foca, partida.getTablero());
                 }
             }
         }

@@ -73,9 +73,18 @@ public class Inventario {
 
     // Devuelve un ítem aleatorio del inventario (para el evento "perder objeto aleatorio")
     public Item obtenerItemAleatorio() {
-        if (lista.isEmpty()) {
-        	return null;
+        if (lista.isEmpty()) return null;
+        
+        // Intentar no perder el pez si hay otros objetos
+        ArrayList<Item> noPeces = new ArrayList<>();
+        for (Item it : lista) {
+            if (!(it instanceof Pez)) noPeces.add(it);
         }
+        
+        if (!noPeces.isEmpty()) {
+            return noPeces.get(new Random().nextInt(noPeces.size()));
+        }
+        
         return lista.get(new Random().nextInt(lista.size()));
     }
 

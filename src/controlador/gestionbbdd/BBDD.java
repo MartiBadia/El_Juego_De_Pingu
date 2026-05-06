@@ -55,12 +55,19 @@ public class BBDD {
 					}
 				}
 
-				// 2) Actualizar tabla PARTIDA para incluir el dueño de la partida
+				// 2) Actualizar tabla PARTIDA para incluir el dueño y el ganador
 				if (!existeColumna(con, "PARTIDA", "USERNAME")) {
 					String sqlAlt = "ALTER TABLE PARTIDA ADD USERNAME VARCHAR2(50) REFERENCES USUARIOS_JUEGO(USERNAME)";
 					try (Statement st = con.createStatement()) {
 						st.execute(sqlAlt);
 						System.out.println("Añadido dueño (USERNAME) a la tabla PARTIDA.");
+					}
+				}
+				if (!existeColumna(con, "PARTIDA", "GANADOR")) {
+					String sqlGanador = "ALTER TABLE PARTIDA ADD GANADOR VARCHAR2(50)";
+					try (Statement st = con.createStatement()) {
+						st.execute(sqlGanador);
+						System.out.println("Columna GANADOR añadida a la tabla PARTIDA.");
 					}
 				}
 
@@ -72,11 +79,49 @@ public class BBDD {
 						System.out.println("Columna SKIN añadida a JUGADOR_ESTADO.");
 					}
 				}
+				// 4) Aseguramos que USUARIOS_JUEGO tenga las columnas de estadísticas
+				if (!existeColumna(con, "USUARIOS_JUEGO", "PARTIDAS_GUANYADES")) {
+					String sqlStat1 = "ALTER TABLE USUARIOS_JUEGO ADD PARTIDAS_GUANYADES NUMBER DEFAULT 0";
+					try (Statement st = con.createStatement()) {
+						st.execute(sqlStat1);
+						System.out.println("Columna PARTIDAS_GUANYADES añadida.");
+					}
+				}
+				if (!existeColumna(con, "USUARIOS_JUEGO", "PARTIDAS_JUGADES")) {
+					String sqlStat2 = "ALTER TABLE USUARIOS_JUEGO ADD PARTIDAS_JUGADES NUMBER DEFAULT 0";
+					try (Statement st = con.createStatement()) {
+						st.execute(sqlStat2);
+						System.out.println("Columna PARTIDAS_JUGADES añadida.");
+					}
+				}
+				inicializarPLSQL(con);
 			} catch (SQLException e) {
 				System.err.println("Error durante la inicialización de tablas: " + e.getMessage());
 			}
 		}
 		return con;
+	}
+
+	private static void inicializarPLSQL(Connection con) {
+		String triggerSql = 
+			"CREATE OR REPLACE TRIGGER TRG_INCREMENTAR_GANADAS " +
+			"AFTER UPDATE OF FINALIZADA ON PARTIDA " +
+			"FOR EACH ROW " +
+			"WHEN (NEW.FINALIZADA = 1 AND OLD.FINALIZADA = 0) " +
+			"BEGIN " +
+			"    -- Solo incrementamos victorias si el ganador coincide con el usuario de la cuenta (el pinguino)\n" +
+			"    IF :NEW.GANADOR = :NEW.USERNAME THEN\n" +
+			"        UPDATE USUARIOS_JUEGO SET PARTIDAS_GUANYADES = PARTIDAS_GUANYADES + 1\n" +
+			"        WHERE USERNAME = :NEW.USERNAME;\n" +
+			"    END IF;\n" +
+			"END;";
+		
+		try (Statement st = con.createStatement()) {
+			st.execute(triggerSql);
+			System.out.println("Trigger TRG_INCREMENTAR_GANADAS actualizado.");
+		} catch (SQLException e) {
+			System.err.println("Error al inicializar trigger PL/SQL: " + e.getMessage());
+		}
 	}
 
 	private static boolean existeTabla(Connection con, String nombreTabla) throws SQLException {
@@ -295,10 +340,25 @@ public class BBDD {
 	}
 
 	/**
+	 * Incrementa en 1 el contador de partidas jugadas para un usuario.
+	 */
+	public void sumarPartidaJugada(Connection con, String username) {
+		if (con == null || username == null) return;
+		String sql = "UPDATE USUARIOS_JUEGO SET PARTIDAS_JUGADES = PARTIDAS_JUGADES + 1 WHERE USERNAME = ?";
+		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, username);
+			pstmt.executeUpdate();
+			System.out.println("Suma de partida jugada registrada para: " + username);
+		} catch (SQLException e) {
+			System.err.println("Error al sumar partida jugada: " + e.getMessage());
+		}
+	}
+
+	/**
 	 * Devuelve una lista con TODAS las partidas de UN usuario específico.
 	 */
 	public ArrayList<LinkedHashMap<String, String>> listarPartidas(Connection con, String username) {
-		String sql = "SELECT ID_PARTIDA, TURNOS, FINALIZADA FROM PARTIDA WHERE USERNAME = ? ORDER BY ID_PARTIDA DESC";
+		String sql = "SELECT ID_PARTIDA, TURNOS, FINALIZADA FROM PARTIDA WHERE USERNAME = ? AND FINALIZADA = 0 ORDER BY ID_PARTIDA DESC";
 		ArrayList<LinkedHashMap<String, String>> resultados = new ArrayList<>();
 		try (PreparedStatement pstmt = con.prepareStatement(sql)) {
 			pstmt.setString(1, username);
@@ -348,11 +408,22 @@ public class BBDD {
 
 	    int idPartida = p.getIdPartida();
 
+	    String ganador = "Nadie";
+	    if (p.isFinalizada() && p.getGanador() != null) {
+
+	        if (p.getGanador() instanceof modelo.jugador.Pinguino) {
+	            ganador = username; 
+	        } else {
+	            ganador = p.getGanador().getNombre();
+	        }
+	    }
+
 	    if (idPartida > 0) {
 	        // 1) UPDATE EN PARTIDA (Sobreescribimos)
 	        String sqlUpdate = "UPDATE PARTIDA SET TURNOS = " + p.getTurnos() + 
 	                           ", JUGADOR_ACTUAL = " + p.getJugadorActualIndice() + 
 	                           ", FINALIZADA = " + (p.isFinalizada() ? 1 : 0) +
+	                           ", GANADOR = '" + ganador + "'" +
 	                           " WHERE ID_PARTIDA = " + idPartida;
 	        update(con, sqlUpdate);
 
@@ -361,8 +432,8 @@ public class BBDD {
 	        delete(con, "DELETE FROM CASILLAS_ESPECIALES WHERE ID_PARTIDA = " + idPartida);
 	    } else {
 	        // 1) INSERT EN PARTIDA (Nueva partida)
-	        String sqlPartida = "INSERT INTO PARTIDA (TURNOS, JUGADOR_ACTUAL, FINALIZADA, USERNAME) VALUES ("
-	                + p.getTurnos() + ", " + p.getJugadorActualIndice() + ", " + (p.isFinalizada() ? 1 : 0) + ", '" + username + "')";
+	        String sqlPartida = "INSERT INTO PARTIDA (TURNOS, JUGADOR_ACTUAL, FINALIZADA, USERNAME, GANADOR) VALUES ("
+	                + p.getTurnos() + ", " + p.getJugadorActualIndice() + ", " + (p.isFinalizada() ? 1 : 0) + ", '" + username + "', '" + ganador + "')";
 	        insert(con, sqlPartida);
 
 	        String sqlIdP = "SELECT MAX(ID_PARTIDA) AS ID FROM PARTIDA";
@@ -522,6 +593,131 @@ public class BBDD {
 
 		System.out.println("Partida " + id + " cargada correctamente.");
 		return partida;
+	}
+
+	// ══════════════════════════════════════════════════
+	//  LLAMADAS A PL/SQL (FUNCIONES Y PROCEDIMIENTOS)
+	// ══════════════════════════════════════════════════
+
+	/**
+	 * Obtiene el récord máximo de victorias usando la función PL/SQL FN_MAX_GUANYADES.
+	 */
+	public int obtenerMaxVictorias(Connection con) {
+		String sql = "{ ? = call FN_MAX_GUANYADES() }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.registerOutParameter(1, Types.NUMERIC);
+			cstmt.execute();
+			return cstmt.getInt(1);
+		} catch (SQLException e) {
+			System.err.println("Error al llamar a FN_MAX_GUANYADES: " + e.getMessage());
+			return 0;
+		}
+	}
+
+	/**
+	 * Obtiene la media de victorias usando la función PL/SQL FN_MITJA_GUANYADES.
+	 */
+	public double obtenerMediaVictorias(Connection con) {
+		String sql = "{ ? = call FN_MITJA_GUANYADES() }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.registerOutParameter(1, Types.NUMERIC);
+			cstmt.execute();
+			return cstmt.getDouble(1);
+		} catch (SQLException e) {
+			System.err.println("Error al llamar a FN_MITJA_GUANYADES: " + e.getMessage());
+			return 0.0;
+		}
+	}
+
+	/**
+	 * Obtiene el porcentaje de jugadores con menos victorias que las indicadas.
+	 */
+	public double obtenerPorcentajeSuperado(Connection con, int victorias) {
+		String sql = "{ ? = call FN_PERCENTATGE_MENYS(?) }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.registerOutParameter(1, Types.NUMERIC);
+			cstmt.setInt(2, victorias);
+			cstmt.execute();
+			return cstmt.getDouble(1);
+		} catch (SQLException e) {
+			System.err.println("Error al llamar a FN_PERCENTATGE_MENYS: " + e.getMessage());
+			return 0.0;
+		}
+	}
+
+	/**
+	 * Ejecuta el procedimiento SP_JUGADORES_RECORD y muestra la salida de DBMS_OUTPUT.
+	 */
+	public void ejecutarJugadoresRecord(Connection con) {
+		habilitarDbmsOutput(con);
+		String sql = "{ call SP_JUGADORES_RECORD() }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.execute();
+			imprimirDbmsOutput(con);
+		} catch (SQLException e) {
+			System.err.println("Error al ejecutar SP_JUGADORES_RECORD: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Ejecuta el procedimiento SP_JUGADORES_SUPERIOR_MITJA y muestra la salida de DBMS_OUTPUT.
+	 */
+	public void ejecutarJugadoresSuperiorMedia(Connection con) {
+		habilitarDbmsOutput(con);
+		String sql = "{ call SP_JUGADORES_SUPERIOR_MITJA() }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.execute();
+			imprimirDbmsOutput(con);
+		} catch (SQLException e) {
+			System.err.println("Error al ejecutar SP_JUGADORES_SUPERIOR_MITJA: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Ejecuta el procedimiento SP_RANKING_JUGADES para un usuario y muestra la salida.
+	 */
+	public void ejecutarRankingJugadas(Connection con, String username) {
+		habilitarDbmsOutput(con);
+		String sql = "{ call SP_RANKING_JUGADES(?) }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.setString(1, username);
+			cstmt.execute();
+			imprimirDbmsOutput(con);
+		} catch (SQLException e) {
+			System.err.println("Error al ejecutar SP_RANKING_JUGADES: " + e.getMessage());
+		}
+	}
+
+	// ══════════════════════════════════════════════════
+	//  HELPERS PARA DBMS_OUTPUT
+	// ══════════════════════════════════════════════════
+
+	private void habilitarDbmsOutput(Connection con) {
+		try (CallableStatement cstmt = con.prepareCall("{ call dbms_output.enable(20000) }")) {
+			cstmt.execute();
+		} catch (SQLException e) {
+			System.err.println("Error al habilitar DBMS_OUTPUT: " + e.getMessage());
+		}
+	}
+
+	private void imprimirDbmsOutput(Connection con) {
+		String sql = "{ call dbms_output.get_line(?, ?) }";
+		try (CallableStatement cstmt = con.prepareCall(sql)) {
+			cstmt.registerOutParameter(1, Types.VARCHAR);
+			cstmt.registerOutParameter(2, Types.NUMERIC);
+
+			int status = 0;
+			while (status == 0) {
+				cstmt.execute();
+				String line = cstmt.getString(1);
+				status = cstmt.getInt(2);
+				if (status == 0 && line != null) {
+					System.out.println("[PL/SQL] " + line);
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error al leer DBMS_OUTPUT: " + e.getMessage());
+		}
 	}
 
 

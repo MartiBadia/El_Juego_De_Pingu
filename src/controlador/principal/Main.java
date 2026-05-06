@@ -13,7 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.Parent;
 import javafx.stage.Stage;
 
-public class main extends Application {
+public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -30,7 +30,7 @@ public class main extends Application {
 	}
 
 
-    public static void main(String[] args) {
+    public static void Main(String[] args) {
         launch(args);
     }
 } 

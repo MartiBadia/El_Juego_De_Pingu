@@ -19,7 +19,7 @@ public class CasillaSalida extends Casilla {
 
     @Override
     public String realizarAccionConLog(Partida partida, Jugador jugador) {
-        return "🏠 Estás en la casilla de salida.";
+        return "Estás en la casilla de salida.";
     }
 
     @Override

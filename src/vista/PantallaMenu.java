@@ -150,7 +150,11 @@ public class PantallaMenu {
         }
 
         hideAllCards();
-        if (loginCard != null) loginCard.setVisible(true);
+        if (usuarioLogueado != null) {
+            showOptionsCard();
+        } else {
+            if (loginCard != null) loginCard.setVisible(true);
+        }
 
         try {
             if (conexionBBDD == null || conexionBBDD.isClosed() || !conexionBBDD.isValid(2)) {
@@ -613,10 +617,23 @@ public class PantallaMenu {
             return;
         }
 
-        selectedSkins.add(skinFile);
-        
         String inputName = playerNameField.getText().trim();
-        String playerName = inputName.isEmpty() ? (messages.getString("card.login.user") + " " + currentSkinPlayerIndex) : inputName;
+        if (inputName.isEmpty()) {
+            skinErrorLabel.setText("El nombre no puede estar vacío");
+            return;
+        }
+
+        // Validar nombre único
+        for (modelo.jugador.Jugador jExistente : jugadoresTemp) {
+            if (jExistente.getNombre().equalsIgnoreCase(inputName)) {
+                skinErrorLabel.setText("¡Los nombres deben ser diferentes!");
+                return;
+            }
+        }
+
+        // Si el nombre es válido, marcamos la skin como usada
+        selectedSkins.add(skinFile);
+        String playerName = inputName;
         
         String color = (currentSkinPlayerIndex == 1) ? "Azul" : (currentSkinPlayerIndex == 2) ? "Naranja" : (currentSkinPlayerIndex == 3) ? "Verde" : "Amarillo";
         modelo.jugador.Pinguino p = new modelo.jugador.Pinguino(playerName, color);

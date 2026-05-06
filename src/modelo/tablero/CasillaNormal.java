@@ -31,7 +31,7 @@ public class CasillaNormal extends Casilla {
      */
     @Override
     public String realizarAccionConLog(Partida partida, Jugador jugador) {
-        return "📍 Has caído en una casilla normal.";
+        return "Has caído en una casilla normal.";
     }
 
     @Override

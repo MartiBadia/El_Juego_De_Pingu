@@ -157,13 +157,20 @@ public class GestorJugador {
 
     public void focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
         if (f.isSoborno()) {
-            System.out.println("Foca ya está sobornada (soborno=" + f.isSoborno() + ")");
             return;
         }
         
-        // La foca golpea al pingüino → al inicio (posición 0)
+        // AUTO-SOBORNO: Si tiene pez, lo usa automáticamente
+        if (p.getInventario().contarPorTipo("Pez") > 0) {
+            jugadorUsaItem(p, "Pez");
+            f.setSoborno(true);
+            f.setTurnosBloqueada(2);
+            System.out.println("¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!");
+            return;
+        }
+        
+        // Si no tiene pez, la foca golpea al pingüino → al inicio (posición 0)
         f.golpearJugador(p, tablero);
-        System.out.println("¡La foca golpea a " + p.getNombre() + "! -> casilla " + p.getPosicion());
     }
 
     // Versión sin tablero (compatibilidad con firma anterior)

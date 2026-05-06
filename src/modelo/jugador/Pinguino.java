@@ -74,6 +74,6 @@ public class Pinguino extends Jugador {
 
     @Override
     public String toString() {
-        return "Pingüino " + nombre + " [" + color + "] Casilla:" + posicion + " | " + inv.toString();
+        return " Pingüino " + nombre + " [" + color + "] Casilla:" + posicion + " | " + inv.toString();
     }
 }
