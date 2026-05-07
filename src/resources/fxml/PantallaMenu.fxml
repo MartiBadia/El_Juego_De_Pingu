@@ -99,6 +99,7 @@
                     <Button fx:id="createGameBtn" text="🎮  Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
                     <Button fx:id="loadSavedGameBtn" text="📂  Cargar Partida Guardada" onAction="#handleLoadGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
                     <Button fx:id="audioConfigBtn" text="🔊  Configurar Audio" onAction="#showAudioCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
+                    <Button fx:id="quitBtn" text="❌  Salir del Juego" onAction="#handleQuitGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
 
                     <Region prefHeight="10"/>
                     <Label fx:id="optionsHint" text="Elige una opción para comenzar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
@@ -162,10 +163,8 @@
                     <Label fx:id="skinTitle" text="Jugador 1: Elige tu Skin" styleClass="card-title"/>
                     <Region prefHeight="8"/>
 
-                    <VBox spacing="8">
-                        <Label fx:id="skinNameLabel" text="Tu Nombre:" styleClass="field-label"/>
-                        <TextField fx:id="playerNameField" promptText="Escribe tu nombre..." styleClass="field"/>
-                    </VBox>
+                    <!-- El nombre es automático: el del login -->
+                    <Region prefHeight="8"/>
 
                     <VBox spacing="15" alignment="CENTER">
                         <StackPane styleClass="skin-preview-container">

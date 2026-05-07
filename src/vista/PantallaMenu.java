@@ -74,7 +74,6 @@ public class PantallaMenu {
 
     @FXML private Label playerCountLabel;
     @FXML private Label sealCountLabel;
-    @FXML private TextField playerNameField;
     @FXML private Label errorLabel;
 
     @FXML private Label skinTitle;
@@ -468,10 +467,6 @@ public class PantallaMenu {
             actualizarEstadoSeleccionSkin();
             skinTitle.setText(messages.getString("card.skin.title") + " (" + currentSkinPlayerIndex + ")");
             skinErrorLabel.setText("");
-            playerNameField.clear();
-            playerNameField.setPromptText(messages.getString("card.skin.name"));
-            // Pre-rellenar el nombre con el username
-            playerNameField.setText(username);
         }
     }
 
@@ -749,23 +744,9 @@ public class PantallaMenu {
             return;
         }
 
-        String inputName = playerNameField.getText().trim();
-        if (inputName.isEmpty()) {
-            skinErrorLabel.setText("El nombre no puede estar vacío");
-            return;
-        }
-
-        // Validar nombre único
-        for (modelo.jugador.Jugador jExistente : jugadoresTemp) {
-            if (jExistente.getNombre().equalsIgnoreCase(inputName)) {
-                skinErrorLabel.setText("¡Los nombres deben ser diferentes!");
-                return;
-            }
-        }
-
-        // Si el nombre es válido, marcamos la skin como usada
+        // El nombre es el username con el que se logueó
+        String playerName = loggedInUsers.get(currentSkinPlayerIndex - 1);
         selectedSkins.add(skinFile);
-        String playerName = inputName;
         
         String color = (currentSkinPlayerIndex == 1) ? "Azul" : (currentSkinPlayerIndex == 2) ? "Naranja" : (currentSkinPlayerIndex == 3) ? "Verde" : "Amarillo";
         modelo.jugador.Pinguino p = new modelo.jugador.Pinguino(playerName, color);
@@ -774,8 +755,6 @@ public class PantallaMenu {
         p.setEsIA(false);
         jugadoresTemp.add(p);
         
-        playerNameField.clear();
-
         if (currentSkinPlayerIndex < numHumans) {
             currentSkinPlayerIndex++;
             currentCarouselIdx = 0;

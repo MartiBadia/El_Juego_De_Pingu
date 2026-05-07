@@ -142,8 +142,7 @@ public class GestorPartida {
             
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro.getPosicion() == foca.getPosicion()) {
-                    String msgF = gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, foca, partida.getTablero());
-                    if (!msgF.isEmpty()) log.append(msgF).append("\n");
+                    log.append(gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, foca, partida.getTablero())).append("\n");
                 }
             }
         }
@@ -160,12 +159,10 @@ public class GestorPartida {
                     for (Jugador item : partida.getJugadores()) {
                         if (item instanceof modelo.jugador.Foca) {
                             if (item.getPosicion() == p1.getPosicion()) {
-                                String msg1 = gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) item, partida.getTablero());
-                                if (!msg1.isEmpty()) log.append(msg1).append("\n");
+                                log.append(gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) item, partida.getTablero())).append("\n");
                             }
                             if (item.getPosicion() == otro.getPosicion()) {
-                                String msg2 = gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, (modelo.jugador.Foca) item, partida.getTablero());
-                                if (!msg2.isEmpty()) log.append(msg2).append("\n");
+                                log.append(gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, (modelo.jugador.Foca) item, partida.getTablero())).append("\n");
                             }
                         }
                     }
@@ -175,8 +172,7 @@ public class GestorPartida {
             // Encuentro con foca directo si no hubo batalla o si la batalla terminó ahí
             for (Jugador f : partida.getJugadores()) {
                 if (f instanceof modelo.jugador.Foca && f.getPosicion() == p1.getPosicion()) {
-                    String msgFoca = gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) f, partida.getTablero());
-                    if (!msgFoca.isEmpty()) log.append(msgFoca).append("\n");
+                    log.append(gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) f, partida.getTablero())).append("\n");
                 }
             }
         }

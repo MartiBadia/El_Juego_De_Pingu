@@ -21,7 +21,7 @@ public class GestorJugador {
     }
 
 
-    public void jugadorUsaItem(Pinguino p, String nombreItem) {
+    public String jugadorUsaItem(Pinguino p, String nombreItem, Tablero t) {
         ArrayList<modelo.items.Item> listaItems = p.getInventario().getLista();
         modelo.items.Item itemAUsar = null;
         
@@ -36,19 +36,32 @@ public class GestorJugador {
 
         if (itemAUsar != null) {
             p.getInventario().quitarItem(itemAUsar);
-            System.out.println(p.getNombre() + " usa: " + nombreItem);
             
             if (nombreItem.equals("Moto de Nieve")) {
-                p.moverPosicion(20); // Efecto de la moto: avanza 20 casillas
-                System.out.println(p.getNombre() + " ruge con la Moto de Nieve y avanza 20 casillas!");
+                int posSiguienteTrineo = -1;
+                for (modelo.tablero.Casilla c : t.getCasillas()) {
+                    if (c instanceof modelo.tablero.Trineo && c.getPosicion() > p.getPosicion()) {
+                        posSiguienteTrineo = c.getPosicion();
+                        break;
+                    }
+                }
+
+                if (posSiguienteTrineo != -1) {
+                    p.setPosicion(posSiguienteTrineo);
+                    return "¡" + p.getNombre() + " ruge con la Moto de Nieve y vuela hasta el siguiente Trineo (casilla " + (posSiguienteTrineo + 1) + ")!";
+                } else {
+                    // Si no hay trineos, avanza un tramo grande (ej: 15 casillas)
+                    p.moverPosicion(15, t.getTamaño() - 1);
+                    return "¡" + p.getNombre() + " ruge con la Moto de Nieve! Como no hay trineos cerca, avanza 15 casillas.";
+                }
             }
-        } else {
-            System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
+            return p.getNombre() + " usa " + nombreItem + ".";
         }
+        return p.getNombre() + " no tiene " + nombreItem + " en el inventario.";
     }
 
-    public void jugadorUsaNuevo(Pinguino p, String nombreItem) {
-        jugadorUsaItem(p, nombreItem);
+    public void jugadorUsaNuevo(Pinguino p, String nombreItem, Tablero t) {
+        jugadorUsaItem(p, nombreItem, t);
     }
 
     /**
@@ -162,7 +175,7 @@ public class GestorJugador {
         
         // AUTO-SOBORNO: Si tiene pez, lo usa automáticamente
         if (p.getInventario().contarPorTipo("Pez") > 0) {
-            jugadorUsaItem(p, "Pez");
+            jugadorUsaItem(p, "Pez", tablero);
             f.setSoborno(true);
             f.setTurnosBloqueada(2);
             return "¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!";
