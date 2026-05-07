@@ -93,7 +93,7 @@
 /* =================== BARRA INFERIOR =================== */
 .bottom-bar {
     -fx-background-image: url("/resources/images/ui/barra_horizontal.png");
-    -fx-background-size: 100% 150%;
+    -fx-background-size: 100% 140%;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
     -fx-border-width: 0;

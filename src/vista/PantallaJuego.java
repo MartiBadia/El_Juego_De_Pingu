@@ -333,13 +333,13 @@ public class PantallaJuego {
         rosterButtonsMap = new HashMap<>();
 
         for (Jugador j : gestorPartida.getPartida().getJugadores()) {
-            // Contenedor principal: VBox vertical
-            VBox card = new VBox(25);
+            // Contenedor principal: VBox vertical con menos espacio
+            VBox card = new VBox(10);
             card.getStyleClass().add("ice-cube");
             javafx.scene.layout.HBox.setHgrow(card, javafx.scene.layout.Priority.ALWAYS);
             card.setMaxWidth(Double.MAX_VALUE);
             card.setAlignment(javafx.geometry.Pos.CENTER);
-            card.setPadding(new javafx.geometry.Insets(12));
+            card.setPadding(new javafx.geometry.Insets(8));
 
             // FILA SUPERIOR: HBox para Skin (Izquierda) e Inventario (Derecha)
             javafx.scene.layout.HBox topRow = new javafx.scene.layout.HBox(15);
@@ -351,15 +351,12 @@ public class PantallaJuego {
 
             // 2. Rejilla de mini-inventario (A LA DERECHA de la skin)
             GridPane miniInv = new GridPane();
-            miniInv.setHgap(15); miniInv.setVgap(6);
+            miniInv.setHgap(8); miniInv.setVgap(4);
             miniInv.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
             javafx.scene.layout.HBox.setHgrow(miniInv, javafx.scene.layout.Priority.ALWAYS);
             
-            javafx.scene.layout.ColumnConstraints col1 = new javafx.scene.layout.ColumnConstraints();
-            col1.setPercentWidth(50);
-            javafx.scene.layout.ColumnConstraints col2 = new javafx.scene.layout.ColumnConstraints();
-            col2.setPercentWidth(50);
-            miniInv.getColumnConstraints().addAll(col1, col2);
+            // Eliminamos las restricciones de porcentaje para que el texto respire
+            miniInv.getColumnConstraints().clear();
             
             Map<String, Label> jLabels = new HashMap<>();
             Map<String, Button> jButtons = new HashMap<>();
@@ -394,14 +391,16 @@ public class PantallaJuego {
         hbox.setPadding(new javafx.geometry.Insets(4, 8, 4, 8));
         
         Label l = new Label(texto + " 0");
-        l.setStyle("-fx-font-size: 14px; -fx-text-fill: #a8c8e8; -fx-font-weight: bold;");
+        l.setStyle("-fx-font-size: 11px; -fx-text-fill: #a8c8e8; -fx-font-weight: bold;");
+        l.setMinWidth(45); // Asegurar que el nombre no se corte
         labels.put(tipo, l);
         
         javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        spacer.setMinWidth(2);
         
         Button b = new Button("Usar");
-        b.setStyle("-fx-font-size: 12px; -fx-padding: 3 8;");
+        b.setStyle("-fx-font-size: 9px; -fx-padding: 2 4;");
         b.getStyleClass().add("btn-tiny");
         b.setOnAction(e -> usarItemEnTurno(tipo));
         b.setDisable(true);

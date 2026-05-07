@@ -155,9 +155,9 @@ public class GestorJugador {
     }
 
 
-    public void focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
+    public String focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
         if (f.isSoborno()) {
-            return;
+            return "";
         }
         
         // AUTO-SOBORNO: Si tiene pez, lo usa automáticamente
@@ -165,12 +165,34 @@ public class GestorJugador {
             jugadorUsaItem(p, "Pez");
             f.setSoborno(true);
             f.setTurnosBloqueada(2);
-            System.out.println("¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!");
-            return;
+            return "¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!";
         }
         
-        // Si no tiene pez, la foca golpea al pingüino → al inicio (posición 0)
-        f.golpearJugador(p, tablero);
+        // Si no tiene pez, la foca golpea al pingüino
+        int posPinguino = p.getPosicion();
+        int nuevaPos = 0;
+        modelo.tablero.Agujero holePrevio = null;
+
+        // Buscar el agujero de hielo más cercano por detrás
+        for (modelo.tablero.Casilla c : tablero.getCasillas()) {
+            if (c instanceof modelo.tablero.Agujero) {
+                modelo.tablero.Agujero h = (modelo.tablero.Agujero) c;
+                if (h.getPosicion() < posPinguino) {
+                    if (holePrevio == null || h.getPosicion() > holePrevio.getPosicion()) {
+                        holePrevio = h;
+                    }
+                }
+            }
+        }
+
+        if (holePrevio != null) {
+            nuevaPos = holePrevio.getPosicionAgujeroAnterior();
+            p.setPosicion(nuevaPos);
+            return "¡La foca asusta a " + p.getNombre() + " y lo hace retroceder hasta el agujero de la casilla " + holePrevio.getPosicion() + " (destino: " + nuevaPos + ")!";
+        } else {
+            p.setPosicion(0);
+            return "¡La foca asusta a " + p.getNombre() + " y lo manda de vuelta al inicio!";
+        }
     }
 
     // Versión sin tablero (compatibilidad con firma anterior)

@@ -124,8 +124,8 @@ public class GestorPartida {
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino) {
                     if (otro.getPosicion() > posInicial && otro.getPosicion() < posFinal) {
-                        log.append("Foca pasó sobre " + otro.getNombre() + "!\n");
-                        foca.aplastarJugador((modelo.jugador.Pinguino) otro);
+                        String msgRobo = foca.aplastarJugador((modelo.jugador.Pinguino) otro);
+                        if (!msgRobo.isEmpty()) log.append(msgRobo).append("\n");
                     }
                 }
             }
@@ -142,8 +142,8 @@ public class GestorPartida {
             
             for (Jugador otro : partida.getJugadores()) {
                 if (otro instanceof modelo.jugador.Pinguino && otro.getPosicion() == foca.getPosicion()) {
-                    log.append("Foca coincide con " + otro.getNombre() + "!\n");
-                    gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, foca, partida.getTablero());
+                    String msgF = gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, foca, partida.getTablero());
+                    if (!msgF.isEmpty()) log.append(msgF).append("\n");
                 }
             }
         }
@@ -160,12 +160,12 @@ public class GestorPartida {
                     for (Jugador item : partida.getJugadores()) {
                         if (item instanceof modelo.jugador.Foca) {
                             if (item.getPosicion() == p1.getPosicion()) {
-                                log.append("¡" + p1.getNombre() + " cayó en una foca tras la batalla!\n");
-                                gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) item, partida.getTablero());
+                                String msg1 = gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) item, partida.getTablero());
+                                if (!msg1.isEmpty()) log.append(msg1).append("\n");
                             }
                             if (item.getPosicion() == otro.getPosicion()) {
-                                log.append("¡" + otro.getNombre() + " cayó en una foca tras la batalla!\n");
-                                gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, (modelo.jugador.Foca) item, partida.getTablero());
+                                String msg2 = gestorJugador.focaInteractuaPinguino((modelo.jugador.Pinguino) otro, (modelo.jugador.Foca) item, partida.getTablero());
+                                if (!msg2.isEmpty()) log.append(msg2).append("\n");
                             }
                         }
                     }
@@ -175,8 +175,8 @@ public class GestorPartida {
             // Encuentro con foca directo si no hubo batalla o si la batalla terminó ahí
             for (Jugador f : partida.getJugadores()) {
                 if (f instanceof modelo.jugador.Foca && f.getPosicion() == p1.getPosicion()) {
-                    log.append("¡" + p1.getNombre() + " se encontró con una Foca!\n");
-                    gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) f, partida.getTablero());
+                    String msgFoca = gestorJugador.focaInteractuaPinguino(p1, (modelo.jugador.Foca) f, partida.getTablero());
+                    if (!msgFoca.isEmpty()) log.append(msgFoca).append("\n");
                 }
             }
         }
