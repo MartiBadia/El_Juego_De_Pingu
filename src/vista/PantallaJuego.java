@@ -346,8 +346,10 @@ public class PantallaJuego {
             topRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
             // 1. Skin del Jugador
-            ImageView img = new ImageView(new Image("/resources/images/skins/" + j.getSkin()));
-            img.setFitWidth(65); img.setFitHeight(65); img.setPreserveRatio(true);
+            ImageView skinView = new ImageView(new javafx.scene.image.Image("/resources/images/skins/" + j.getSkin()));
+            skinView.setFitWidth(70);
+            skinView.setFitHeight(70);
+            skinView.setPreserveRatio(true);
 
             // 2. Rejilla de mini-inventario (A LA DERECHA de la skin)
             GridPane miniInv = new GridPane();
@@ -364,13 +366,19 @@ public class PantallaJuego {
             Map<String, Label> jLabels = new HashMap<>();
             Map<String, Button> jButtons = new HashMap<>();
             
-            miniInv.add(crearMiniFila("Pez:", "Pez", jLabels, jButtons), 0, 0);
-            miniInv.add(crearMiniFila("Bola:", "Bola de Nieve", jLabels, jButtons), 1, 0);
-            miniInv.add(crearMiniFila("Moto:", "Moto de Nieve", jLabels, jButtons), 0, 1);
-            miniInv.add(crearMiniFila("Ráp:", "Dado Rapido", jLabels, jButtons), 1, 1);
-            miniInv.add(crearMiniFila("Len:", "Dado Lento", jLabels, jButtons), 0, 2);
-
-            topRow.getChildren().addAll(img, miniInv);
+            if (j instanceof Pinguino) {
+                miniInv.add(crearMiniFila("Pez:", "Pez", jLabels, jButtons), 0, 0);
+                miniInv.add(crearMiniFila("Bola:", "Bola de Nieve", jLabels, jButtons), 1, 0);
+                miniInv.add(crearMiniFila("Moto:", "Moto de Nieve", jLabels, jButtons), 0, 1);
+                miniInv.add(crearMiniFila("Ráp:", "Dado Rapido", jLabels, jButtons), 1, 1);
+                miniInv.add(crearMiniFila("Len:", "Dado Lento", jLabels, jButtons), 0, 2);
+                topRow.getChildren().addAll(skinView, miniInv);
+            } else {
+                // Para las focas, centramos su imagen y no mostramos inventario
+                topRow.setAlignment(javafx.geometry.Pos.CENTER);
+                topRow.getChildren().add(skinView);
+            }
+            
             rosterButtonsMap.put(j, jButtons);
 
             // SECCIÓN INFERIOR: Nombre centrado
@@ -393,12 +401,18 @@ public class PantallaJuego {
         hbox.getStyleClass().add("inventory-item-box");
         hbox.setPadding(new javafx.geometry.Insets(4, 8, 4, 8));
         
-        Label l = new Label(texto + " 0");
-        l.setStyle("-fx-font-size: 14px; -fx-text-fill: #a8c8e8; -fx-font-weight: bold;");
-        labels.put(tipo, l);
+        Label l = new Label(texto);
+        l.getStyleClass().add("inventory-item-label");
+        l.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // No permitir truncado
+        
+        Label count = new Label("0");
+        count.getStyleClass().addAll("inventory-item-label", "inventory-item-count");
+        count.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE); // No permitir truncado
+        labels.put(tipo, count);
         
         javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
         javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        spacer.setMinWidth(5); // Espacio mínimo de seguridad
         
         Button b = new Button("Usar");
         b.setStyle("-fx-font-size: 12px; -fx-padding: 3 8;");
@@ -407,7 +421,8 @@ public class PantallaJuego {
         b.setDisable(true);
         buttons.put(tipo, b);
         
-        hbox.getChildren().addAll(l, spacer, b);
+        hbox.getChildren().addAll(l, count, spacer, b);
+        hbox.setSpacing(5); // Espaciado entre elementos
         return hbox;
     }
 
@@ -423,12 +438,12 @@ public class PantallaJuego {
                 Pinguino p = (Pinguino) j;
                 modelo.items.Inventario inv = p.getInventario();
                 
-                // Actualizar textos de cantidades
-                labels.get("Pez").setText("Pez: " + inv.contarPorTipo("Pez"));
-                labels.get("Bola de Nieve").setText("Bola: " + inv.contarPorTipo("Bola de Nieve"));
-                labels.get("Moto de Nieve").setText("Moto: " + inv.contarPorTipo("Moto de Nieve"));
-                labels.get("Dado Rapido").setText("Ráp: " + inv.contarPorTipo("Dado Rapido"));
-                labels.get("Dado Lento").setText("Len: " + inv.contarPorTipo("Dado Lento"));
+                // Actualizar solo las cantidades
+                labels.get("Pez").setText(String.valueOf(inv.contarPorTipo("Pez")));
+                labels.get("Bola de Nieve").setText(String.valueOf(inv.contarPorTipo("Bola de Nieve")));
+                labels.get("Moto de Nieve").setText(String.valueOf(inv.contarPorTipo("Moto de Nieve")));
+                labels.get("Dado Rapido").setText(String.valueOf(inv.contarPorTipo("Dado Rapido")));
+                labels.get("Dado Lento").setText(String.valueOf(inv.contarPorTipo("Dado Lento")));
                 
                 // Habilitar/Deshabilitar botones: solo el jugador actual puede usar ítems
                 boolean esTurno = (j == jActual && !gestorPartida.getPartida().isFinalizada());
@@ -587,13 +602,14 @@ public class PantallaJuego {
 
     @FXML
     public void handleDado() {
-        if (gestorPartida.getPartida().isFinalizada()) return;
-        Jugador j = gestorPartida.getPartida().getJugadorActual();
-        if (j instanceof modelo.jugador.Foca) return;
-
-        int res = gestorPartida.tirarDado(j);
-        dadoResultText.setText("Ha salido: " + res);
-        iniciarMovimientoAnimado(j, res);
+        if (!gestorPartida.getPartida().isFinalizada()) {
+            Jugador j = gestorPartida.getPartida().getJugadorActual();
+            if (!(j instanceof modelo.jugador.Foca)) {
+                int res = gestorPartida.tirarDado(j);
+                dadoResultText.setText("Ha salido: " + res);
+                iniciarMovimientoAnimado(j, res);
+            }
+        }
     }
 
     private void iniciarMovimientoAnimado(Jugador j, int avance) {
@@ -694,7 +710,7 @@ public class PantallaJuego {
             int nPeces = pTarget.getInventario().contarPorTipo("Pez");
             if (nPeces > 0) {
                 // Soborno automático
-                gestorPartida.getGestorJugador().jugadorUsaItem(pTarget, "Pez");
+                gestorPartida.getGestorJugador().jugadorUsaItem(pTarget, "Pez", gestorPartida.getPartida().getTablero());
                 fTarget.setSoborno(true);
                 fTarget.setTurnosBloqueada(2);
                 appendLog(pTarget, "usa automáticamente un pez para entretener a la foca.");
@@ -718,6 +734,24 @@ public class PantallaJuego {
             mostrarAnimacionTurno(jNuevo, () -> {
                 actualizarLabelTurno();
                 actualizarInventarioVisual();
+                
+                // --- Lógica de Salto de Turno (Suelo Quebradizo / Congelado) ---
+                if (jNuevo instanceof Pinguino) {
+                    Pinguino p = (Pinguino) jNuevo;
+                    if (p.getTurnosCongelado() > 0) {
+                        p.setTurnosCongelado(p.getTurnosCongelado() - 1);
+                        appendLog(p, "pierde este turno por estar congelado (" + p.getTurnosCongelado() + " turnos restantes).");
+                        
+                        dado.setDisable(true); // Bloquear dado durante la espera
+                        
+                        // Pequeña pausa para que el usuario lea el mensaje antes de pasar al siguiente
+                        javafx.animation.PauseTransition pauseSkip = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
+                        pauseSkip.setOnFinished(ev -> concluirTurno());
+                        pauseSkip.play();
+                        return;
+                    }
+                }
+                
                 if (jNuevo instanceof modelo.jugador.Foca) jugarTurnoFoca();
             });
         }
@@ -806,6 +840,9 @@ public class PantallaJuego {
         Jugador ganador = gestorPartida.getPartida().getGanador();
         appendLog(ganador, "¡HA GANADO LA PARTIDA!");
         dado.setDisable(true);
+        
+        // Si el ganador es un pingüino (humano), se sumará la victoria automáticamente al guardar la partida.
+        
         handleSaveGame(); // Guardado automático al finalizar
 
         // Pop-up de fin de partida
@@ -867,41 +904,37 @@ public class PantallaJuego {
     @FXML private void handleMoto()   { usarItemEnTurno("Moto de Nieve"); }
 
     private void usarItemEnTurno(String nombreItem) {
-        if (gestorPartida.getPartida().isFinalizada()) return;
-        Jugador actual = gestorPartida.getPartida().getJugadorActual();
-        if (!(actual instanceof Pinguino)) return;
+        if (!gestorPartida.getPartida().isFinalizada()) {
+            Jugador actual = gestorPartida.getPartida().getJugadorActual();
+            if (actual instanceof Pinguino) {
+                Pinguino p = (Pinguino) actual;
+                modelo.items.Item item = p.getInventario().obtenerItemPorNombre(nombreItem);
+                
+                if (item != null) {
+                    if (item instanceof modelo.items.Dado) {
+                        modelo.items.Dado d = (modelo.items.Dado) item;
+                        int avance = d.tirarRandom();
+                        p.getInventario().quitarItem(d);
+                        appendLog(p, "usa un " + nombreItem + " y saca un " + avance + "!");
+                        dadoResultText.setText("Especial: " + avance);
+                        iniciarMovimientoAnimado(p, avance);
+                    } else {
+                        int posPrevia = p.getPosicion();
+                        String msg = gestorPartida.getGestorJugador().jugadorUsaItem(p, nombreItem, gestorPartida.getPartida().getTablero());
 
-        Pinguino p = (Pinguino) actual;
-        
-        // Buscar el ítem en el inventario
-        modelo.items.Item item = p.getInventario().obtenerItemPorNombre(nombreItem);
-        if (item == null) return;
-
-        // Lógica especial para DADOS (Rápido o Lento)
-        if (item instanceof modelo.items.Dado) {
-            modelo.items.Dado d = (modelo.items.Dado) item;
-            int avance = d.tirarRandom();
-            
-            // Consumir el ítem y loguear
-            p.getInventario().quitarItem(d);
-            appendLog(p, "usa un " + nombreItem + " y saca un " + avance + "!");
-            dadoResultText.setText("Especial: " + avance);
-            
-            // Iniciar movimiento animado (esto al final procesará el turno)
-            iniciarMovimientoAnimado(p, avance);
-        } 
-        else {
-            // Lógica para otros ítems (Moto, Pez, etc.)
-            int posPrevia = p.getPosicion();
-            gestorPartida.getGestorJugador().jugadorUsaItem(p, nombreItem);
-
-            if (p.getPosicion() != posPrevia) {
-                // Caso de la Moto de Nieve: avance directo (podríamos animarlo pero por ahora es instantáneo)
-                javafx.application.Platform.runLater(this::actualizarPosicionesVisuales);
-                appendLog(p, "ha usado " + nombreItem + "!");
+                        if (p.getPosicion() != posPrevia) {
+                            actualizarPosicionesVisuales();
+                            appendLog(p, msg);
+                            if (nombreItem.equalsIgnoreCase("Moto de Nieve")) {
+                                concluirTurno();
+                            }
+                        } else if (!msg.isEmpty()) {
+                            appendLog(p, msg);
+                        }
+                    }
+                    actualizarInventarioVisual();
+                }
             }
         }
-        
-        actualizarInventarioVisual();
     }
 }

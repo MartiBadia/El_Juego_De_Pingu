@@ -37,7 +37,7 @@ public class Evento extends Casilla {
         } else if (azar < 0.60) {
             gestorJ.pinguinoEventoDadoRapido(ping);
             obtenido = "¡Has obtenido un Dado Rápido (5-10)!";
-        } else if (azar < 0.80) {
+        } else if (azar < 0.90) { 
             gestorJ.pinguinoEventoDadoLento(ping);
             obtenido = "¡Has obtenido un Dado Lento (1-3)!";
         } else {

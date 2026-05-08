@@ -36,13 +36,25 @@ public class Foca extends Jugador {
         this.posicion = this.posicion + n;
     }
 
-    //si la foca pasa por la casilla de un jugador le hace perder la mitad del inventario
-    public void aplastarJugador(Pinguino p) {
+    // si la foca pasa por la casilla de un jugador le roba el 50% del inventario
+    public String aplastarJugador(Pinguino p) {
         java.util.ArrayList<modelo.items.Item> lista = p.getInventario().getLista();
-        int mitad = lista.size() / 2;
-        for (int i = 0; i < mitad; i++) {
-            lista.remove(0);
+        if (lista.isEmpty()) return "";
+        
+        // Calculamos la mitad redondeando hacia arriba (si tiene 1, roba 1; si tiene 3, roba 2)
+        int cantidadARobar = (int) Math.ceil(lista.size() / 2.0);
+        int robados = 0;
+        java.util.Random rnd = new java.util.Random();
+
+        for (int i = 0; i < cantidadARobar; i++) {
+            if (!lista.isEmpty()) {
+                int idx = rnd.nextInt(lista.size());
+                lista.remove(idx);
+                robados++;
+            }
         }
+        if (robados == 0) return "";
+        return "¡La foca ha pasado sobre " + p.getNombre() + " pero no tenía nada!!";
     }
 
     public void golpearJugador(Pinguino p, modelo.tablero.Tablero tablero) {

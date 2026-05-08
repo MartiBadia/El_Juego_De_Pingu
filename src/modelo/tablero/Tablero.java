@@ -62,9 +62,11 @@ public class Tablero {
             if (Math.random() < 0.35) {
                 ArrayList<Integer> tiposDisponibles = new ArrayList<>();
                 for (int t = 0; t < 5; t++) {
-                    if (i - ultimaPosTipo[t] < 4) continue;
-                    if (t == 0 && countOsos >= 3) continue;
-                    tiposDisponibles.add(t);
+                    if (i - ultimaPosTipo[t] >= 4) {
+                        if (!(t == 0 && countOsos >= 3)) {
+                            tiposDisponibles.add(t);
+                        }
+                    }
                 }
                 tiposDisponibles.add(5);
 
@@ -141,17 +143,21 @@ public class Tablero {
 
         while (count < minimo) {
             int randomPos = 1 + (int)(Math.random() * (this.tamano - 2));
+            
             boolean ocupada = false;
-            for (Casilla c : casillas) {
-                if (c.getPosicion() == randomPos) {
+            int idxOcupada = 0;
+            while (idxOcupada < casillas.size() && !ocupada) {
+                if (casillas.get(idxOcupada).getPosicion() == randomPos) {
                     ocupada = true;
-                    break;
                 }
+                idxOcupada++;
             }
 
             if (!ocupada) {
                 boolean distanciaOk = true;
-                for (Casilla c : casillas) {
+                int idxDistancia = 0;
+                while (idxDistancia < casillas.size() && distanciaOk) {
+                    Casilla c = casillas.get(idxDistancia);
                     boolean mismoTipo = false;
                     if (tipo.equals("Oso") && c instanceof Oso) mismoTipo = true;
                     if (tipo.equals("Trineo") && c instanceof Trineo) mismoTipo = true;
@@ -160,8 +166,8 @@ public class Tablero {
                     
                     if (mismoTipo && Math.abs(c.getPosicion() - randomPos) < 4) {
                         distanciaOk = false;
-                        break;
                     }
+                    idxDistancia++;
                 }
 
                 if (distanciaOk) {

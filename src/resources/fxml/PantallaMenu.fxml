@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
@@ -57,35 +58,38 @@
                     <Insets top="20" right="80" bottom="40" left="80"/>
                 </padding>
 
-                <!-- CARD DE LOGIN -->
-                <VBox fx:id="loginCard" spacing="12" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="true" alignment="CENTER">
+                <!-- CARD DE AUTH POR JUGADOR -->
+                <VBox fx:id="playerAuthCard" spacing="12" styleClass="card" maxWidth="400" maxHeight="-Infinity" visible="false" alignment="CENTER">
                     <padding>
                         <Insets top="30" right="24" bottom="24" left="24"/>
                     </padding>
 
                     <Label fx:id="loginTitle" text="IDENTIFICACIÓN" styleClass="card-title"/>
-                    <Region prefHeight="8"/>
+                    <Label fx:id="playerAuthInfoLabel" text="Jugador 1 – Inicia sesión o regístrate" styleClass="hint" alignment="CENTER" maxWidth="Infinity" style="-fx-text-fill: #38bdf8; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                    <Region prefHeight="4"/>
 
                     <VBox spacing="10">
                         <Label fx:id="userLabel" text="Usuario" styleClass="field-label"/>
                         <TextField fx:id="userField" promptText="Usuario..." styleClass="field"/>
 
                         <Label fx:id="passLabel" text="Contraseña" styleClass="field-label"/>
-                        <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field" onAction="#handleLogin"/>
+                        <PasswordField fx:id="passField" promptText="Contraseña..." styleClass="field" onAction="#handlePlayerLogin"/>
                     </VBox>
 
                     <Region prefHeight="6"/>
 
                     <HBox spacing="10">
-                        <Button fx:id="loginButton" text="Entrar" onAction="#handleLogin" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary"/>
-                        <Button fx:id="registerButton" text="Registro" onAction="#handleRegister" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="loginButton" text="Entrar" onAction="#handlePlayerLogin" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="primary"/>
+                        <Button fx:id="registerButton" text="Registrarse" onAction="#handlePlayerRegister" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                     </HBox>
 
-                    <Label fx:id="feedbackLabel" text="Inicia sesión para jugar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+                    <Label fx:id="feedbackLabel" text="" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
+
+                    <Button fx:id="authBackBtn" text="Cancelar" onAction="#handleAuthBack" maxWidth="Infinity" styleClass="danger"/>
                 </VBox>
 
                 <!-- CARD DE SELECCIÓN (MENU PRINCIPAL) -->
-                <VBox fx:id="optionsCard" spacing="16" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                <VBox fx:id="optionsCard" spacing="16" styleClass="card" maxWidth="380" maxHeight="-Infinity" visible="true" alignment="CENTER">
                     <padding>
                         <Insets top="30" right="24" bottom="24" left="24"/>
                     </padding>
@@ -95,8 +99,9 @@
 
                     <Button fx:id="createGameBtn" text="🎮  Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
                     <Button fx:id="loadSavedGameBtn" text="📂  Cargar Partida Guardada" onAction="#handleLoadGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
+                    <Button fx:id="rankingBtn" text="🏆  Ver Rankings" onAction="#showRankingCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
                     <Button fx:id="audioConfigBtn" text="🔊  Configurar Audio" onAction="#showAudioCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
-                    <Button fx:id="logoutBtn" text="🚪  Cerrar Sesión" onAction="#handleLogout" maxWidth="Infinity" styleClass="danger" prefHeight="50"/>
+                    <Button fx:id="quitBtn" text="❌  Salir del Juego" onAction="#handleQuitGame" maxWidth="Infinity" styleClass="danger" prefHeight="50"/>
 
                     <Region prefHeight="10"/>
                     <Label fx:id="optionsHint" text="Elige una opción para comenzar" styleClass="hint" alignment="CENTER" maxWidth="Infinity"/>
@@ -160,10 +165,8 @@
                     <Label fx:id="skinTitle" text="Jugador 1: Elige tu Skin" styleClass="card-title"/>
                     <Region prefHeight="8"/>
 
-                    <VBox spacing="8">
-                        <Label fx:id="skinNameLabel" text="Tu Nombre:" styleClass="field-label"/>
-                        <TextField fx:id="playerNameField" promptText="Escribe tu nombre..." styleClass="field"/>
-                    </VBox>
+                    <!-- El nombre es automático: el del login -->
+                    <Region prefHeight="8"/>
 
                     <VBox spacing="15" alignment="CENTER">
                         <StackPane styleClass="skin-preview-container">
@@ -225,6 +228,35 @@
                     
                     <Region prefHeight="10"/>
                     <Button text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" styleClass="primary"/>
+                </VBox>
+
+                <!-- CARD DE RANKINGS -->
+                <VBox fx:id="rankingCard" spacing="16" styleClass="card" maxWidth="700" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="30" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label text="RANKING GLOBAL" styleClass="card-title"/>
+                    <Region prefHeight="10"/>
+
+                    <HBox spacing="30" alignment="CENTER">
+                        <!-- Ranking de Participación -->
+                        <VBox spacing="10" HBox.hgrow="ALWAYS" alignment="TOP_CENTER">
+                            <Label text="MÁS PARTIDAS JUGADAS" styleClass="field-label" style="-fx-text-fill: #38bdf8;"/>
+                            <VBox fx:id="rankingParticipacionContainer" spacing="5" alignment="TOP_CENTER"/>
+                        </VBox>
+
+                        <Separator orientation="VERTICAL" prefHeight="200"/>
+
+                        <!-- Ranking de Victorias -->
+                        <VBox spacing="10" HBox.hgrow="ALWAYS" alignment="TOP_CENTER">
+                            <Label text="MÁS VICTORIAS" styleClass="field-label" style="-fx-text-fill: #fbbf24;"/>
+                            <VBox fx:id="rankingVictoriasContainer" spacing="5" alignment="TOP_CENTER"/>
+                        </VBox>
+                    </HBox>
+
+                    <Region prefHeight="15"/>
+                    <Button text="Volver al Menú" onAction="#showOptionsCard" maxWidth="250" styleClass="primary" prefHeight="45"/>
                 </VBox>
             </StackPane>
         </center>

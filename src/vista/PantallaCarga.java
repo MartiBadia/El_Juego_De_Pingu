@@ -156,11 +156,8 @@ public class PantallaCarga {
     // ══════════════ Iniciar animación de carga ══════════════
 
     public void iniciarCarga() {
-        // Registrar que el usuario ha entrado en una partida
-        if (conexionBBDD != null && usuarioLogueado != null) {
-            controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
-            helper.sumarPartidaJugada(conexionBBDD, usuarioLogueado);
-        }
+        // El incremento de partidas jugadas se gestiona en PantallaMenu al iniciar una nueva partida,
+        // evitando duplicados aquí.
 
         final double pasos = DURACION_TOTAL_MS / INTERVALO_MS;
         final double incrementoPorPaso = 1.0 / pasos;

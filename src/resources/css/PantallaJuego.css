@@ -93,7 +93,7 @@
 /* =================== BARRA INFERIOR =================== */
 .bottom-bar {
     -fx-background-image: url("/resources/images/ui/barra_horizontal.png");
-    -fx-background-size: 100% 150%;
+    -fx-background-size: 100% 140%;
     -fx-background-position: center;
     -fx-background-repeat: no-repeat;
     -fx-border-width: 0;
@@ -368,6 +368,8 @@
     -fx-background-radius: 12;
     -fx-padding: 12;
     -fx-alignment: TOP_CENTER;
+    -fx-min-width: 280; /* Aumentado significativamente para el inventario */
+    -fx-pref-width: 280;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 12, 0, 0, 6);
 }
 
@@ -411,9 +413,22 @@
 }
 
 .inventory-item-box {
-    -fx-background-color: rgba(0, 0, 0, 0.2);
-    -fx-border-color: rgba(79, 195, 247, 0.3);
-    -fx-border-width: 1;
-    -fx-background-radius: 6;
-    -fx-border-radius: 6;
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-border-color: rgba(0, 229, 255, 0.4);
+    -fx-border-width: 1.5;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 2);
+}
+
+.inventory-item-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(one-pass-box, black, 2, 0.8, 0, 1);
+}
+
+.inventory-item-count {
+    -fx-text-fill: #facc15; /* Amarillo brillante para las cifras */
+    -fx-font-weight: 900;
 }

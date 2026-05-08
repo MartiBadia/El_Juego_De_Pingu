@@ -21,7 +21,7 @@ public class GestorJugador {
     }
 
 
-    public void jugadorUsaItem(Pinguino p, String nombreItem) {
+    public String jugadorUsaItem(Pinguino p, String nombreItem, Tablero t) {
         ArrayList<modelo.items.Item> listaItems = p.getInventario().getLista();
         modelo.items.Item itemAUsar = null;
         
@@ -36,19 +36,35 @@ public class GestorJugador {
 
         if (itemAUsar != null) {
             p.getInventario().quitarItem(itemAUsar);
-            System.out.println(p.getNombre() + " usa: " + nombreItem);
             
             if (nombreItem.equals("Moto de Nieve")) {
-                p.moverPosicion(20); // Efecto de la moto: avanza 20 casillas
-                System.out.println(p.getNombre() + " ruge con la Moto de Nieve y avanza 20 casillas!");
+                int posSiguienteTrineo = -1;
+                ArrayList<modelo.tablero.Casilla> casillas = t.getCasillas();
+                int idx = 0;
+                while (idx < casillas.size() && posSiguienteTrineo == -1) {
+                    modelo.tablero.Casilla c = casillas.get(idx);
+                    if (c instanceof modelo.tablero.Trineo && c.getPosicion() > p.getPosicion()) {
+                        posSiguienteTrineo = c.getPosicion();
+                    }
+                    idx++;
+                }
+
+                if (posSiguienteTrineo != -1) {
+                    p.setPosicion(posSiguienteTrineo);
+                    return "¡" + p.getNombre() + " ruge con la Moto de Nieve y vuela hasta el siguiente Trineo (casilla " + (posSiguienteTrineo + 1) + ")!";
+                } else {
+                    // Si no hay trineos, avanza un tramo grande (ej: 15 casillas)
+                    p.moverPosicion(15, t.getTamaño() - 1);
+                    return "¡" + p.getNombre() + " ruge con la Moto de Nieve! Como no hay trineos cerca, avanza 15 casillas.";
+                }
             }
-        } else {
-            System.out.println(p.getNombre() + " no tiene " + nombreItem + " en el inventario.");
+            return p.getNombre() + " usa " + nombreItem + ".";
         }
+        return p.getNombre() + " no tiene " + nombreItem + " en el inventario.";
     }
 
-    public void jugadorUsaNuevo(Pinguino p, String nombreItem) {
-        jugadorUsaItem(p, nombreItem);
+    public void jugadorUsaNuevo(Pinguino p, String nombreItem, Tablero t) {
+        jugadorUsaItem(p, nombreItem, t);
     }
 
     /**
@@ -155,22 +171,44 @@ public class GestorJugador {
     }
 
 
-    public void focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
+    public String focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
         if (f.isSoborno()) {
-            return;
+            return "";
         }
         
         // AUTO-SOBORNO: Si tiene pez, lo usa automáticamente
         if (p.getInventario().contarPorTipo("Pez") > 0) {
-            jugadorUsaItem(p, "Pez");
+            jugadorUsaItem(p, "Pez", tablero);
             f.setSoborno(true);
             f.setTurnosBloqueada(2);
-            System.out.println("¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!");
-            return;
+            return "¡" + p.getNombre() + " usa un pez automáticamente para evitar a la foca!";
         }
         
-        // Si no tiene pez, la foca golpea al pingüino → al inicio (posición 0)
-        f.golpearJugador(p, tablero);
+        // Si no tiene pez, la foca golpea al pingüino
+        int posPinguino = p.getPosicion();
+        int nuevaPos = 0;
+        modelo.tablero.Agujero holePrevio = null;
+
+        // Buscar el agujero de hielo más cercano por detrás
+        for (modelo.tablero.Casilla c : tablero.getCasillas()) {
+            if (c instanceof modelo.tablero.Agujero) {
+                modelo.tablero.Agujero h = (modelo.tablero.Agujero) c;
+                if (h.getPosicion() < posPinguino) {
+                    if (holePrevio == null || h.getPosicion() > holePrevio.getPosicion()) {
+                        holePrevio = h;
+                    }
+                }
+            }
+        }
+
+        if (holePrevio != null) {
+            nuevaPos = holePrevio.getPosicionAgujeroAnterior();
+            p.setPosicion(nuevaPos);
+            return "¡La foca asusta a " + p.getNombre() + " y lo hace retroceder hasta el agujero de la casilla " + holePrevio.getPosicion() + " (destino: " + nuevaPos + ")!";
+        } else {
+            p.setPosicion(0);
+            return "¡La foca asusta a " + p.getNombre() + " y lo manda de vuelta al inicio!";
+        }
     }
 
     // Versión sin tablero (compatibilidad con firma anterior)

@@ -39,8 +39,15 @@ import javafx.scene.media.MediaPlayer;
 public class PantallaMenu {
 
     private static Connection conexionBBDD;
-    private static String usuarioLogueado; 
+    private static String usuarioLogueado;
     private static MediaPlayer musicPlayer;
+
+    // ── Modo de autenticación ──
+    private enum AuthMode { CREATE_PLAYER, LOAD_GAME, LOAD_PLAYER_AUTH }
+    private AuthMode currentAuthMode = AuthMode.CREATE_PLAYER;
+    private int idPartidaPendienteCargar = -1;
+    private ArrayList<String> humanPlayersToAuth = new ArrayList<>();
+    private int currentLoadPlayerIdx = 0;
 
     @FXML private StackPane rootPane;
     @FXML private BorderPane mainContent;
@@ -48,25 +55,30 @@ public class PantallaMenu {
     @FXML private ImageView backgroundImage;
     @FXML private Canvas snowCanvas;
 
+    // Auth card por jugador
+    @FXML private VBox playerAuthCard;
+    @FXML private Label playerAuthInfoLabel;
     @FXML private TextField userField;
     @FXML private PasswordField passField;
     @FXML private Button loginButton;
     @FXML private Button registerButton;
+    @FXML private Button authBackBtn;
     @FXML private Label feedbackLabel;
 
-    @FXML private VBox loginCard;
     @FXML private VBox optionsCard;
     @FXML private VBox configCard;
     @FXML private VBox loadGameCard;
     @FXML private VBox skinSelectionCard;
     @FXML private VBox gamesListContainer;
     @FXML private VBox audioCard;
+    @FXML private VBox rankingCard;
+    @FXML private VBox rankingParticipacionContainer;
+    @FXML private VBox rankingVictoriasContainer;
 
     @FXML private Label playerCountLabel;
     @FXML private Label sealCountLabel;
-    @FXML private TextField playerNameField;
     @FXML private Label errorLabel;
-    
+
     @FXML private Label skinTitle;
     @FXML private Label skinErrorLabel;
     @FXML private javafx.scene.image.ImageView skinPreview;
@@ -79,7 +91,6 @@ public class PantallaMenu {
     @FXML private Label optionsTitle;
     @FXML private Button createGameBtn;
     @FXML private Button loadSavedGameBtn;
-    @FXML private Button logoutBtn;
     @FXML private Label optionsHint;
 
     @FXML private Label configTitle;
@@ -102,6 +113,9 @@ public class PantallaMenu {
 
     // --- Estado interno ---
     private Random rand = new Random();
+
+    // Usuarios logueados por cada jugador humano
+    private ArrayList<String> loggedInUsers = new ArrayList<>();
 
     // Variables de estado para selección de skins
     private int numHumans;
@@ -150,11 +164,7 @@ public class PantallaMenu {
         }
 
         hideAllCards();
-        if (usuarioLogueado != null) {
-            showOptionsCard();
-        } else {
-            if (loginCard != null) loginCard.setVisible(true);
-        }
+        showOptionsCard();
 
         try {
             if (conexionBBDD == null || conexionBBDD.isClosed() || !conexionBBDD.isValid(2)) {
@@ -235,19 +245,17 @@ public class PantallaMenu {
 
         // Menu Bar - Eliminado
 
-        // Login Card
+        // Player Auth Card
         if (loginTitle != null) loginTitle.setText(messages.getString("card.login.title"));
         if (userLabel != null) userLabel.setText(messages.getString("card.login.user"));
         if (passLabel != null) passLabel.setText(messages.getString("card.login.pass"));
         if (loginButton != null) loginButton.setText(messages.getString("card.login.enter"));
         if (registerButton != null) registerButton.setText(messages.getString("card.login.register"));
-        if (feedbackLabel != null) feedbackLabel.setText(messages.getString("card.login.hint"));
 
         // Options Card
         if (optionsTitle != null) optionsTitle.setText(messages.getString("card.options.title"));
         if (createGameBtn != null) createGameBtn.setText("🎮  " + messages.getString("card.options.create"));
         if (loadSavedGameBtn != null) loadSavedGameBtn.setText("📂  " + messages.getString("card.options.load"));
-        if (logoutBtn != null) logoutBtn.setText("🚪  " + messages.getString("card.options.logout"));
         if (optionsHint != null) optionsHint.setText(messages.getString("card.options.hint"));
 
         // Config Card
@@ -331,65 +339,154 @@ public class PantallaMenu {
     // ══════════════ GESTIÓN DE CARDS ══════════════
 
     private void hideAllCards() {
-        if (loginCard != null) loginCard.setVisible(false);
+        if (playerAuthCard != null) playerAuthCard.setVisible(false);
         if (optionsCard != null) optionsCard.setVisible(false);
         if (configCard != null) configCard.setVisible(false);
         if (loadGameCard != null) loadGameCard.setVisible(false);
         if (skinSelectionCard != null) skinSelectionCard.setVisible(false);
         if (audioCard != null) audioCard.setVisible(false);
+        if (rankingCard != null) rankingCard.setVisible(false);
     }
 
-    @FXML
-    private void handleLogin(ActionEvent event) {
-        String username = userField.getText();
-        String password = passField.getText();
+    // ══════════════ AUTH POR JUGADOR ══════════════
 
-        if (username.isEmpty() || password.isEmpty()) {
-            feedbackLabel.setText(messages.getString("login.empty"));
-            return;
-        }
+    /** Muestra la card de auth configurada para el jugador actual o para cargar partida. */
+    private void showPlayerAuthCard(AuthMode mode) {
+        currentAuthMode = mode;
+        hideAllCards();
+        if (playerAuthCard != null) playerAuthCard.setVisible(true);
+        if (userField != null) userField.clear();
+        if (passField != null) passField.clear();
+        if (feedbackLabel != null) feedbackLabel.setText("");
 
-        controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
-        if (dbHelper.loginUsuario(conexionBBDD, username, password)) {
-            usuarioLogueado = username;
-            feedbackLabel.setText("Login OK. " + username + "!");
-            showOptionsCard();
+        if (mode == AuthMode.CREATE_PLAYER) {
+            if (playerAuthInfoLabel != null)
+                playerAuthInfoLabel.setText("Jugador " + currentSkinPlayerIndex + " — Inicia sesión o regístrate");
+            if (userField != null) {
+                userField.setEditable(true);
+                userField.setPromptText("Usuario...");
+            }
+        } else if (mode == AuthMode.LOAD_PLAYER_AUTH) {
+            String targetUser = humanPlayersToAuth.get(currentLoadPlayerIdx);
+            if (playerAuthInfoLabel != null)
+                playerAuthInfoLabel.setText("Identificación necesaria: " + targetUser);
+            if (userField != null) {
+                userField.setText(targetUser);
+                userField.setEditable(false); 
+            }
         } else {
-            feedbackLabel.setText(messages.getString("login.not_found"));
-            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
-        }
-    }
-
-    @FXML
-    private void handleRegister() {
-        String username = userField.getText();
-        String password = passField.getText();
-
-        if (username.isEmpty() || password.isEmpty()) {
-            feedbackLabel.setText(messages.getString("register.empty"));
-            return;
-        }
-
-        controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
-        if (dbHelper.existeUsuario(conexionBBDD, username)) {
-            feedbackLabel.setText(messages.getString("register.exists"));
-        } else {
-            if (dbHelper.registrarUsuario(conexionBBDD, username, password)) {
-                feedbackLabel.setText(messages.getString("register.success"));
-            } else {
-                feedbackLabel.setText(messages.getString("register.error"));
+            if (playerAuthInfoLabel != null)
+                playerAuthInfoLabel.setText("Inicia sesión para ver tus partidas guardadas");
+            if (userField != null) {
+                userField.setEditable(true);
+                userField.setPromptText("Usuario...");
             }
         }
     }
 
     @FXML
-    private void handleLoadGame(ActionEvent event) {
-        hideAllCards();
-        loadGameCard.setVisible(true);
-        refreshGamesList(event);
+    private void handlePlayerLogin(ActionEvent event) {
+        String username = userField.getText().trim();
+        String password = passField.getText();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            feedbackLabel.setText(messages.getString("login.empty"));
+            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+        } else if (currentAuthMode == AuthMode.CREATE_PLAYER && loggedInUsers.contains(username)) {
+            feedbackLabel.setText("Este usuario ya está en la partida. Usa otro.");
+            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+        } else {
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            if (dbHelper.loginUsuario(conexionBBDD, username, password)) {
+                feedbackLabel.setStyle("");
+                onAuthSuccess(username);
+            } else {
+                feedbackLabel.setText(messages.getString("login.not_found"));
+                feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            }
+        }
     }
 
-    private void refreshGamesList(ActionEvent event) {
+    @FXML
+    private void handlePlayerRegister() {
+        String username = userField.getText().trim();
+        String password = passField.getText();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            feedbackLabel.setText(messages.getString("register.empty"));
+            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+        } else if (currentAuthMode == AuthMode.CREATE_PLAYER && loggedInUsers.contains(username)) {
+            feedbackLabel.setText("Este usuario ya está en la partida. Usa otro.");
+            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+        } else {
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            if (dbHelper.existeUsuario(conexionBBDD, username)) {
+                feedbackLabel.setText(messages.getString("register.exists"));
+                feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            } else {
+                if (dbHelper.registrarUsuario(conexionBBDD, username, password)) {
+                    feedbackLabel.setText(messages.getString("register.success") + " ¡Ahora inicia sesión!");
+                    feedbackLabel.setStyle("-fx-text-fill: #4ade80;");
+                } else {
+                    feedbackLabel.setText(messages.getString("register.error"));
+                    feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+                }
+            }
+        }
+    }
+
+    /** Llamado cuando el login fue exitoso, según el modo actual. */
+    private void onAuthSuccess(String username) {
+        if (currentAuthMode == AuthMode.LOAD_GAME) {
+            usuarioLogueado = username;
+            hideAllCards();
+            loadGameCard.setVisible(true);
+            refreshGamesList();
+        } else if (currentAuthMode == AuthMode.LOAD_PLAYER_AUTH) {
+            // Un jugador de la partida cargada se ha identificado
+            currentLoadPlayerIdx++;
+            if (currentLoadPlayerIdx < humanPlayersToAuth.size()) {
+                // Siguiente jugador
+                showPlayerAuthCard(AuthMode.LOAD_PLAYER_AUTH);
+            } else {
+                // Todos identificados, cargar de verdad
+                ejecutarCargaFinal();
+            }
+        } else {
+            // CREATE_PLAYER: guardar usuario y pasar a elegir skin
+            loggedInUsers.add(username);
+            if (loggedInUsers.size() == 1) usuarioLogueado = username; // primer jugador = usuario principal
+            hideAllCards();
+            skinSelectionCard.setVisible(true);
+            actualizarEstadoSeleccionSkin();
+            skinTitle.setText(messages.getString("card.skin.title") + " (" + currentSkinPlayerIndex + ")");
+            skinErrorLabel.setText("");
+        }
+    }
+
+    @FXML
+    private void handleAuthBack() {
+        if (currentAuthMode == AuthMode.LOAD_GAME) {
+            showOptionsCard();
+        } else if (currentAuthMode == AuthMode.LOAD_PLAYER_AUTH) {
+            hideAllCards();
+            loadGameCard.setVisible(true);
+        } else {
+            // Cancelar creación de partida: volver a configCard
+            loggedInUsers.clear();
+            jugadoresTemp.clear();
+            selectedSkins.clear();
+            hideAllCards();
+            configCard.setVisible(true);
+        }
+    }
+
+    @FXML
+    private void handleLoadGame(ActionEvent event) {
+        showPlayerAuthCard(AuthMode.LOAD_GAME);
+    }
+
+    private void refreshGamesList() {
         gamesListContainer.getChildren().clear();
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
         ArrayList<LinkedHashMap<String, String>> partidas = helper.listarPartidas(conexionBBDD, usuarioLogueado);
@@ -409,7 +506,7 @@ public class PantallaMenu {
                 Button loadBtn = new Button("Partida #" + id + " | Turnos: " + turnos + " | " + estado);
                 loadBtn.setMaxWidth(Double.MAX_VALUE);
                 HBox.setHgrow(loadBtn, Priority.ALWAYS);
-                loadBtn.setOnAction(e -> cargarPartidaPorId(event, Integer.parseInt(id)));
+                loadBtn.setOnAction(e -> cargarPartidaPorId(Integer.parseInt(id)));
 
                 Button delBtn = new Button();
                 javafx.scene.shape.SVGPath trashIcon = new javafx.scene.shape.SVGPath();
@@ -428,7 +525,7 @@ public class PantallaMenu {
                     trashIcon.setFill(javafx.scene.paint.Color.web("#ef4444"));
                 });
                 
-                delBtn.setOnAction(e -> confirmarEliminacionPartida(event, Integer.parseInt(id), "Partida #" + id));
+                delBtn.setOnAction(e -> confirmarEliminacionPartida(Integer.parseInt(id), "Partida #" + id));
                 
                 itemRow.getChildren().addAll(loadBtn, delBtn);
                 gamesListContainer.getChildren().add(itemRow);
@@ -436,7 +533,7 @@ public class PantallaMenu {
         }
     }
 
-    private void confirmarEliminacionPartida(ActionEvent event, int idPartida, String nombrePartida) {
+    private void confirmarEliminacionPartida(int idPartida, String nombrePartida) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmar eliminación");
         alert.setHeaderText(null);
@@ -446,12 +543,37 @@ public class PantallaMenu {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
             if (helper.eliminarPartida(conexionBBDD, idPartida)) {
-                refreshGamesList(event);
+                refreshGamesList();
             }
         }
     }
 
-    private void cargarPartidaPorId(ActionEvent event, int idPartida) {
+    private void cargarPartidaPorId(int idPartida) {
+        // En lugar de cargar directamente, identificamos jugadores humanos
+        idPartidaPendienteCargar = idPartida;
+        humanPlayersToAuth.clear();
+        currentLoadPlayerIdx = 0;
+
+        controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
+        ArrayList<LinkedHashMap<String, String>> jugadores = helper.select(conexionBBDD, 
+            "SELECT NOMBRE_JUGADOR FROM JUGADOR_ESTADO WHERE ID_PARTIDA = " + idPartida + " AND TIPO_JUGADOR = 'PINGUINO'");
+        
+        for (LinkedHashMap<String, String> j : jugadores) {
+            String nombre = j.get("NOMBRE_JUGADOR");
+            // El usuarioLogueado ya está identificado
+            if (!nombre.equalsIgnoreCase(usuarioLogueado)) {
+                humanPlayersToAuth.add(nombre);
+            }
+        }
+
+        if (humanPlayersToAuth.isEmpty()) {
+            ejecutarCargaFinal();
+        } else {
+            showPlayerAuthCard(AuthMode.LOAD_PLAYER_AUTH);
+        }
+    }
+
+    private void ejecutarCargaFinal() {
         pararNieve();
         stopMusic();
         try {
@@ -461,9 +583,9 @@ public class PantallaMenu {
             PantallaCarga controller = loader.getController();
             controller.setConexion(conexionBBDD);
             controller.setUsuario(usuarioLogueado);
-            controller.setIdPartidaCargar(idPartida);
+            controller.setIdPartidaCargar(idPartidaPendienteCargar);
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) rootPane.getScene().getWindow();
             Scene scene = stage.getScene();
             scene.setRoot(root);
 
@@ -486,10 +608,12 @@ public class PantallaMenu {
     private void incPlayers() {
         int players = Integer.parseInt(playerCountLabel.getText());
         int seals = Integer.parseInt(sealCountLabel.getText());
-        if (players + seals < 4) {
+        if (players < 4 && (players + seals < 6)) { // Max 4 pinguinos, Max 6 total
             playerCountLabel.setText(String.valueOf(players + 1));
             errorLabel.setText("");
             bumpAnimation(playerCountLabel);
+        } else if (players >= 4) {
+            errorLabel.setText("Máximo 4 pingüinos");
         } else {
             errorLabel.setText(messages.getString("error.total_max"));
         }
@@ -509,7 +633,7 @@ public class PantallaMenu {
     private void incSeals() {
         int players = Integer.parseInt(playerCountLabel.getText());
         int seals = Integer.parseInt(sealCountLabel.getText());
-        if (players + seals < 4) {
+        if (players + seals < 6) { // Max 6 total
             sealCountLabel.setText(String.valueOf(seals + 1));
             errorLabel.setText("");
             bumpAnimation(sealCountLabel);
@@ -543,19 +667,16 @@ public class PantallaMenu {
                 return;
             }
 
-            // Iniciar proceso de selección de skins
-            hideAllCards();
-            skinSelectionCard.setVisible(true);
+            // Iniciar proceso de auth + selección de skins
             currentSkinPlayerIndex = 1;
             selectedSkins.clear();
             jugadoresTemp.clear();
+            loggedInUsers.clear();
             currentCarouselIdx = 0;
             skinPreview.setImage(new javafx.scene.image.Image("/resources/images/skins/" + SKIN_FILES[0]));
-            actualizarEstadoSeleccionSkin();
-            skinTitle.setText(messages.getString("card.skin.title") + " (" + currentSkinPlayerIndex + ")");
-            skinErrorLabel.setText("");
-            playerNameField.clear();
-            playerNameField.setPromptText(messages.getString("card.skin.name"));
+
+            // Mostrar auth para el primer jugador
+            showPlayerAuthCard(AuthMode.CREATE_PLAYER);
 
         } catch (NumberFormatException e) {
             errorLabel.setText("Introduce números válidos");
@@ -598,7 +719,7 @@ public class PantallaMenu {
 
     @FXML
     private void handleSelectCurrentSkin(ActionEvent event) {
-        processSkinSelection(event, SKIN_FILES[currentCarouselIdx]);
+        processSkinSelection(SKIN_FILES[currentCarouselIdx]);
     }
 
     private void actualizarEstadoSeleccionSkin() {
@@ -611,29 +732,15 @@ public class PantallaMenu {
         }
     }
 
-    private void processSkinSelection(ActionEvent event, String skinFile) {
+    private void processSkinSelection(String skinFile) {
         if (selectedSkins.contains(skinFile)) {
             skinErrorLabel.setText(messages.getString("error.skin_in_use"));
             return;
         }
 
-        String inputName = playerNameField.getText().trim();
-        if (inputName.isEmpty()) {
-            skinErrorLabel.setText("El nombre no puede estar vacío");
-            return;
-        }
-
-        // Validar nombre único
-        for (modelo.jugador.Jugador jExistente : jugadoresTemp) {
-            if (jExistente.getNombre().equalsIgnoreCase(inputName)) {
-                skinErrorLabel.setText("¡Los nombres deben ser diferentes!");
-                return;
-            }
-        }
-
-        // Si el nombre es válido, marcamos la skin como usada
+        // El nombre es el username con el que se logueó
+        String playerName = loggedInUsers.get(currentSkinPlayerIndex - 1);
         selectedSkins.add(skinFile);
-        String playerName = inputName;
         
         String color = (currentSkinPlayerIndex == 1) ? "Azul" : (currentSkinPlayerIndex == 2) ? "Naranja" : (currentSkinPlayerIndex == 3) ? "Verde" : "Amarillo";
         modelo.jugador.Pinguino p = new modelo.jugador.Pinguino(playerName, color);
@@ -642,13 +749,12 @@ public class PantallaMenu {
         p.setEsIA(false);
         jugadoresTemp.add(p);
         
-        playerNameField.clear();
-
         if (currentSkinPlayerIndex < numHumans) {
             currentSkinPlayerIndex++;
-            skinTitle.setText(messages.getString("card.skin.title") + " (" + currentSkinPlayerIndex + ")");
-            playerNameField.setPromptText(messages.getString("card.skin.name"));
-            actualizarEstadoSeleccionSkin();
+            currentCarouselIdx = 0;
+            skinPreview.setImage(new javafx.scene.image.Image("/resources/images/skins/" + SKIN_FILES[0]));
+            // Pedir login al siguiente jugador
+            showPlayerAuthCard(AuthMode.CREATE_PLAYER);
         } else {
             // Todos los humanos han elegido, añadir focas y empezar
             ArrayList<String> focaSkins = new ArrayList<>();
@@ -667,12 +773,19 @@ public class PantallaMenu {
 
             modelo.tablero.Tablero tablero = new modelo.tablero.Tablero();
             tablero.generarTableroAleatorio();
+            
+            // Incrementar estadísticas de partidas jugadas para todos los participantes humanos
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            for (String user : loggedInUsers) {
+                dbHelper.sumarPartidaJugada(conexionBBDD, user);
+            }
+            
             modelo.partida.Partida nuevaPartida = new modelo.partida.Partida(tablero, jugadoresTemp);
-            cambiarAPantallaJuego(event, nuevaPartida);
+            cambiarAPantallaJuego(nuevaPartida);
         }
     }
 
-    private void cambiarAPantallaJuego(ActionEvent event, modelo.partida.Partida partida) {
+    private void cambiarAPantallaJuego(modelo.partida.Partida partida) {
         pararNieve();
         stopMusic();
         try {
@@ -684,7 +797,7 @@ public class PantallaMenu {
             controller.setUsuario(usuarioLogueado);
             controller.setPartidaNueva(partida);
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) rootPane.getScene().getWindow();
             Scene scene = stage.getScene();
             scene.setRoot(root);
 
@@ -703,17 +816,61 @@ public class PantallaMenu {
     }
 
     @FXML private void handleLogout() {
-        hideAllCards();
-        loginCard.setVisible(true);
-        usuarioLogueado = null; 
-        userField.clear();
-        passField.clear();
-        feedbackLabel.setText(messages.getString("logout.success"));
+        // No se usa en el flujo principal, pero se mantiene por compatibilidad
+        usuarioLogueado = null;
+        loggedInUsers.clear();
+        showOptionsCard();
     }
 
     @FXML public void showOptionsCard() { hideAllCards(); optionsCard.setVisible(true); }
     @FXML public void showConfigCard() { hideAllCards(); configCard.setVisible(true); }
     @FXML public void showAudioCard() { hideAllCards(); audioCard.setVisible(true); }
+
+    @FXML
+    public void showRankingCard() {
+        hideAllCards();
+        rankingCard.setVisible(true);
+        refreshRankings();
+    }
+
+    private void refreshRankings() {
+        rankingParticipacionContainer.getChildren().clear();
+        rankingVictoriasContainer.getChildren().clear();
+        
+        controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
+        
+        // Ranking de Participación (Jugadas)
+        ArrayList<LinkedHashMap<String, String>> rankingP = helper.obtenerRankingParticipacion(conexionBBDD);
+        if (rankingP == null || rankingP.isEmpty()) {
+            Label empty = new Label("Sin datos");
+            empty.setStyle("-fx-text-fill: #94a3b8;");
+            rankingParticipacionContainer.getChildren().add(empty);
+        } else {
+            int pos = 1;
+            for (LinkedHashMap<String, String> fila : rankingP) {
+                Label lbl = new Label(pos + "º " + fila.get("USERNAME") + " - " + fila.get("PARTIDAS_JUGADAS"));
+                lbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 14px; -fx-padding: 2;");
+                rankingParticipacionContainer.getChildren().add(lbl);
+                pos++;
+            }
+        }
+
+        // Ranking de Victorias (Ganadas)
+        ArrayList<LinkedHashMap<String, String>> rankingV = helper.obtenerRankingVictorias(conexionBBDD);
+        if (rankingV == null || rankingV.isEmpty()) {
+            Label empty = new Label("Sin datos");
+            empty.setStyle("-fx-text-fill: #94a3b8;");
+            rankingVictoriasContainer.getChildren().add(empty);
+        } else {
+            int pos = 1;
+            for (LinkedHashMap<String, String> fila : rankingV) {
+                Label lbl = new Label(pos + "º " + fila.get("USERNAME") + " - " + fila.get("PARTIDAS_GANADAS"));
+                lbl.setStyle("-fx-text-fill: #fef08a; -fx-font-size: 14px; -fx-padding: 2; -fx-font-weight: bold;");
+                rankingVictoriasContainer.getChildren().add(lbl);
+                pos++;
+            }
+        }
+    }
 
     @FXML private void handleMute() {
         if (volumeSlider != null) {
