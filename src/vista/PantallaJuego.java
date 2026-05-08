@@ -727,6 +727,24 @@ public class PantallaJuego {
             mostrarAnimacionTurno(jNuevo, () -> {
                 actualizarLabelTurno();
                 actualizarInventarioVisual();
+                
+                // --- Lógica de Salto de Turno (Suelo Quebradizo / Congelado) ---
+                if (jNuevo instanceof Pinguino) {
+                    Pinguino p = (Pinguino) jNuevo;
+                    if (p.getTurnosCongelado() > 0) {
+                        p.setTurnosCongelado(p.getTurnosCongelado() - 1);
+                        appendLog(p, "pierde este turno por estar congelado (" + p.getTurnosCongelado() + " turnos restantes).");
+                        
+                        dado.setDisable(true); // Bloquear dado durante la espera
+                        
+                        // Pequeña pausa para que el usuario lea el mensaje antes de pasar al siguiente
+                        javafx.animation.PauseTransition pauseSkip = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1.5));
+                        pauseSkip.setOnFinished(ev -> concluirTurno());
+                        pauseSkip.play();
+                        return;
+                    }
+                }
+                
                 if (jNuevo instanceof modelo.jugador.Foca) jugarTurnoFoca();
             });
         }
@@ -815,6 +833,13 @@ public class PantallaJuego {
         Jugador ganador = gestorPartida.getPartida().getGanador();
         appendLog(ganador, "¡HA GANADO LA PARTIDA!");
         dado.setDisable(true);
+        
+        // Si el ganador es un pingüino (humano), sumamos victoria en la BBDD
+        if (ganador instanceof modelo.jugador.Pinguino) {
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            dbHelper.sumarPartidaGanada(controlador.gestionbbdd.BBDD.conectarPredeterminado(), ganador.getNombre());
+        }
+        
         handleSaveGame(); // Guardado automático al finalizar
 
         // Pop-up de fin de partida
@@ -908,6 +933,12 @@ public class PantallaJuego {
                 // Caso de la Moto de Nieve o avance directo
                 actualizarPosicionesVisuales();
                 appendLog(p, msg);
+                
+                // Si ha usado la moto, finalizamos su turno para que no pueda tirar el dado
+                if (nombreItem.equalsIgnoreCase("Moto de Nieve")) {
+                    concluirTurno();
+                    return;
+                }
             } else if (!msg.isEmpty()) {
                 appendLog(p, msg);
             }

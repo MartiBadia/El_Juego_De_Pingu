@@ -40,7 +40,7 @@ public class Foca extends Jugador {
     public String aplastarJugador(Pinguino p) {
         java.util.ArrayList<modelo.items.Item> lista = p.getInventario().getLista();
         if (lista.isEmpty()) return "";
-
+        
         // Calculamos la mitad redondeando hacia arriba (si tiene 1, roba 1; si tiene 3, roba 2)
         int cantidadARobar = (int) Math.ceil(lista.size() / 2.0);
         int robados = 0;
@@ -53,7 +53,8 @@ public class Foca extends Jugador {
                 robados++;
             }
         }
-        return "¡La foca ha pasado sobre " + p.getNombre() + " y le ha robado " + robados + " objeto(s) de su inventario!";
+        if (robados == 0) return "";
+        return "¡La foca ha pasado sobre " + p.getNombre() + " pero no tenía nada!!";
     }
 
     public void golpearJugador(Pinguino p, modelo.tablero.Tablero tablero) {

@@ -39,11 +39,14 @@ public class GestorJugador {
             
             if (nombreItem.equals("Moto de Nieve")) {
                 int posSiguienteTrineo = -1;
-                for (modelo.tablero.Casilla c : t.getCasillas()) {
+                ArrayList<modelo.tablero.Casilla> casillas = t.getCasillas();
+                int idx = 0;
+                while (idx < casillas.size() && posSiguienteTrineo == -1) {
+                    modelo.tablero.Casilla c = casillas.get(idx);
                     if (c instanceof modelo.tablero.Trineo && c.getPosicion() > p.getPosicion()) {
                         posSiguienteTrineo = c.getPosicion();
-                        break;
                     }
+                    idx++;
                 }
 
                 if (posSiguienteTrineo != -1) {

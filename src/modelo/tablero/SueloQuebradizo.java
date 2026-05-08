@@ -25,13 +25,17 @@ public class SueloQuebradizo extends Casilla {
         if (!(j instanceof Pinguino)) return "";
         Pinguino ping = (Pinguino) j;
         int totalItems = ping.getInventario().getTotalItems();
+        
+        if (totalItems <= 0) return ""; // No mostrar nada si no tiene objetos
+
         StringBuilder log = new StringBuilder();
         log.append("Suelo Quebradizo (tienes ").append(totalItems).append(" objeto(s)): ");
 
         if (totalItems > 5) {
             ping.setPosicion(0);
             log.append("¡El suelo no aguanta! Vuelves al inicio.");
-        } else if (totalItems > 0) {
+        } else {
+            // Entre 1 y 5 objetos: pierde turno y probabilidad de perder objeto
             ping.setTurnosCongelado(ping.getTurnosCongelado() + 1);
             log.append("El suelo se agrieta. Pierdes un turno.");
             if (random.nextDouble() < 0.30) {
@@ -41,8 +45,6 @@ public class SueloQuebradizo extends Casilla {
                     log.append(" Además pierdes: ").append(perdido.getNombre()).append(".");
                 }
             }
-        } else {
-            log.append("Sin objetos, pasas sin problemas.");
         }
         return log.toString();
     }

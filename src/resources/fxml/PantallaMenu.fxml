@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
@@ -98,6 +99,7 @@
 
                     <Button fx:id="createGameBtn" text="🎮  Crear Nueva Partida" onAction="#showConfigCard" maxWidth="Infinity" styleClass="primary" prefHeight="50"/>
                     <Button fx:id="loadSavedGameBtn" text="📂  Cargar Partida Guardada" onAction="#handleLoadGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
+                    <Button fx:id="rankingBtn" text="🏆  Ver Rankings" onAction="#showRankingCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
                     <Button fx:id="audioConfigBtn" text="🔊  Configurar Audio" onAction="#showAudioCard" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
                     <Button fx:id="quitBtn" text="❌  Salir del Juego" onAction="#handleQuitGame" maxWidth="Infinity" styleClass="secondary" prefHeight="50"/>
 
@@ -226,6 +228,35 @@
                     
                     <Region prefHeight="10"/>
                     <Button text="Volver" onAction="#showOptionsCard" maxWidth="Infinity" styleClass="primary"/>
+                </VBox>
+
+                <!-- CARD DE RANKINGS -->
+                <VBox fx:id="rankingCard" spacing="16" styleClass="card" maxWidth="700" maxHeight="-Infinity" visible="false" alignment="CENTER">
+                    <padding>
+                        <Insets top="30" right="24" bottom="24" left="24"/>
+                    </padding>
+
+                    <Label text="RANKING GLOBAL" styleClass="card-title"/>
+                    <Region prefHeight="10"/>
+
+                    <HBox spacing="30" alignment="CENTER">
+                        <!-- Ranking de Participación -->
+                        <VBox spacing="10" HBox.hgrow="ALWAYS" alignment="TOP_CENTER">
+                            <Label text="MÁS PARTIDAS JUGADAS" styleClass="field-label" style="-fx-text-fill: #38bdf8;"/>
+                            <VBox fx:id="rankingParticipacionContainer" spacing="5" alignment="TOP_CENTER"/>
+                        </VBox>
+
+                        <Separator orientation="VERTICAL" prefHeight="200"/>
+
+                        <!-- Ranking de Victorias -->
+                        <VBox spacing="10" HBox.hgrow="ALWAYS" alignment="TOP_CENTER">
+                            <Label text="MÁS VICTORIAS" styleClass="field-label" style="-fx-text-fill: #fbbf24;"/>
+                            <VBox fx:id="rankingVictoriasContainer" spacing="5" alignment="TOP_CENTER"/>
+                        </VBox>
+                    </HBox>
+
+                    <Region prefHeight="15"/>
+                    <Button text="Volver al Menú" onAction="#showOptionsCard" maxWidth="250" styleClass="primary" prefHeight="45"/>
                 </VBox>
             </StackPane>
         </center>

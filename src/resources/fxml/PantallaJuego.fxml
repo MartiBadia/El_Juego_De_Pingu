@@ -116,8 +116,8 @@
         <Label text="MENÚ" styleClass="card-title" style="-fx-font-size: 24px;"/>
         <Region prefHeight="10"/>
         <Button text="💾 Guardar Partida" onAction="#handleSaveGame" maxWidth="Infinity" styleClass="primary"/>
-        <Button text="🏠 Salir al Menú" onAction="#handleGoToMenu" maxWidth="Infinity"/>
-        <Button text="🚪 Cerrar Juego" onAction="#handleQuitGame" maxWidth="Infinity" style="-fx-opacity: 0.8;"/>
+        <Button text="🏠 Salir al Menú" onAction="#handleGoToMenu" maxWidth="Infinity" styleClass="danger"/>
+        <Button text="🚪 Cerrar Juego" onAction="#handleQuitGame" maxWidth="Infinity" styleClass="danger"/>
         <Region prefHeight="10"/>
         
         <VBox spacing="5" alignment="CENTER_LEFT">

@@ -71,6 +71,9 @@ public class PantallaMenu {
     @FXML private VBox skinSelectionCard;
     @FXML private VBox gamesListContainer;
     @FXML private VBox audioCard;
+    @FXML private VBox rankingCard;
+    @FXML private VBox rankingParticipacionContainer;
+    @FXML private VBox rankingVictoriasContainer;
 
     @FXML private Label playerCountLabel;
     @FXML private Label sealCountLabel;
@@ -342,6 +345,7 @@ public class PantallaMenu {
         if (loadGameCard != null) loadGameCard.setVisible(false);
         if (skinSelectionCard != null) skinSelectionCard.setVisible(false);
         if (audioCard != null) audioCard.setVisible(false);
+        if (rankingCard != null) rankingCard.setVisible(false);
     }
 
     // ══════════════ AUTH POR JUGADOR ══════════════
@@ -779,6 +783,13 @@ public class PantallaMenu {
 
             modelo.tablero.Tablero tablero = new modelo.tablero.Tablero();
             tablero.generarTableroAleatorio();
+            
+            // Incrementar estadísticas de partidas jugadas para todos los participantes humanos
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            for (String user : loggedInUsers) {
+                dbHelper.sumarPartidaJugada(conexionBBDD, user);
+            }
+            
             modelo.partida.Partida nuevaPartida = new modelo.partida.Partida(tablero, jugadoresTemp);
             cambiarAPantallaJuego(nuevaPartida);
         }
@@ -824,6 +835,52 @@ public class PantallaMenu {
     @FXML public void showOptionsCard() { hideAllCards(); optionsCard.setVisible(true); }
     @FXML public void showConfigCard() { hideAllCards(); configCard.setVisible(true); }
     @FXML public void showAudioCard() { hideAllCards(); audioCard.setVisible(true); }
+
+    @FXML
+    public void showRankingCard() {
+        hideAllCards();
+        rankingCard.setVisible(true);
+        refreshRankings();
+    }
+
+    private void refreshRankings() {
+        rankingParticipacionContainer.getChildren().clear();
+        rankingVictoriasContainer.getChildren().clear();
+        
+        controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
+        
+        // Ranking de Participación (Jugadas)
+        ArrayList<LinkedHashMap<String, String>> rankingP = helper.obtenerRankingParticipacion(conexionBBDD);
+        if (rankingP == null || rankingP.isEmpty()) {
+            Label empty = new Label("Sin datos");
+            empty.setStyle("-fx-text-fill: #94a3b8;");
+            rankingParticipacionContainer.getChildren().add(empty);
+        } else {
+            int pos = 1;
+            for (LinkedHashMap<String, String> fila : rankingP) {
+                Label lbl = new Label(pos + "º " + fila.get("USERNAME") + " - " + fila.get("PARTIDAS_JUGADAS"));
+                lbl.setStyle("-fx-text-fill: #e2e8f0; -fx-font-size: 14px; -fx-padding: 2;");
+                rankingParticipacionContainer.getChildren().add(lbl);
+                pos++;
+            }
+        }
+
+        // Ranking de Victorias (Ganadas)
+        ArrayList<LinkedHashMap<String, String>> rankingV = helper.obtenerRankingVictorias(conexionBBDD);
+        if (rankingV == null || rankingV.isEmpty()) {
+            Label empty = new Label("Sin datos");
+            empty.setStyle("-fx-text-fill: #94a3b8;");
+            rankingVictoriasContainer.getChildren().add(empty);
+        } else {
+            int pos = 1;
+            for (LinkedHashMap<String, String> fila : rankingV) {
+                Label lbl = new Label(pos + "º " + fila.get("USERNAME") + " - " + fila.get("PARTIDAS_GANADAS"));
+                lbl.setStyle("-fx-text-fill: #fef08a; -fx-font-size: 14px; -fx-padding: 2; -fx-font-weight: bold;");
+                rankingVictoriasContainer.getChildren().add(lbl);
+                pos++;
+            }
+        }
+    }
 
     @FXML private void handleMute() {
         if (volumeSlider != null) {
