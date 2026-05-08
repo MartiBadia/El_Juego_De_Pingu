@@ -42,228 +42,21 @@ public class BBDD {
 		Connection con = conectarBaseDatos("DW2526_GR09_PINGU", "AMBHL00", "FUERA");
 		if (con == null) con = conectarBaseDatos("DW2526_GR09_PINGU", "AMBHL00", "CENTRO");
 		
-		if (con != null) {
-			try {
-				// 1) Aseguramos que la tabla de usuarios del juego exista
-				if (!existeTabla(con, "USUARIOS_JUEGO")) {
-					String sql = "CREATE TABLE USUARIOS_JUEGO (" +
-								 "USERNAME VARCHAR2(50) PRIMARY KEY, " +
-								 "PASSWORD VARCHAR2(100) NOT NULL, " +
-								 "FECHA_REGISTRO DATE DEFAULT SYSDATE, " +
-								 "PARTIDAS_GANADAS NUMBER DEFAULT 0, " +
-								 "PARTIDAS_JUGADAS NUMBER DEFAULT 0)";
-					try (Statement st = con.createStatement()) {
-						st.execute(sql);
-						System.out.println("Tabla USUARIOS_JUEGO creada.");
-					}
-				}
-
-				// 2) Aseguramos que la tabla PARTIDA exista
-				if (!existeTabla(con, "PARTIDA")) {
-					String sql = "CREATE TABLE PARTIDA (" +
-								 "ID_PARTIDA NUMBER PRIMARY KEY, " +
-								 "USERNAME VARCHAR2(50) REFERENCES USUARIOS_JUEGO(USERNAME), " +
-								 "TURNOS NUMBER, " +
-								 "JUGADOR_ACTUAL VARCHAR2(50), " +
-								 "FINALIZADA CHAR(1) CHECK (FINALIZADA IN ('S', 'N')), " +
-								 "FECHA_GUARDADO DATE DEFAULT SYSDATE, " +
-								 "GANADOR VARCHAR2(50))";
-					try (Statement st = con.createStatement()) {
-						st.execute(sql);
-						System.out.println("Tabla PARTIDA creada.");
-					}
-				}
-
-				// 3) Aseguramos que la tabla CASILLAS_ESPECIALES exista
-				if (!existeTabla(con, "CASILLAS_ESPECIALES")) {
-					String sql = "CREATE TABLE CASILLAS_ESPECIALES (" +
-								 "ID_CASILLA NUMBER PRIMARY KEY, " +
-								 "ID_PARTIDA NUMBER REFERENCES PARTIDA(ID_PARTIDA), " +
-								 "POSICION NUMBER, " +
-								 "TIPO_CASILLA VARCHAR2(50), " +
-								 "DATO_EXTRA VARCHAR2(100))";
-					try (Statement st = con.createStatement()) {
-						st.execute(sql);
-						System.out.println("Tabla CASILLAS_ESPECIALES creada.");
-					}
-				}
-
-				// 4) Aseguramos que la tabla JUGADOR_ESTADO exista
-				if (!existeTabla(con, "JUGADOR_ESTADO")) {
-					String sql = "CREATE TABLE JUGADOR_ESTADO (" +
-								 "ID_ESTADO NUMBER PRIMARY KEY, " +
-								 "ID_PARTIDA NUMBER REFERENCES PARTIDA(ID_PARTIDA), " +
-								 "NOMBRE_JUGADOR VARCHAR2(50), " +
-								 "TIPO_JUGADOR VARCHAR2(20), " +
-								 "COLOR VARCHAR2(20), " +
-								 "POSICION NUMBER, " +
-								 "TURNOS_STOP NUMBER, " +
-								 "SOBORNADA CHAR(1) CHECK (SOBORNADA IN ('S', 'N')), " +
-								 "TURNOS_BLOQUEO NUMBER, " +
-								 "SKIN VARCHAR2(100))";
-					try (Statement st = con.createStatement()) {
-						st.execute(sql);
-						System.out.println("Tabla JUGADOR_ESTADO creada.");
-					}
-				}
-
-				// 5) Aseguramos que la tabla INVENTARIO_ITEMS exista
-				if (!existeTabla(con, "INVENTARIO_ITEMS")) {
-					String sql = "CREATE TABLE INVENTARIO_ITEMS (" +
-								 "ID_ITEM NUMBER PRIMARY KEY, " +
-								 "ID_ESTADO NUMBER REFERENCES JUGADOR_ESTADO(ID_ESTADO), " +
-								 "TIPO_ITEM VARCHAR2(50), " +
-								 "CANTIDAD NUMBER)";
-					try (Statement st = con.createStatement()) {
-						st.execute(sql);
-						System.out.println("Tabla INVENTARIO_ITEMS creada.");
-					}
-				}
-
-				inicializarPLSQL(con);
-			} catch (SQLException e) {
-				System.err.println("Error durante la inicialización de tablas: " + e.getMessage());
-			}
-		}
 		return con;
 	}
 
-	private static void inicializarPLSQL(Connection con) {
-		try (Statement st = con.createStatement()) {
-			// 1) Secuencia (solo si no existe)
-			if (!existeSecuencia(con, "SEQ_GENERAL")) {
-				st.execute("CREATE SEQUENCE SEQ_GENERAL START WITH 100 INCREMENT BY 1");
-				System.out.println("Secuencia SEQ_GENERAL creada.");
-			}
-
-			// 2) Triggers mejorados
-			st.execute("CREATE OR REPLACE TRIGGER TRG_BI_PARTIDA " +
-					   "BEFORE INSERT ON PARTIDA FOR EACH ROW " +
-					   "BEGIN " +
-					   "  IF :NEW.ID_PARTIDA IS NULL OR :NEW.ID_PARTIDA = 0 THEN " +
-					   "    SELECT SEQ_GENERAL.NEXTVAL INTO :NEW.ID_PARTIDA FROM DUAL; " +
-					   "  END IF; " +
-					   "END;");
-
-			// Se ha eliminado TRG_SUMAR_VICTORIA para evitar errores de mutación (ORA-04091) 
-			// y se gestionará directamente desde Java en el método guardarBBDD.
-			try {
-				st.execute("DROP TRIGGER TRG_SUMAR_VICTORIA");
-			} catch (SQLException ignored) {}
-			
-			st.execute("CREATE OR REPLACE TRIGGER TRG_BI_JUGADOR " +
-					   "BEFORE INSERT ON JUGADOR_ESTADO FOR EACH ROW " +
-					   "BEGIN " +
-					   "  IF :NEW.ID_ESTADO IS NULL OR :NEW.ID_ESTADO = 0 THEN " +
-					   "    SELECT SEQ_GENERAL.NEXTVAL INTO :NEW.ID_ESTADO FROM DUAL; " +
-					   "  END IF; " +
-					   "END;");
-
-			st.execute("CREATE OR REPLACE TRIGGER TRG_BI_ITEM " +
-					   "BEFORE INSERT ON INVENTARIO_ITEMS FOR EACH ROW " +
-					   "BEGIN " +
-					   "  IF :NEW.ID_ITEM IS NULL OR :NEW.ID_ITEM = 0 THEN " +
-					   "    SELECT SEQ_GENERAL.NEXTVAL INTO :NEW.ID_ITEM FROM DUAL; " +
-					   "  END IF; " +
-					   "END;");
-			
-			st.execute("CREATE OR REPLACE TRIGGER TRG_BI_CASILLA " +
-					   "BEFORE INSERT ON CASILLAS_ESPECIALES FOR EACH ROW " +
-					   "BEGIN " +
-					   "  IF :NEW.ID_CASILLA IS NULL OR :NEW.ID_CASILLA = 0 THEN " +
-					   "    SELECT SEQ_GENERAL.NEXTVAL INTO :NEW.ID_CASILLA FROM DUAL; " +
-					   "  END IF; " +
-					   "END;");
-
-			// 3) Funciones
-			st.execute("CREATE OR REPLACE FUNCTION FN_MAX_VICTORIAS RETURN NUMBER IS " +
-					   "  v_max NUMBER; " +
-					   "BEGIN " +
-					   "  SELECT MAX(PARTIDAS_GANADAS) INTO v_max FROM USUARIOS_JUEGO; " +
-					   "  RETURN NVL(v_max, 0); " +
-					   "END;");
-
-			st.execute("CREATE OR REPLACE FUNCTION FN_MEDIA_VICTORIAS RETURN NUMBER IS " +
-					   "  v_media NUMBER; " +
-					   "BEGIN " +
-					   "  SELECT AVG(PARTIDAS_GANADAS) INTO v_media FROM USUARIOS_JUEGO; " +
-					   "  RETURN NVL(v_media, 0); " +
-					   "END;");
-
-			st.execute("CREATE OR REPLACE FUNCTION FN_PORCENTAJE_MENOR(p_vic NUMBER) RETURN NUMBER IS " +
-					   "  PRAGMA AUTONOMOUS_TRANSACTION; " +
-					   "  v_total NUMBER; v_menos NUMBER; " +
-					   "BEGIN " +
-					   "  SELECT COUNT(*) INTO v_total FROM USUARIOS_JUEGO; " +
-					   "  IF v_total = 0 THEN RETURN 0; END IF; " +
-					   "  SELECT COUNT(*) INTO v_menos FROM USUARIOS_JUEGO WHERE PARTIDAS_GANADAS < p_vic; " +
-					   "  COMMIT; " +
-					   "  RETURN (v_menos / v_total) * 100; " +
-					   "END;");
-
-			// 4) Procedimientos
-			st.execute("CREATE OR REPLACE PROCEDURE PR_QUIEN_TIENE_RECORD IS " +
-					   "  v_rec NUMBER; " +
-					   "BEGIN " +
-					   "  v_rec := FN_MAX_VICTORIAS; " +
-					   "  DBMS_OUTPUT.PUT_LINE('Récord actual: ' || v_rec); " +
-					   "  FOR r IN (SELECT USERNAME FROM USUARIOS_JUEGO WHERE PARTIDAS_GANADAS = v_rec) LOOP " +
-					   "    DBMS_OUTPUT.PUT_LINE('Jugador: ' || r.USERNAME); " +
-					   "  END LOOP; " +
-					   "END;");
-
-			st.execute("CREATE OR REPLACE PROCEDURE PR_SOBRE_LA_MEDIA IS " +
-					   "  v_med NUMBER; " +
-					   "BEGIN " +
-					   "  v_med := FN_MEDIA_VICTORIAS; " +
-					   "  DBMS_OUTPUT.PUT_LINE('Media de victorias: ' || ROUND(v_med, 2)); " +
-					   "  FOR r IN (SELECT USERNAME FROM USUARIOS_JUEGO WHERE PARTIDAS_GANADAS > v_med) LOOP " +
-					   "    DBMS_OUTPUT.PUT_LINE('Jugador: ' || r.USERNAME); " +
-					   "  END LOOP; " +
-					   "END;");
-
-			st.execute("CREATE OR REPLACE PROCEDURE PR_RANKING_JUGADAS IS " +
-					   "BEGIN " +
-					   "  FOR r IN (SELECT USERNAME, PARTIDAS_JUGADAS FROM USUARIOS_JUEGO ORDER BY PARTIDAS_JUGADAS DESC) LOOP " +
-					   "    DBMS_OUTPUT.PUT_LINE(r.USERNAME || ': ' || r.PARTIDAS_JUGADAS || ' partidas'); " +
-					   "  END LOOP; " +
-					   "END;");
-
-			System.out.println("Objetos PL/SQL inicializados correctamente.");
-		} catch (SQLException e) {
-			System.err.println("Error al inicializar objetos PL/SQL: " + e.getMessage());
-		}
-	}	private static boolean existeSecuencia(Connection con, String nombreSec) throws SQLException {
-		String sql = "SELECT COUNT(*) FROM USER_SEQUENCES WHERE SEQUENCE_NAME = '" + nombreSec.toUpperCase() + "'";
+	private int obtenerSiguienteID(Connection con) {
+		String sql = "SELECT SEQ_GENERAL.NEXTVAL FROM DUAL";
 		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-			if (rs.next()) return rs.getInt(1) > 0;
+			if (rs.next()) return rs.getInt(1);
+		} catch (SQLException e) {
+			System.err.println("Error al obtener ID de la secuencia: " + e.getMessage());
 		}
-		return false;
-	}
-
-	private static int nextVal(Connection con) {
-		String sql = "SELECT SEQ_GENERAL.NEXTVAL AS ID FROM DUAL";
-		ArrayList<LinkedHashMap<String, String>> res = select(con, sql);
-		if (!res.isEmpty()) return Integer.parseInt(res.get(0).get("ID"));
 		return 0;
 	}
-
-	private static boolean existeTabla(Connection con, String nombreTabla) throws SQLException {
-		String sql = "SELECT COUNT(*) FROM USER_TABLES WHERE TABLE_NAME = '" + nombreTabla.toUpperCase() + "'";
-		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-			if (rs.next()) return rs.getInt(1) > 0;
-		}
-		return false;
-	}
-
-	private static boolean existeColumna(Connection con, String nombreTabla, String nombreColumna) throws SQLException {
-		String sql = "SELECT COUNT(*) FROM USER_TAB_COLUMNS WHERE TABLE_NAME = '" + nombreTabla.toUpperCase() + 
-					 "' AND COLUMN_NAME = '" + nombreColumna.toUpperCase() + "'";
-		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-			if (rs.next()) return rs.getInt(1) > 0;
-		}
-		return false;
-	}
+	// ══════════════════════════════════════════════════
+	//  MÉTODOS DE UTILIDAD
+	// ══════════════════════════════════════════════════
 
 	public boolean registrarUsuario(Connection con, String user, String pass) {
 		if (con == null) return false;
@@ -593,7 +386,7 @@ public class BBDD {
 	            delete(con, "DELETE FROM CASILLAS_ESPECIALES WHERE ID_PARTIDA = " + idPartida);
 	        } else {
 	            // 1) INSERT EN PARTIDA (Obtenemos ID de secuencia manualmente para evitar errores de sincronización)
-	            idPartida = nextVal(con);
+	            idPartida = obtenerSiguienteID(con);
 	            p.setIdPartida(idPartida);
 	            
 	            String sqlPartida = "INSERT INTO PARTIDA (ID_PARTIDA, TURNOS, JUGADOR_ACTUAL, FINALIZADA, USERNAME, GANADOR) VALUES (?, ?, ?, ?, ?, ?)";
@@ -621,7 +414,7 @@ public class BBDD {
 	                bloqueo = ((modelo.jugador.Foca) j).getTurnosBloqueada();
 	            }
 
-	            int idEstado = nextVal(con);
+	            int idEstado = obtenerSiguienteID(con);
 	            String sqlJ = "INSERT INTO JUGADOR_ESTADO (ID_ESTADO, ID_PARTIDA, NOMBRE_JUGADOR, TIPO_JUGADOR, COLOR, POSICION, TURNOS_STOP, SOBORNADA, TURNOS_BLOQUEO, SKIN) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	            try (PreparedStatement pstmt = con.prepareStatement(sqlJ)) {
 	                pstmt.setInt(1, idEstado);

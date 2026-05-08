@@ -62,9 +62,11 @@ public class Tablero {
             if (Math.random() < 0.35) {
                 ArrayList<Integer> tiposDisponibles = new ArrayList<>();
                 for (int t = 0; t < 5; t++) {
-                    if (i - ultimaPosTipo[t] < 4) continue;
-                    if (t == 0 && countOsos >= 3) continue;
-                    tiposDisponibles.add(t);
+                    if (i - ultimaPosTipo[t] >= 4) {
+                        if (!(t == 0 && countOsos >= 3)) {
+                            tiposDisponibles.add(t);
+                        }
+                    }
                 }
                 tiposDisponibles.add(5);
 

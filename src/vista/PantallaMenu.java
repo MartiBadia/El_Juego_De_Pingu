@@ -392,23 +392,18 @@ public class PantallaMenu {
         if (username.isEmpty() || password.isEmpty()) {
             feedbackLabel.setText(messages.getString("login.empty"));
             feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
-            return;
-        }
-
-        // Verificar que el usuario no esté ya en la partida
-        if (currentAuthMode == AuthMode.CREATE_PLAYER && loggedInUsers.contains(username)) {
+        } else if (currentAuthMode == AuthMode.CREATE_PLAYER && loggedInUsers.contains(username)) {
             feedbackLabel.setText("Este usuario ya está en la partida. Usa otro.");
             feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
-            return;
-        }
-
-        controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
-        if (dbHelper.loginUsuario(conexionBBDD, username, password)) {
-            feedbackLabel.setStyle("");
-            onAuthSuccess(username);
         } else {
-            feedbackLabel.setText(messages.getString("login.not_found"));
-            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            if (dbHelper.loginUsuario(conexionBBDD, username, password)) {
+                feedbackLabel.setStyle("");
+                onAuthSuccess(username);
+            } else {
+                feedbackLabel.setText(messages.getString("login.not_found"));
+                feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            }
         }
     }
 
@@ -420,27 +415,22 @@ public class PantallaMenu {
         if (username.isEmpty() || password.isEmpty()) {
             feedbackLabel.setText(messages.getString("register.empty"));
             feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
-            return;
-        }
-
-        // Verificar que el usuario no esté ya en la partida
-        if (currentAuthMode == AuthMode.CREATE_PLAYER && loggedInUsers.contains(username)) {
+        } else if (currentAuthMode == AuthMode.CREATE_PLAYER && loggedInUsers.contains(username)) {
             feedbackLabel.setText("Este usuario ya está en la partida. Usa otro.");
             feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
-            return;
-        }
-
-        controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
-        if (dbHelper.existeUsuario(conexionBBDD, username)) {
-            feedbackLabel.setText(messages.getString("register.exists"));
-            feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
         } else {
-            if (dbHelper.registrarUsuario(conexionBBDD, username, password)) {
-                feedbackLabel.setText(messages.getString("register.success") + " ¡Ahora inicia sesión!");
-                feedbackLabel.setStyle("-fx-text-fill: #4ade80;");
-            } else {
-                feedbackLabel.setText(messages.getString("register.error"));
+            controlador.gestionbbdd.BBDD dbHelper = new controlador.gestionbbdd.BBDD();
+            if (dbHelper.existeUsuario(conexionBBDD, username)) {
+                feedbackLabel.setText(messages.getString("register.exists"));
                 feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+            } else {
+                if (dbHelper.registrarUsuario(conexionBBDD, username, password)) {
+                    feedbackLabel.setText(messages.getString("register.success") + " ¡Ahora inicia sesión!");
+                    feedbackLabel.setStyle("-fx-text-fill: #4ade80;");
+                } else {
+                    feedbackLabel.setText(messages.getString("register.error"));
+                    feedbackLabel.setStyle("-fx-text-fill: #ff6b6b;");
+                }
             }
         }
     }

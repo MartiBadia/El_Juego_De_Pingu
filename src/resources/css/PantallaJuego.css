@@ -265,18 +265,6 @@
     -fx-text-fill: white;
 }
 
-.button.danger {
-    -fx-background-color: #991b1b;
-    -fx-text-fill: #fca5a5;
-    -fx-border-color: #ef4444 #450a0a #450a0a #ef4444;
-    -fx-border-width: 3;
-}
-
-.button.danger:hover {
-    -fx-background-color: #b91c1c;
-    -fx-text-fill: white;
-}
-
 .btn-tiny {
     -fx-padding: 4 10;
     -fx-font-size: 12px;
