@@ -1,11 +1,9 @@
 package modelo.items;
 
-/**
- * Representa el ítem Moto de Nieve.
- * Es un vehículo potente que permite al pingüino avanzar una gran distancia.
- */
+// Un objeto especial que permite avanzar mucho más rápido por el tablero
 public class MotoNieve extends Item {
 
+    // Constructor básico para la moto
     public MotoNieve() {
         super("Moto de Nieve", 1);
     }

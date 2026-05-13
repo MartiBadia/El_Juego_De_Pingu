@@ -2,23 +2,31 @@ package modelo.tablero;
 
 import java.util.ArrayList;
 
+/**
+ * El escenario del juego. Contiene una lista de todas las casillas especiales
+ * y se encarga de generarlas aleatoriamente al inicio de la partida.
+ */
 public class Tablero {
     private ArrayList<Casilla> casillas;
     private int tamano; // Total de posiciones del tablero
     public static final int TAMANO_MINIMO = 50; 
 
     // Constructor (crea el tablero vacío)
+    // Prepara un tablero nuevo con el tamaño mínimo por defecto
     public Tablero() {
         this.casillas = new ArrayList<>();
         this.tamano = TAMANO_MINIMO;
     }
 
     // --- GETTER ---
+    // Nos da la lista de todas las casillas especiales que hay
     public ArrayList<Casilla> getCasillas() { return casillas; }
 
+    // Devuelve el número total de casillas que tiene el tablero
     public int getTamaño() { return tamano; }
 
     // Obtiene la casilla que corresponde a una posición concreta del jugador
+    // Busca una casilla especial en una posición dada. Si no hay nada especial, devuelve una normal.
     public Casilla getCasillaEnPosicion(int posicion) {
         Casilla resultado = null;
         int i = 0;
@@ -38,14 +46,18 @@ public class Tablero {
     }
 
     // --- SETTER ---
+    // Permite cambiar todas las casillas de golpe (útil para cargar datos)
     public void setCasillas(ArrayList<Casilla> casillas) {
         this.casillas = casillas;
     }
 
+    // Añade una casilla especial individual a la lista
     public void añadirCasilla(Casilla c) {
         casillas.add(c);
     }
 
+    // Crea un tablero aleatorio mezclando tipos de casillas (osos, agujeros, etc.)
+    // Se asegura de que no estén pegadas y de que haya un mínimo de cada una.
     public void generarTableroAleatorio() {
         casillas.clear();
         this.tamano = TAMANO_MINIMO; // Exactamente 50 casillas.
@@ -131,6 +143,7 @@ public class Tablero {
         casillas.add(new CasillaMeta(this.tamano - 1));
     }
 
+    // Método de apoyo para rellenar el tablero si faltan casillas críticas de algún tipo
     private void asegurarMinimo(int actual, int minimo, String tipo) {
         int count = 0;
         // Contar cuántos hay realmente (por si acaso los parámetros 'actual' no están actualizados)
@@ -186,10 +199,12 @@ public class Tablero {
         }
     }
 
+    // Reservado para futuras actualizaciones visuales o dinámicas del tablero
     public void actualizarTablero() {
         // En un futuro para efectos dinámicos
     }
 
+    // Resume el estado del tablero en una frase
     @Override
     public String toString() {
         return "Tablero de " + tamano + " casillas con " + casillas.size() + " casillas especiales.";

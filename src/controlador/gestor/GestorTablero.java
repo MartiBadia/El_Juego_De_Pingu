@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 public class GestorTablero {
 
+    // Constructor por defecto
     public GestorTablero() {
     }
 
@@ -15,6 +16,7 @@ public class GestorTablero {
      * Obtiene la casilla especial que corresponde a la posición del jugador
      * y ejecuta su acción. Si no hay casilla especial (casilla normal), no hace nada.
      */
+    // Busca la casilla donde está el jugador y hace que pase lo que tenga que pasar
     public void ejecutarCasilla(Partida partida, Jugador j) {
         Tablero tablero = partida.getTablero();
         // Obtiene la casilla de la posición actual y ejecuta su acción
@@ -22,6 +24,7 @@ public class GestorTablero {
         c.realizarAccion(partida, j);
     }
 
+    // Ejecuta la acción de una casilla concreta para un jugador
     public void ejecutarCasilla(Partida partida, Jugador j, Casilla c) {
         c.realizarAccion(partida, j);
     }
@@ -30,6 +33,7 @@ public class GestorTablero {
      //Comprueba si la partida ha terminado.
     
      
+    // Revisa si algún jugador ha llegado a la última casilla para proclamarlo ganador
     public void comprobarFinTurno(Partida partida) {
         int totalCasillas = partida.getTablero().getTamaño();
         ArrayList<Jugador> jugadores = partida.getJugadores();

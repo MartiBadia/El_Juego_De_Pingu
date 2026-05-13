@@ -20,6 +20,7 @@ public class GestorPartida {
     private Random random;
 
     // Constructor: inicializa gestores internos y conecta a la BBDD
+    // Crea el gestor y establece la conexión con la base de datos pidiendo los datos al usuario
     public GestorPartida(Scanner scan) {
         this.random        = new Random();
         this.bbdd          = new BBDD();
@@ -30,6 +31,7 @@ public class GestorPartida {
     }
 
     // Constructor sin conexión (para tests o entornos sin BBDD)
+    // Constructor por si no queremos o no podemos usar la base de datos (para pruebas rápidas)
     public GestorPartida() {
         this.random        = new Random();
         this.bbdd          = new BBDD();
@@ -40,36 +42,44 @@ public class GestorPartida {
 
     // --- Getters / Setters ---
 
+    // Devuelve el objeto con todos los datos de la partida actual
     public Partida getPartida() {
         return this.partida;
     }
 
+    // Permite inyectar una partida ya creada (por ejemplo, al cargar una)
     public void setPartida(Partida partida) {
         this.partida = partida;
     }
 
+    // Nos da la conexión activa con la DB
     public Connection getConexion() {
         return this.con;
     }
 
+    // Accede al gestor encargado de los movimientos y estados de los jugadores
     public GestorJugador getGestorJugador() {
         return this.gestorJugador;
     }
 
+    // Cambia el gestor de jugadores por otro
     public void setGestorJugador(GestorJugador gestorJugador) {
         this.gestorJugador = gestorJugador;
     }
 
     // --- Gestión de partida ---
 
+    // Inicializa una partida nueva con los jugadores y el tablero indicados
     public void nuevaPartida(ArrayList<Jugador> jugadores, Tablero tablero) {
         this.partida = new Partida(tablero, jugadores);
     }
 
+    // Tira un dado de 6 caras para un jugador
     public int tirarDado(Jugador j) {
         return random.nextInt(6) + 1;
     }
 
+    // Lanza un dado (puede ser especial o normal) y devuelve el resultado
     public int iniciarDado(modelo.items.Dado dado, Integer datoOpcional) {
         if (datoOpcional != null) return datoOpcional;
         if (dado != null) return dado.tirarRandom();
@@ -80,6 +90,7 @@ public class GestorPartida {
      * Ejecuta el turno completo de todos los jugadores:
      * mueve, aplica la casilla y comprueba si alguien ha ganado.
      */
+    // Hace que todos los jugadores muevan en su turno correspondiente
     public void ejecutarTurnoCompleto() {
         for (Jugador j : partida.getJugadores()) {
             if (!partida.isFinalizada()) {
@@ -92,6 +103,7 @@ public class GestorPartida {
     
       //Procesa el turno de un jugador concreto:
      
+    // Gestiona todo lo que pasa cuando un jugador avanza: bloqueos, choques, robos y la acción de la casilla final
     public String procesarTurnoConAvance(Jugador j, int avance) {
         StringBuilder log = new StringBuilder();
         
@@ -199,11 +211,13 @@ public class GestorPartida {
         return log.toString();
     }
     
+    // Procesa el turno estándar de un jugador lanzando el dado automáticamente
     public void procesarTurnoJugador(Jugador j) {
         int avance = tirarDado(j);
         procesarTurnoConAvance(j, avance);
     }
 
+    // Turno específico para la foca
     public String procesarTurnoFoca(modelo.jugador.Foca f) {
         int avance = tirarDado(f);
         return procesarTurnoConAvance(f, avance);
@@ -214,6 +228,7 @@ public class GestorPartida {
      * Ejecuta la lógica de la casilla actual del jugador y comprueba el fin de turno.
      * Creado específicamente para sincronizar el movimiento visual con la lógica del juego.
      */
+    // Ejecuta la lógica de la casilla pero pensada para el flujo visual de la interfaz
     public void ejecutarCasillaVisualmente(Jugador j) {
         System.out.println("Ejecutando lógica de la casilla en posición: " + j.getPosicion());
         gestorTablero.ejecutarCasilla(partida, j);
@@ -222,6 +237,7 @@ public class GestorPartida {
     }
 
     
+    // Pasa el turno al siguiente jugador de la lista
     public void siguienteTurno() {
         int actual = (partida.getJugadorActualIndice() + 1) % partida.getJugadores().size();
         partida.setJugadorActual(actual);
@@ -230,16 +246,19 @@ public class GestorPartida {
         }
     }
 
+    // Sinónimo de siguienteTurno
     public void avanzarTurno() {
         siguienteTurno();
     }
 
+    // Revisa si alguien ha ganado y actualiza el estado de la partida
     public void actualizarEstadoTablero() {
         gestorTablero.comprobarFinTurno(partida);
     }
 
 
 
+    // Manda los datos de la partida actual a la base de datos para no perder el progreso
     public void guardarPartida(String username) {
         if (con == null) {
             System.out.println("No hay conexión activa. Conecta antes con setConexion().");
@@ -249,6 +268,7 @@ public class GestorPartida {
     }
 
 
+    // Carga una partida guardada previamente en la DB usando su identificador
     public void cargaPartida(int id) {
         if (con == null) {
             System.out.println("No hay conexión activa. Conecta antes con setConexion().");
@@ -263,6 +283,7 @@ public class GestorPartida {
     
      //Cierra la conexión con la BBDD al terminar la sesión.
      
+    // Desconecta el gestor de la base de datos limpiamente
     public void cerrarConexion() {
         BBDD.cerrar(con);
         this.con = null;

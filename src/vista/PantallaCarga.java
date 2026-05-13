@@ -62,6 +62,7 @@ public class PantallaCarga {
 
     private int mensajeIndex = 0;
 
+    // Inicializa la pantalla, ajusta el lienzo para la nieve y arranca el efecto visual
     @FXML
     private void initialize() {
         progressFill.setPrefWidth(0);
@@ -77,6 +78,7 @@ public class PantallaCarga {
 
     // ══════════════ EFECTO DE NIEVE ══════════════
 
+    // Prepara los arrays para las coordenadas y velocidades de cada copo de nieve
     private void iniciarNieve() {
         snowX = new double[MAX_SNOWFLAKES];
         snowY = new double[MAX_SNOWFLAKES];
@@ -104,6 +106,7 @@ public class PantallaCarga {
         snowTimer.start();
     }
 
+    // Dibuja y mueve los copos en cada frame de la animación
     private void actualizarNieve() {
         double w = snowCanvas.getWidth();
         double h = snowCanvas.getHeight();
@@ -135,26 +138,31 @@ public class PantallaCarga {
 
     // ══════════════ Setters para datos de partida ══════════════
 
+    // Recibe la conexión para pasarla a la siguiente pantalla
     public void setConexion(Connection con) {
         this.conexionBBDD = con;
     }
 
+    // Recibe el nombre del usuario actual
     public void setUsuario(String user) {
         this.usuarioLogueado = user;
     }
 
     /** Para partidas nuevas: recibe la partida ya configurada */
+    // Prepara una partida que acabamos de crear
     public void setPartidaNueva(modelo.partida.Partida partida) {
         this.partidaPendiente = partida;
     }
 
     /** Para partidas guardadas: recibe el ID a cargar */
+    // Prepara la carga de una partida antigua desde la DB
     public void setIdPartidaCargar(int id) {
         this.idPartidaCargar = id;
     }
 
     // ══════════════ Iniciar animación de carga ══════════════
 
+    // Arranca la barra de progreso y los mensajes que van rotando cada pocos segundos
     public void iniciarCarga() {
         // El incremento de partidas jugadas se gestiona en PantallaMenu al iniciar una nueva partida,
         // evitando duplicados aquí.
@@ -202,6 +210,7 @@ public class PantallaCarga {
 
     // ══════════════ Transición al juego ══════════════
 
+    // Carga el tablero principal y le pasa todos los datos de la partida
     private void cargarPantallaJuego() {
         try {
             java.net.URL fxmlUrl = getClass().getResource("/resources/fxml/PantallaJuego.fxml");

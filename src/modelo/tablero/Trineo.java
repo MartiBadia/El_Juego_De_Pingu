@@ -3,23 +3,23 @@ package modelo.tablero;
 import modelo.jugador.Jugador;
 import modelo.partida.Partida;
 
-/**
- * Casilla especial Trineo.
- * Al caer en ella, el jugador avanza un número determinado de casillas (ej: 12).
- */
+// El trineo sirve para saltar rápidamente a la siguiente casilla de trineo
 public class Trineo extends Casilla {
 
     private static final int AVANCE = 12;
 
+    // Constructor que pone el trineo en su sitio
     public Trineo(int posicion) {
         super(posicion);
     }
 
+    // Llama a la lógica principal del trineo
     @Override
     public void realizarAccion(Partida p, Jugador j) {
         realizarAccionConLog(p, j);
     }
 
+    // Calcula a qué trineo saltar y gestiona choques con otros jugadores al aterrizar
     @Override
     public String realizarAccionConLog(Partida p, Jugador j) {
         int posSiguienteTrineo = -1;

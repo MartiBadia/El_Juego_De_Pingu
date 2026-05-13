@@ -6,20 +6,28 @@ import modelo.partida.Partida;
 import modelo.items.Item;
 import java.util.Random;
 
+/**
+ * Una casilla peligrosa que reacciona al peso del jugador (número de objetos).
+ * Si llevas demasiado encima, el hielo se rompe y te manda al inicio.
+ */
 public class SueloQuebradizo extends Casilla {
     
     private Random random;
 
+    // Constructor para el suelo frágil
     public SueloQuebradizo(int pos) {
         super(pos);
         this.random = new Random();
     }
 
+    // Llama al método que gestiona la rotura del hielo
     @Override
     public void realizarAccion(Partida p, Jugador j) {
         realizarAccionConLog(p, j); // delega para no duplicar lógica
     }
 
+    // Si el jugador lleva muchos objetos, el hielo se rompe y vuelve al inicio. 
+    // Si lleva pocos, solo pierde un turno y quizás algún objeto.
     @Override
     public String realizarAccionConLog(Partida p, Jugador j) {
         if (!(j instanceof Pinguino)) return "";

@@ -134,6 +134,7 @@ public class PantallaMenu {
 
     private ResourceBundle messages;
 
+    // Configura las animaciones de entrada, la base de datos, el fondo, la nieve y el idioma
     @FXML
     private void initialize() {
         // Animación de entrada: Fade-In (Suavizado total)
@@ -206,6 +207,7 @@ public class PantallaMenu {
         }
     }
 
+    // Cambia el emoji del altavoz según el nivel de sonido actual
     private void updateVolumeIcon(double volume) {
         if (volumeIconLabel == null) return;
         if (volume == 0) volumeIconLabel.setText("🔇");
@@ -214,6 +216,7 @@ public class PantallaMenu {
         else volumeIconLabel.setText("🔊");
     }
 
+    // Carga la pista de audio y la pone en bucle infinito
     private void playMenuMusic() {
         try {
             if (musicPlayer != null) {
@@ -230,12 +233,14 @@ public class PantallaMenu {
         }
     }
 
+    // Para la música cuando cambiamos de escena
     private void stopMusic() {
         if (musicPlayer != null) {
             musicPlayer.stop();
         }
     }
 
+    // Traduce todos los textos de la interfaz al idioma seleccionado
     private void updateUITexts() {
         // Enlace sync con TranslationManager
         messages = utils.TranslationManager.getBundle();
@@ -279,6 +284,7 @@ public class PantallaMenu {
 
     // ══════════════ EFECTO DE NIEVE ══════════════
 
+    // Prepara los copos de nieve para que caigan por el menú
     private void iniciarNieve() {
         snowX = new double[MAX_SNOWFLAKES];
         snowY = new double[MAX_SNOWFLAKES];
@@ -306,6 +312,7 @@ public class PantallaMenu {
         snowTimer.start();
     }
 
+    // Mueve y dibuja los copos frame a frame para crear el efecto de tormenta suave
     private void actualizarNieve() {
         double w = snowCanvas.getWidth();
         double h = snowCanvas.getHeight();
@@ -338,6 +345,7 @@ public class PantallaMenu {
 
     // ══════════════ GESTIÓN DE CARDS ══════════════
 
+    // Oculta todas las tarjetas (ventanas internas) del menú para dejar el fondo limpio
     private void hideAllCards() {
         if (playerAuthCard != null) playerAuthCard.setVisible(false);
         if (optionsCard != null) optionsCard.setVisible(false);
@@ -351,6 +359,7 @@ public class PantallaMenu {
     // ══════════════ AUTH POR JUGADOR ══════════════
 
     /** Muestra la card de auth configurada para el jugador actual o para cargar partida. */
+    // Configura y muestra la ventana de login adaptándola a si es para crear jugador o cargar partida
     private void showPlayerAuthCard(AuthMode mode) {
         currentAuthMode = mode;
         hideAllCards();
@@ -384,6 +393,7 @@ public class PantallaMenu {
         }
     }
 
+    // Comprueba las credenciales en la DB al pulsar el botón de Entrar
     @FXML
     private void handlePlayerLogin(ActionEvent event) {
         String username = userField.getText().trim();
@@ -407,6 +417,7 @@ public class PantallaMenu {
         }
     }
 
+    // Crea un nuevo registro en la base de datos si el nombre de usuario está libre
     @FXML
     private void handlePlayerRegister() {
         String username = userField.getText().trim();
@@ -436,6 +447,7 @@ public class PantallaMenu {
     }
 
     /** Llamado cuando el login fue exitoso, según el modo actual. */
+    // Se encarga de avanzar al siguiente paso tras un login exitoso (cargar partida, elegir skin, etc.)
     private void onAuthSuccess(String username) {
         if (currentAuthMode == AuthMode.LOAD_GAME) {
             usuarioLogueado = username;
@@ -464,6 +476,7 @@ public class PantallaMenu {
         }
     }
 
+    // Vuelve atrás en el flujo de pantallas según dónde estemos
     @FXML
     private void handleAuthBack() {
         if (currentAuthMode == AuthMode.LOAD_GAME) {
@@ -481,11 +494,13 @@ public class PantallaMenu {
         }
     }
 
+    // Muestra la ventana para iniciar sesión y poder cargar partidas antiguas
     @FXML
     private void handleLoadGame(ActionEvent event) {
         showPlayerAuthCard(AuthMode.LOAD_GAME);
     }
 
+    // Consulta la base de datos para mostrar la lista de partidas guardadas del usuario
     private void refreshGamesList() {
         gamesListContainer.getChildren().clear();
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
@@ -533,6 +548,7 @@ public class PantallaMenu {
         }
     }
 
+    // Muestra un aviso para confirmar que el usuario quiere borrar la partida
     private void confirmarEliminacionPartida(int idPartida, String nombrePartida) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmar eliminación");
@@ -548,6 +564,7 @@ public class PantallaMenu {
         }
     }
 
+    // Prepara la carga de una partida por ID, pidiendo que todos los jugadores se identifiquen si es necesario
     private void cargarPartidaPorId(int idPartida) {
         // En lugar de cargar directamente, identificamos jugadores humanos
         idPartidaPendienteCargar = idPartida;
@@ -573,6 +590,7 @@ public class PantallaMenu {
         }
     }
 
+    // Salta a la pantalla de carga con los datos de la partida seleccionada
     private void ejecutarCargaFinal() {
         pararNieve();
         stopMusic();
@@ -595,6 +613,7 @@ public class PantallaMenu {
         }
     }
 
+    // Una pequeña animación de rebote para cuando pulsamos botones
     private void bumpAnimation(Node node) {
         javafx.animation.ScaleTransition st = new javafx.animation.ScaleTransition(Duration.millis(100), node);
         st.setFromX(1.0); st.setFromY(1.0);
@@ -604,6 +623,7 @@ public class PantallaMenu {
         st.play();
     }
 
+    // Incrementa el número de jugadores humanos (pingüinos)
     @FXML
     private void incPlayers() {
         int players = Integer.parseInt(playerCountLabel.getText());
@@ -619,6 +639,7 @@ public class PantallaMenu {
         }
     }
 
+    // Reduce el número de jugadores humanos
     @FXML
     private void decPlayers() {
         int val = Integer.parseInt(playerCountLabel.getText());
@@ -629,6 +650,7 @@ public class PantallaMenu {
         }
     }
 
+    // Añade focas (IA) a la partida
     @FXML
     private void incSeals() {
         int players = Integer.parseInt(playerCountLabel.getText());
@@ -642,6 +664,7 @@ public class PantallaMenu {
         }
     }
 
+    // Quita focas de la partida
     @FXML
     private void decSeals() {
         int val = Integer.parseInt(sealCountLabel.getText());
@@ -652,6 +675,7 @@ public class PantallaMenu {
         }
     }
 
+    // Recoge la configuración de pingüinos y focas y arranca el proceso de creación
     @FXML
     private void handleStartGame(ActionEvent event) {
         try {
@@ -683,18 +707,21 @@ public class PantallaMenu {
         }
     }
 
+    // Muestra la skin anterior en el carrusel
     @FXML
     private void handlePrevSkin() {
         currentCarouselIdx = (currentCarouselIdx - 1 + SKIN_FILES.length) % SKIN_FILES.length;
         animateSkinChange(true);
     }
 
+    // Muestra la siguiente skin en el carrusel
     @FXML
     private void handleNextSkin() {
         currentCarouselIdx = (currentCarouselIdx + 1) % SKIN_FILES.length;
         animateSkinChange(false);
     }
 
+    // Ejecuta una animación de escalado para que el cambio de skin se vea más fluido
     private void animateSkinChange(boolean reverse) {
         javafx.animation.ScaleTransition scaleOut = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), skinPreview);
         scaleOut.setFromX(1.0); scaleOut.setFromY(1.0);
@@ -717,11 +744,13 @@ public class PantallaMenu {
         scaleOut.play();
     }
 
+    // Confirma la skin actual para el jugador que está de turno
     @FXML
     private void handleSelectCurrentSkin(ActionEvent event) {
         processSkinSelection(SKIN_FILES[currentCarouselIdx]);
     }
 
+    // Revisa si la skin que estamos mirando ya la ha cogido otro jugador para avisar
     private void actualizarEstadoSeleccionSkin() {
         if (selectedSkins.contains(SKIN_FILES[currentCarouselIdx])) {
             skinErrorLabel.setText(messages.getString("error.skin_in_use"));
@@ -732,6 +761,7 @@ public class PantallaMenu {
         }
     }
 
+    // Asigna la skin elegida al jugador, y si todos han terminado, genera el tablero y lanza el juego
     private void processSkinSelection(String skinFile) {
         if (selectedSkins.contains(skinFile)) {
             skinErrorLabel.setText(messages.getString("error.skin_in_use"));
@@ -785,6 +815,7 @@ public class PantallaMenu {
         }
     }
 
+    // Salta a la pantalla de carga con los datos de la partida
     private void cambiarAPantallaJuego(modelo.partida.Partida partida) {
         pararNieve();
         stopMusic();
@@ -815,6 +846,7 @@ public class PantallaMenu {
         }
     }
 
+    // Limpia el rastro de usuarios logueados y vuelve al menú principal
     @FXML private void handleLogout() {
         // No se usa en el flujo principal, pero se mantiene por compatibilidad
         usuarioLogueado = null;
@@ -826,6 +858,7 @@ public class PantallaMenu {
     @FXML public void showConfigCard() { hideAllCards(); configCard.setVisible(true); }
     @FXML public void showAudioCard() { hideAllCards(); audioCard.setVisible(true); }
 
+    // Muestra la tarjeta de los más jugones y ganadores
     @FXML
     public void showRankingCard() {
         hideAllCards();
@@ -833,6 +866,7 @@ public class PantallaMenu {
         refreshRankings();
     }
 
+    // Consulta la DB y rellena las listas de rankings con los mejores jugadores
     private void refreshRankings() {
         rankingParticipacionContainer.getChildren().clear();
         rankingVictoriasContainer.getChildren().clear();
@@ -872,6 +906,7 @@ public class PantallaMenu {
         }
     }
 
+    // Activa o desactiva el sonido completamente
     @FXML private void handleMute() {
         if (volumeSlider != null) {
             if (volumeSlider.getValue() > 0) {
@@ -884,5 +919,6 @@ public class PantallaMenu {
         }
     }
 
+    // Cierra la aplicación por completo
     @FXML private void handleQuitGame() { System.exit(0); }
 }

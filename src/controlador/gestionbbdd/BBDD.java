@@ -10,6 +10,7 @@ import modelo.partida.Partida;
 
 public class BBDD {
 
+	// Pide al usuario por consola los datos necesarios para conectar a la DB
 	public static Connection conectarBaseDatos(Scanner scan) {
 		System.out.println("Selecciona centro o fuera de centro (CENTRO/FUERA):");
 		String entorno = scan.nextLine().trim().toLowerCase();
@@ -20,6 +21,7 @@ public class BBDD {
 		return conectarBaseDatos(user, pwd, entorno);
 	}
 
+	// Intenta abrir la conexión con Oracle usando los drivers y la URL correspondiente al entorno
 	public static Connection conectarBaseDatos(String user, String pwd, String entorno) {
 		String url = entorno.equalsIgnoreCase("centro") 
 				? "jdbc:oracle:thin:@//192.168.3.26:1521/XEPDB2"
@@ -37,6 +39,7 @@ public class BBDD {
 		return null;
 	}
 
+	// Conecta automáticamente usando las credenciales fijas del grupo
 	public static Connection conectarPredeterminado() {
 		// Intentamos conectar con las credenciales de grupo exigidas
 		Connection con = conectarBaseDatos("DW2526_GR09_PINGU", "AMBHL00", "FUERA");
@@ -45,6 +48,7 @@ public class BBDD {
 		return con;
 	}
 
+	// Pide a la base de datos el siguiente número de la secuencia para los IDs
 	private int obtenerSiguienteID(Connection con) {
 		String sql = "SELECT SEQ_GENERAL.NEXTVAL FROM DUAL";
 		try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
@@ -58,6 +62,7 @@ public class BBDD {
 	//  MÉTODOS DE UTILIDAD
 	// ══════════════════════════════════════════════════
 
+	// Crea una cuenta nueva de usuario en la tabla correspondiente
 	public boolean registrarUsuario(Connection con, String user, String pass) {
 		if (con == null) return false;
 		String sql = "INSERT INTO USUARIOS_JUEGO (USERNAME, PASSWORD) VALUES (?, ?)";
@@ -72,6 +77,7 @@ public class BBDD {
 		}
 	}
 
+	// Comprueba si el usuario y la contraseña coinciden con algún registro
 	public boolean loginUsuario(Connection con, String user, String pass) {
 		if (con == null) return false;
 		String sql = "SELECT USERNAME FROM USUARIOS_JUEGO WHERE USERNAME = ? AND PASSWORD = ?";
@@ -87,6 +93,7 @@ public class BBDD {
 		}
 	}
 
+	// Revisa si un nombre de usuario ya está pillado
 	public boolean existeUsuario(Connection con, String user) {
 		if (con == null) return false;
 		String sql = "SELECT USERNAME FROM USUARIOS_JUEGO WHERE USERNAME = ?";
@@ -101,9 +108,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Cierra la conexión con la BBDD.
-	 */
+	// Cierra la conexión de forma segura
 	public static void cerrar(Connection con) {
 		if (con != null) {
 			try {
@@ -113,44 +118,22 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Realiza una inserción en la base de datos.
-	 *
-	 * @param con Objeto Connection que representa la conexión a la base de datos.
-	 * @param sql Sentencia SQL de inserción que hayáis creado.
-	 */
+	// Lanza un INSERT genérico a la base de datos
 	public static int insert(Connection con, String sql) {
 		return executeInsUpDel(con, sql, "Insert");
 	}
 
-	/**
-	 * Realiza una actualización en la base de datos.
-	 *
-	 * @param con Objeto Connection que representa la conexión a la base de datos.
-	 * @param sql Sentencia SQL de actualización que hayáis creado.
-	 */
+	// Lanza un UPDATE genérico
 	public static int update(Connection con, String sql) {
 		return executeInsUpDel(con, sql, "Update");
 	}
 
-	/**
-	 * Realiza una eliminación en la base de datos.
-	 *
-	 * @param con Objeto Connection que representa la conexión a la base de datos.
-	 * @param sql Sentencia SQL de eliminación que hayáis creado.
-	 */
+	// Lanza un DELETE genérico
 	public static int delete(Connection con, String sql) {
 		return executeInsUpDel(con, sql, "Delete");
 	}
 
-	/**
-	 * Realiza una consulta en la base de datos y devuelve los resultados.
-	 *
-	 * @param con Objeto Connection que representa la conexión a la base de datos.
-	 * @param sql Sentencia SQL de consulta.
-	 * @return Devuelve un ArrayList con todas las filas del SELECT. Cada fila es un
-	 *         Map con sus columnas (columna -> valor).
-	 */
+	// Ejecuta un SELECT y nos devuelve los datos en una lista de mapas (columna -> valor)
 	public static ArrayList<LinkedHashMap<String, String>> select(Connection con, String sql) {
 
 		ArrayList<LinkedHashMap<String, String>> resultados = new ArrayList<>();
@@ -184,16 +167,7 @@ public class BBDD {
 		return resultados;
 	}
 
-	/**
-	 * Imprime los resultados de una consulta SELECT en la base de datos. EN ESTE
-	 * CASO SÍ PODÉIS IMPRIMIR MÁS DE UNA FILA.
-	 *
-	 * @param con                         Objeto Connection que representa la
-	 *                                    conexión a la base de datos.
-	 * @param sql                         Sentencia SQL de consulta.
-	 * @param listaElementosSeleccionados Array de Strings con los nombres de las
-	 *                                    columnas seleccionadas.
-	 */
+	// Ejecuta un SELECT y pinta los resultados directamente por la consola (útil para debug)
 	public static void print(Connection con, String sql, String[] listaElementosSeleccionados) {
 		if (con == null) {
 			System.out.println("No hay conexión. Llama antes a conectarBaseDatos().");
@@ -223,15 +197,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Ejecuta las consultas Insert, Update o Delete.
-	 *
-	 * @param con      Objeto Connection que representa la conexión a la base de
-	 *                 datos.
-	 * @param sql      Sentencia SQL que se va a ejecutar.
-	 * @param etiqueta Consulta a ejecutar -> Insert / Update / Delete
-	 * @return Número de filas afectadas
-	 */
+	// Se encarga de la ejecución real de sentencias que modifican datos (Insert, Update, Delete)
 	public static int executeInsUpDel(Connection con, String sql, String etiqueta) {
 		if (con == null) {
 			System.out.println("No hay conexión. Llama antes a conectarBaseDatos().");
@@ -248,9 +214,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Elimina una partida de la BD. El borrado en cascada se encarga del resto.
-	 */
+	// Borra todo el rastro de una partida (jugadores, items, casillas) para limpiar la DB
 	public boolean eliminarPartida(Connection con, int idPartida) {
 		// 1) Borrar items de inventario (asociados a jugadores de esta partida)
 		delete(con, "DELETE FROM INVENTARIO_ITEMS WHERE ID_ESTADO IN (SELECT ID_ESTADO FROM JUGADOR_ESTADO WHERE ID_PARTIDA = " + idPartida + ")");
@@ -266,9 +230,7 @@ public class BBDD {
 		return executeInsUpDel(con, sql, "Delete") > 0;
 	}
 
-	/**
-	 * Incrementa en 1 el contador de partidas jugadas para un usuario.
-	 */
+	// Suma uno al contador de partidas del usuario
 	public void sumarPartidaJugada(Connection con, String username) {
 		if (con == null || username == null) return;
 		String sql = "UPDATE USUARIOS_JUEGO SET PARTIDAS_JUGADAS = PARTIDAS_JUGADAS + 1 WHERE USERNAME = ?";
@@ -281,9 +243,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Incrementa en 1 el contador de partidas ganadas para un usuario.
-	 */
+	// Registra una victoria más para el jugador
 	public void sumarPartidaGanada(Connection con, String username) {
 		if (con == null || username == null) return;
 		String sql = "UPDATE USUARIOS_JUEGO SET PARTIDAS_GANADAS = PARTIDAS_GANADAS + 1 WHERE USERNAME = ?";
@@ -296,9 +256,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Devuelve una lista con TODAS las partidas de UN usuario específico.
-	 */
+	// Busca y lista las partidas que un usuario tiene a medias (sin finalizar)
 	public ArrayList<LinkedHashMap<String, String>> listarPartidas(Connection con, String username) {
 		String sql = "SELECT ID_PARTIDA, TURNOS, FINALIZADA FROM PARTIDA WHERE USERNAME = ? AND FINALIZADA = 'N' ORDER BY ID_PARTIDA DESC";
 		ArrayList<LinkedHashMap<String, String>> resultados = new ArrayList<>();
@@ -321,17 +279,13 @@ public class BBDD {
 		return resultados;
 	}
 
-	/**
-	 * Obtiene el top 10 de jugadores con más victorias.
-	 */
+	// Nos da los 10 mejores jugadores por número de victorias
 	public ArrayList<LinkedHashMap<String, String>> obtenerRankingVictorias(Connection con) {
 		String sql = "SELECT USERNAME, PARTIDAS_GANADAS FROM USUARIOS_JUEGO ORDER BY PARTIDAS_GANADAS DESC FETCH FIRST 10 ROWS ONLY";
 		return select(con, sql);
 	}
 
-	/**
-	 * Obtiene el top 10 de jugadores con más partidas jugadas.
-	 */
+	// Nos da los 10 jugadores más activos del juego
 	public ArrayList<LinkedHashMap<String, String>> obtenerRankingParticipacion(Connection con) {
 		String sql = "SELECT USERNAME, PARTIDAS_JUGADAS FROM USUARIOS_JUEGO ORDER BY PARTIDAS_JUGADAS DESC FETCH FIRST 10 ROWS ONLY";
 		return select(con, sql);
@@ -358,6 +312,7 @@ public class BBDD {
 	 */
 	// En tu archivo BBDD.java, modifica el método guardarBBDD:
 
+	// Método principal para guardar todo el estado de la partida en las tablas de la DB
 	public void guardarBBDD(Connection con, Partida p, String username) {
 	    if (con == null || p == null) {
 	        System.out.println("No se puede guardar: conexión o partida nulos.");
@@ -477,14 +432,7 @@ public class BBDD {
 
 
 
-	/**
-	 * Carga una partida desde la base de datos a partir de su ID.
-	 * Reconstuiye los jugadores con su posición e inventario.
-	 *
-	 * @param con Conexión activa a la BBDD
-	 * @param id  ID de la partida a cargar
-	 * @return Objeto Partida reconstruido, o null si no existe
-	 */
+	// Recupera una partida guardada reconstruyendo el tablero, los jugadores y sus objetos
 	public Partida cargarBBDD(Connection con, int id) {
 		if (con == null) {
 			System.out.println("No se puede cargar: conexión nula.");
@@ -604,9 +552,7 @@ public class BBDD {
 	//  LLAMADAS A PL/SQL (FUNCIONES Y PROCEDIMIENTOS)
 	// ══════════════════════════════════════════════════
 
-	/**
-	 * Obtiene el récord máximo de victorias usando la función PL/SQL FN_MAX_VICTORIAS.
-	 */
+	// Llama a una función de la base de datos para saber cuál es el récord de victorias actual
 	public int obtenerMaxVictorias(Connection con) {
 		String sql = "{ ? = call FN_MAX_VICTORIAS() }";
 		try (CallableStatement cstmt = con.prepareCall(sql)) {
@@ -619,9 +565,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Obtiene la media de victorias usando la función PL/SQL FN_MEDIA_VICTORIAS.
-	 */
+	// Calcula la media de victorias de todos los jugadores registrados
 	public double obtenerMediaVictorias(Connection con) {
 		String sql = "{ ? = call FN_MEDIA_VICTORIAS() }";
 		try (CallableStatement cstmt = con.prepareCall(sql)) {
@@ -634,9 +578,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Obtiene el porcentaje de jugadores con menos victorias que las indicadas.
-	 */
+	// Calcula cuántos jugadores tienen menos victorias que el valor indicado
 	public double obtenerPorcentajeSuperado(Connection con, int victorias) {
 		String sql = "{ ? = call FN_PORCENTAJE_MENOR(?) }";
 		try (CallableStatement cstmt = con.prepareCall(sql)) {
@@ -650,9 +592,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Ejecuta el procedimiento PR_QUIEN_TIENE_RECORD y muestra la salida de DBMS_OUTPUT.
-	 */
+	// Llama a un procedimiento que imprime quién ostenta el récord ahora mismo
 	public void ejecutarJugadoresRecord(Connection con) {
 		habilitarDbmsOutput(con);
 		String sql = "{ call PR_QUIEN_TIENE_RECORD() }";
@@ -664,9 +604,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Ejecuta el procedimiento PR_SOBRE_LA_MEDIA y muestra la salida de DBMS_OUTPUT.
-	 */
+	// Muestra por consola los jugadores que están por encima de la media de victorias
 	public void ejecutarJugadoresSuperiorMedia(Connection con) {
 		habilitarDbmsOutput(con);
 		String sql = "{ call PR_SOBRE_LA_MEDIA() }";
@@ -678,9 +616,7 @@ public class BBDD {
 		}
 	}
 
-	/**
-	 * Ejecuta el procedimiento PR_RANKING_JUGADAS y muestra la salida de DBMS_OUTPUT.
-	 */
+	// Llama al procedimiento que genera el ranking de partidas jugadas
 	public void ejecutarRankingJugadas(Connection con) {
 		habilitarDbmsOutput(con);
 		String sql = "{ call PR_RANKING_JUGADAS() }";
@@ -696,6 +632,7 @@ public class BBDD {
 	//  HELPERS PARA DBMS_OUTPUT
 	// ══════════════════════════════════════════════════
 
+	// Prepara la conexión para poder recibir mensajes de texto desde PL/SQL
 	private void habilitarDbmsOutput(Connection con) {
 		try (CallableStatement cstmt = con.prepareCall("{ call dbms_output.enable(20000) }")) {
 			cstmt.execute();
@@ -704,6 +641,7 @@ public class BBDD {
 		}
 	}
 
+	// Recoge y muestra los mensajes que PL/SQL ha ido acumulando en el buffer
 	private void imprimirDbmsOutput(Connection con) {
 		String sql = "{ call dbms_output.get_line(?, ?) }";
 		try (CallableStatement cstmt = con.prepareCall(sql)) {

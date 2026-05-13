@@ -16,11 +16,13 @@ public class GestorJugador {
 
     private Random random;
 
+    // Constructor que inicializa el generador de números aleatorios
     public GestorJugador() {
         this.random = new Random();
     }
 
 
+    // Gestiona el uso de un objeto por parte del pingüino (ej: usar la moto o un pez)
     public String jugadorUsaItem(Pinguino p, String nombreItem, Tablero t) {
         ArrayList<modelo.items.Item> listaItems = p.getInventario().getLista();
         modelo.items.Item itemAUsar = null;
@@ -63,6 +65,7 @@ public class GestorJugador {
         return p.getNombre() + " no tiene " + nombreItem + " en el inventario.";
     }
 
+    // Alias para usar un objeto
     public void jugadorUsaNuevo(Pinguino p, String nombreItem, Tablero t) {
         jugadorUsaItem(p, nombreItem, t);
     }
@@ -71,6 +74,7 @@ public class GestorJugador {
      * El jugador retrocede 'pasos' posiciones (recibe daño).
      * La posición no puede bajar de 0.
      */
+    // Hace que un jugador retroceda unas cuantas posiciones
     public void jugadorRecibeDaño(Jugador j, int pasos, Tablero t) {
         j.moverPosicion(-pasos);
         if (j.getPosicion() < 0) j.setPosicion(0);
@@ -85,6 +89,7 @@ public class GestorJugador {
      * Lógica al finalizar el turno de un jugador:
      * - Decrementa los contadores de congelado/bloqueo si procede.
      */
+    // Se encarga de actualizar los contadores de penalizaciones al acabar el turno
     public void jugadorFinalizaTurno(Jugador j) {
         if (j instanceof Pinguino) {
             Pinguino p = (Pinguino) j;
@@ -108,6 +113,7 @@ public class GestorJugador {
     /**
      * Evento: el pingüino obtiene un pez (si no supera el máximo de 2).
      */
+    // Regala un pez al pingüino si tiene sitio en la mochila
     public void pinguinoEventoPez(Pinguino p) {
         boolean añadido = p.getInventario().añadirItem(new Pez());
         if (añadido) {
@@ -120,6 +126,7 @@ public class GestorJugador {
     /**
      * Evento: el pingüino obtiene entre 1 y 3 bolas de nieve aleatorias.
      */
+    // Da bolas de nieve al pingüino
     public void pinguinoEventoBolaDeNieve(Pinguino p) {
         int cantidad = random.nextInt(3) + 1; // 1 a 3
         int añadidas = 0;
@@ -132,6 +139,7 @@ public class GestorJugador {
     /**
      * Evento: el pingüino obtiene un dado rápido (avanza 5-10, probabilidad baja).
      */
+    // Intenta añadir un dado rápido al inventario
     public void pinguinoEventoDadoRapido(Pinguino p) {
         boolean añadido = p.getInventario().añadirItem(new Dado("Dado Rapido", 5, 10, true));
         if (añadido) {
@@ -142,6 +150,7 @@ public class GestorJugador {
     }
 
     
+    // Intenta añadir un dado lento (para ir con cuidado)
     public void pinguinoEventoDadoLento(Pinguino p) {
         boolean añadido = p.getInventario().añadirItem(new Dado("Dado Lento", 1, 3, true));
         if (añadido) {
@@ -155,6 +164,7 @@ public class GestorJugador {
     /**
      * Evento: el pingüino obtiene una moto de nieve (máximo 1).
      */
+    // Regala la moto de nieve si no tiene ya una
     public void pinguinoEventoMotoNieve(Pinguino p) {
         boolean añadido = p.getInventario().añadirItem(new MotoNieve());
         if (añadido) {
@@ -165,12 +175,14 @@ public class GestorJugador {
     }
 
 
+    // Ejecuta la lógica de combate entre dos pingüinos que caen en el mismo sitio
     public void pinguinoLuchaPinguino(Pinguino p1, Pinguino p2) {
         System.out.println("¡Batalla! " + p1.getNombre() + " vs " + p2.getNombre());
         p1.gestionarBatalla(p2);
     }
 
 
+    // Gestiona lo que pasa cuando un pingüino se encuentra con una foca (intento de soborno o susto)
     public String focaInteractuaPinguino(Pinguino p, Foca f, Tablero tablero) {
         if (f.isSoborno()) {
             return "";
@@ -216,11 +228,13 @@ public class GestorJugador {
         System.out.println("Usa focaInteractuaPinguino(p, f, tablero) para la lógica completa.");
     }
 
+    // Castiga al pingüino haciendo que se salte su próximo turno
     public void pinguinoPierdeUnTurno(Pinguino p) {
         p.setTurnosCongelado(p.getTurnosCongelado() + 1);
         System.out.println(p.getNombre() + " pierde un turno.");
     }
 
+    // Reparte un premio al azar al pingüino basándose en un tipo
     public void pinguinoEvento(Pinguino p, String tipo) {
         switch (tipo) {
             case "Pez": pinguinoEventoPez(p); break;
@@ -231,6 +245,7 @@ public class GestorJugador {
         }
     }
 
+    // El pingüino pierde algo de su inventario de forma aleatoria
     void pinguinoPierdeItemAleatorio(Pinguino p) {
         modelo.items.Item item = p.getInventario().obtenerItemAleatorio();
         if (item != null) {

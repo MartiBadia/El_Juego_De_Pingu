@@ -8,15 +8,18 @@ import modelo.partida.Partida;
 public class Evento extends Casilla {
     
     // Constructor
+    // Constructor sencillo para la casilla de evento
     public Evento(int pos) {
         this.posicion = pos;
     }
 
+    // Llama al método con log para que pase algo
     @Override
     public void realizarAccion(Partida p, Jugador j) {
         realizarAccionConLog(p, j); // delega para no duplicar lógica
     }
 
+    // Elige un premio al azar (pez, bolas, dados, moto...) y se lo da al pingüino
     @Override
     public String realizarAccionConLog(Partida p, Jugador j) {
         if (!(j instanceof Pinguino)) return "";

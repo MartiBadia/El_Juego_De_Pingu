@@ -28,6 +28,7 @@ public class PantallaIntro {
     private MediaPlayer mediaPlayer;
     private boolean videoFinished = false;
 
+    // Se ejecuta al cargar la pantalla; configura la imagen de fondo y espera a que la escena esté lista para el video
     @FXML
     public void initialize() {
         // Hacer la imagen responsiva
@@ -57,6 +58,7 @@ public class PantallaIntro {
         });
     }
 
+    // Busca el archivo de video en los recursos e intenta reproducirlo
     private void cargarVideo() {
         try {
             String videoPath = null;
@@ -110,10 +112,12 @@ public class PantallaIntro {
         }
     }
 
+    // (Sin usar) Reservado para posibles eventos futuros del reproductor
     private void playerEvents(MediaPlayer player) {
         // Redundante con los listeners configurados arriba, pero mantenemos por compatibilidad si es necesario
     }
 
+    // Para el video si el usuario tiene prisa y quiere saltar al inicio
     private void skipVideo() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -121,6 +125,7 @@ public class PantallaIntro {
         showStartPrompt();
     }
 
+    // Muestra el mensaje de "Pulsa Espacio" con una animación suave de desvanecimiento
     private void showStartPrompt() {
         if (videoFinished) return;
         videoFinished = true;
@@ -152,6 +157,7 @@ public class PantallaIntro {
         showBack.play();
     }
 
+    // Salta al menú principal del juego
     private void goToMenu() {
         if (mediaPlayer != null) mediaPlayer.stop();
         try {

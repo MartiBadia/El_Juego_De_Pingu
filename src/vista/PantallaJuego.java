@@ -104,6 +104,7 @@ public class PantallaJuego {
     //  INICIALIZACIÓN
     // ══════════════════════════════════════════════════
 
+    // Prepara las listas de fichas, el gestor de partida y configura la música y el sonido al entrar en el juego
     @FXML
     private void initialize() {
         appendLog(null, "¡Bienvenido a El Juego de Pingu!");
@@ -140,6 +141,7 @@ public class PantallaJuego {
         }
     }
 
+    // Actualiza el icono del volumen según el nivel (0-1)
     private void updateVolumeIcon(double volume) {
         if (volumeIconLabel == null) return;
         if (volume == 0) volumeIconLabel.setText("🔇");
@@ -148,6 +150,7 @@ public class PantallaJuego {
         else volumeIconLabel.setText("🔊");
     }
 
+    // Carga y reproduce la música ambiental del nivel de hielo
     private void playGameMusic() {
         try {
             String path = getClass().getResource("/resources/audio/Brillo Sobre el Hielo (1).mp3").toExternalForm();
@@ -161,12 +164,14 @@ public class PantallaJuego {
         }
     }
 
+    // Detiene la música de fondo
     private void stopMusic() {
         if (musicPlayer != null) {
             musicPlayer.stop();
         }
     }
 
+    // Re-dibuja el tablero y las fichas si cambia el tamaño de la ventana para que todo encaje con la imagen de fondo
     private void actualizarTodoVisually() {
         if (gestorPartida == null || gestorPartida.getPartida() == null) return;
         
@@ -195,6 +200,7 @@ public class PantallaJuego {
      * a coordenadas locales del Pane del tablero, teniendo en
      * cuenta el escalado "cover" del fondo de pantalla.
      */
+    // Transforma las coordenadas teóricas de la imagen de fondo a coordenadas reales en la pantalla
     private double[] imageToPaneCoords(double imgX, double imgY) {
         double boardW = tablero.getWidth();
         double boardH = tablero.getHeight();
@@ -219,6 +225,7 @@ public class PantallaJuego {
     }
 
     /** Posiciona cualquier nodo en el centro de la casilla i. */
+    // Coloca un elemento visual (como una casilla) en el centro de una de las 50 posiciones del mapa
     private void posicionarEnCasilla(Node node, int i, double nodeSize) {
         double[] pos = imageToPaneCoords(PATH_IMG[i][0], PATH_IMG[i][1]);
         node.setLayoutX(pos[0] - nodeSize / 2.0);
@@ -226,6 +233,7 @@ public class PantallaJuego {
     }
 
     /** Posiciona una ficha en su casilla con una mejor separación entre jugadores. */
+    // Coloca la ficha del jugador en su sitio, dándole un pequeño empujón para que no se pisen si hay varios en el mismo sitio
     private void posicionarFicha(ImageView ficha, int cellPos, int tokenOffset) {
         int safePos = Math.min(cellPos, PATH_IMG.length - 1);
         double[] pos = imageToPaneCoords(PATH_IMG[safePos][0], PATH_IMG[safePos][1]);
@@ -252,6 +260,7 @@ public class PantallaJuego {
     //  LOG DE EVENTOS
     // ══════════════════════════════════════════════════
 
+    // Añade un mensaje al registro de eventos del juego (el pergamino lateral)
     private void appendLog(Jugador j, String msg) {
         if (eventosContenedor == null) return;
         Text textNode = new Text();
@@ -269,6 +278,7 @@ public class PantallaJuego {
         }
     }
 
+    // Devuelve el código hexadecimal del color asignado al jugador (para el log y los brillos)
     private String getPlayerColorHex(Jugador j) {
         if (j instanceof modelo.jugador.Foca) return "#ff1744"; // Foca = Rojo brillante
         String color = j.getColor() != null ? j.getColor().toLowerCase() : "";
@@ -281,6 +291,7 @@ public class PantallaJuego {
         }
     }
 
+    // Añade un aura de color alrededor de la ficha del jugador para que destaque
     private void aplicarEfectoBrillo(ImageView iv, Jugador j) {
         String hex = getPlayerColorHex(j);
         javafx.scene.effect.DropShadow ds = new javafx.scene.effect.DropShadow();
@@ -302,6 +313,7 @@ public class PantallaJuego {
     //  PREPARAR PARTIDA
     // ══════════════════════════════════════════════════
 
+    // Configura la partida y actualiza todos los componentes visuales para empezar a jugar
     public void prepararPartidaPersonalizada(modelo.partida.Partida p) {
         gestorPartida.setPartida(p);
         construirRosterVisual();
@@ -314,6 +326,7 @@ public class PantallaJuego {
         });
     }
 
+    // Busca en la base de datos la partida guardada y la restaura en la pantalla
     public void cargarPartidaEspecifica(int idPartida) {
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
         java.sql.Connection con = controlador.gestionbbdd.BBDD.conectarPredeterminado();
@@ -325,6 +338,7 @@ public class PantallaJuego {
     //  ROSTER VISUAL (panel inferior de jugadores)
     // ══════════════════════════════════════════════════
 
+    // Crea las tarjetas de los jugadores en la parte inferior, con su foto e inventario
     private void construirRosterVisual() {
         if (rosterContainer == null) return;
         rosterContainer.getChildren().clear();
@@ -394,6 +408,7 @@ public class PantallaJuego {
         actualizarRosterInventarios();
     }
 
+    // Genera una pequeña sección visual con el nombre de un objeto y su cantidad
     private javafx.scene.Node crearMiniFila(String texto, String tipo, Map<String, Label> labels, Map<String, Button> buttons) {
         javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(2);
         hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -426,6 +441,7 @@ public class PantallaJuego {
         return hbox;
     }
 
+    // Refresca las cantidades de los inventarios en las tarjetas de todos los jugadores
     private void actualizarRosterInventarios() {
         if (rosterLabelsMap == null) return;
         Jugador jActual = gestorPartida.getPartida().getJugadorActual();
@@ -459,6 +475,7 @@ public class PantallaJuego {
     //  CONSTRUCCIÓN DEL TABLERO VISUAL
     // ══════════════════════════════════════════════════
 
+    // Crea el tablero físicamente en la pantalla, colocando cada tipo de casilla e imagen según el diseño del mapa
     private void construirTableroVisual() {
         // Eliminar casillas antiguas pero conservar las fichas de jugadores
         tablero.getChildren().removeIf(node -> !(node instanceof ImageView));
@@ -502,8 +519,6 @@ public class PantallaJuego {
             ImageView iv = crearImagenCasilla(imgFile);
             if (iv != null) cell.getChildren().add(iv);
 
-            // No añadimos texto extra ya que las nuevas imágenes ya son descriptivas
-
             // Posición absoluta sobre la pasarela
             posicionarEnCasilla(cell, i, CELL_SIZE);
 
@@ -533,6 +548,7 @@ public class PantallaJuego {
         for (ImageView iv : fichasFocas)     { iv.toFront(); iv.setMouseTransparent(true); }
     }
 
+    // Carga la imagen de una casilla desde los recursos
     private ImageView crearImagenCasilla(String fileName) {
         try {
             Image img = new Image(getClass().getResourceAsStream("/resources/images/casillas/" + fileName));
@@ -548,6 +564,7 @@ public class PantallaJuego {
     //  ACTUALIZAR POSICIONES DE FICHAS
     // ══════════════════════════════════════════════════
 
+    // Asegura que todas las fichas estén colocadas en el lugar exacto del tablero donde les corresponde estar
     private void actualizarPosicionesVisuales() {
         ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
         int pIdx = 0, fIdx = 0, tokenOffset = 0;
@@ -563,6 +580,7 @@ public class PantallaJuego {
         }
     }
 
+    // Busca cuál de los ImageView del tablero corresponde a un objeto Jugador concreto
     private ImageView getFichaDeJugador(Jugador j) {
         ArrayList<Jugador> jugadores = gestorPartida.getPartida().getJugadores();
         int pIdx = 0, fIdx = 0;
@@ -579,10 +597,12 @@ public class PantallaJuego {
     //  INVENTARIO Y TURNO
     // ══════════════════════════════════════════════════
 
+    // Actualiza el inventario en las tarjetas de la parte inferior
     private void actualizarInventarioVisual() {
         actualizarRosterInventarios();
     }
 
+    // Ilumina la tarjeta del jugador que tiene el turno actual
     private void actualizarLabelTurno() {
         if (!gestorPartida.getPartida().isFinalizada()) {
             Jugador jActual = gestorPartida.getPartida().getJugadorActual();
@@ -600,6 +620,7 @@ public class PantallaJuego {
     //  LÓGICA DE DADO Y MOVIMIENTO
     // ══════════════════════════════════════════════════
 
+    // Acción al pulsar el dado: tira y mueve al pingüino
     @FXML
     public void handleDado() {
         if (!gestorPartida.getPartida().isFinalizada()) {
@@ -612,6 +633,7 @@ public class PantallaJuego {
         }
     }
 
+    // Prepara el inicio de la animación de movimiento casilla a casilla
     private void iniciarMovimientoAnimado(Jugador j, int avance) {
         int posFisicaInicio = j.getPosicion();
         appendLog(j, "avanza " + avance + " casillas...");
@@ -634,6 +656,7 @@ public class PantallaJuego {
     //  ANIMACIÓN PASO A PASO SOBRE LA PASARELA
     // ══════════════════════════════════════════════════
 
+    // Realiza el desplazamiento visual de la ficha de una casilla a la siguiente con un efecto suave
     private void animarPasoAPaso(Jugador j, int posActual, int pasosRestantes, Runnable onFinish) {
         if (pasosRestantes <= 0) { onFinish.run(); return; }
 
@@ -674,6 +697,7 @@ public class PantallaJuego {
     //  SOBORNO / INTERACCIÓN FOCA
     // ══════════════════════════════════════════════════
 
+    // Si un pingüino cae en la misma casilla que una foca, le da un pez automáticamente para no ser atacado
     private boolean comprobarSobornoEnCasilla(Jugador j, int targetPos) {
         Pinguino pTarget = null;
         modelo.jugador.Foca fTarget = null;
@@ -724,6 +748,7 @@ public class PantallaJuego {
     //  CONCLUSIÓN DE TURNO Y ANIMACIÓN
     // ══════════════════════════════════════════════════
 
+    // Finaliza el turno actual y pasa al siguiente, gestionando si alguien está congelado o si es una foca
     private void concluirTurno() {
         actualizarPosicionesVisuales();
         if (gestorPartida.getPartida().isFinalizada()) {
@@ -757,6 +782,7 @@ public class PantallaJuego {
         }
     }
 
+    // Muestra un anuncio gigante en pantalla para indicar a quién le toca jugar ahora
     private void mostrarAnimacionTurno(Jugador j, Runnable onFinish) {
         if (turnAnimationOverlay == null) { onFinish.run(); return; }
 
@@ -812,6 +838,7 @@ public class PantallaJuego {
         pause.play();
     }
 
+    // Lógica para que la foca (IA) piense, tire el dado y se mueva automáticamente
     private void jugarTurnoFoca() {
         modelo.jugador.Foca foca = (modelo.jugador.Foca) gestorPartida.getPartida().getJugadorActual();
         
@@ -836,6 +863,7 @@ public class PantallaJuego {
         pausa.play();
     }
 
+    // Detiene el juego, informa del ganador y guarda el resultado en la base de datos
     private void mostrarFinDePartida() {
         Jugador ganador = gestorPartida.getPartida().getGanador();
         appendLog(ganador, "¡HA GANADO LA PARTIDA!");
@@ -867,6 +895,7 @@ public class PantallaJuego {
     //  ACCIONES DE MENÚ
     // ══════════════════════════════════════════════════
 
+    // Guarda el estado actual de la partida en la base de datos de Oracle
     @FXML private void handleSaveGame() {
         controlador.gestionbbdd.BBDD helper = new controlador.gestionbbdd.BBDD();
         helper.guardarBBDD(controlador.gestionbbdd.BBDD.conectarPredeterminado(),
@@ -878,6 +907,7 @@ public class PantallaJuego {
     @FXML private void handleNewGame()  { toggleMenu(); handleGoToMenu(); }
     @FXML private void handleQuitGame() { System.exit(0); }
 
+    // Para la música y carga el FXML del menú principal
     @FXML private void handleGoToMenu() {
         stopMusic();
         try {
@@ -903,6 +933,7 @@ public class PantallaJuego {
     @FXML private void handleNieve()  { usarItemEnTurno("Bola de Nieve"); }
     @FXML private void handleMoto()   { usarItemEnTurno("Moto de Nieve"); }
 
+    // Intenta usar un objeto del inventario del pingüino y aplica sus efectos al juego
     private void usarItemEnTurno(String nombreItem) {
         if (!gestorPartida.getPartida().isFinalizada()) {
             Jugador actual = gestorPartida.getPartida().getJugadorActual();
